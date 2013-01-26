@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
+    <mime-type type="application/x-qml">
+        <alias type="text/x-qml"/>
+        <sub-class-of type="text/plain"/>
+        <comment>QML file</comment>
+        <glob pattern="*.qml"/>
+        <glob pattern="*.qmlproject"/>
+    </mime-type>
+    <mime-type type="application/javascript">
+        <alias type="application/x-javascript"/>
+        <alias type="text/javascript"/>
+        <alias type="text/x-javascript"/>
+        <sub-class-of type="text/plain"/>
+        <comment>Qt Script file</comment>
+        <glob pattern="*.js"/>
+        <glob pattern="*.qs"/>
+        <glob pattern="*.qtt"/>
+    </mime-type>
+</mime-info>

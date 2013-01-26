@@ -1,0 +1,1027 @@
+/****************************************************************************
+**
+** This file is part of Qt Creator
+**
+** Copyright (c) 2011 Nokia Corporation and/or its subsidiary(-ies).
+**
+** Contact: Nokia Corporation (qt-info@nokia.com)
+**
+**
+** GNU Free Documentation License
+**
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of this
+** file.
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at qt-info@nokia.com.
+**
+****************************************************************************/
+
+/*!
+    \contentspage{index.html}{Qt Creator}
+    \previouspage qtcreator-ui-text.html
+    \page coding-style.html
+    \nextpage qtcreator-api.html
+
+    \title Qt Creator Coding Rules
+
+    \note This document is work in progress.
+
+    The coding rules aim to guide Qt Creator developers, to help them write
+    understandable and maintainable code, and to minimize confusion and surprises.
+
+    As usual, rules are not set in stone. If you have a good reason to break one,
+    do so. But first make sure that at least some other developers agree with you.
+
+    To contribute to the main Qt Creator source, you should comply to the
+    following rules:
+
+    \list
+        \o  The most important rule is: KISS (keep it short and simple). Always
+            choose the simpler implementation option over the more complicated one.
+            This makes maintenance a lot easier.
+        \o  Write good C++ code. That is, readable, well commented when necessary,
+            and object-oriented.
+        \o  Take advantage of Qt. Do not re-invent the wheel. Think about which parts
+            of your code are generic enough that they might be incorporated into
+            Qt instead of Qt Creator.
+        \o  Adapt the code to the existing structures in Qt Creator.
+            If you have improvement ideas, discuss them with other developers
+            before writing the code.
+        \o  Follow the guidelines in \l{Code Constructs}, \l{Formatting}, and
+            \l{Patterns and Practices}.
+        \o  Document interfaces. Right now we use qdoc, but changing to doxygen
+            is being considered.
+        \endlist
+
+
+    \section1 Submitting Code
+
+    To submit code to Qt Creator, you must understand the tools and mechanics as well as
+    the philosophy behind Qt development. For more information about how to set up
+    the development environment for working on Qt Creator and how to submit code
+    and documentation for inclusion, see
+    \l{http://wiki.qt-project.org/index.php/Main_Page}{Guidelines for Contributions to the Qt Project}.
+
+    \section1 Binary and Source Compatibility
+
+    The following list describes how the releases are numbered and defines
+    \e {binary compatibility} and \e {source code compatibility} between
+    releases:
+
+    \list
+        \o  Qt Creator 2.0.0 is a \e {major release}, Qt Creator 2.1.0 is a \e {minor
+            release}, and Qt Creator 2.1.3 is a \e {patch release}.
+        \o  \e {Backward binary compatibility} means that code linked to an
+            earlier version of the library still works.
+        \o  \e {Forward binary compatibility} means that code linked to a
+            newer version of the library works with an older library.
+        \o  \e {Source code compatibility} means that code compiles without
+            modification.
+        \endlist
+
+    We do not currently guarantee API nor ABI
+    (\l{http://en.wikipedia.org/wiki/Application_binary_interface}{application binary interface})
+    compatibility between major releases and minor releases.
+
+    However, we try to preserve backward and forward binary compatibility and forward and
+    backward source code compatibility in patch releases, so:
+
+    \list
+        \o  Do not add or remove any public API (e.g. global functions,x
+            public/protected/private methods).
+        \o  Do not reimplement methods (not even inlines,
+            nor protected or private methods).
+        \o  Check
+            \l {http://wiki.qt-project.org/index.php/Binary_Compatibility_Workarounds}{Binary Compatibility Workarounds}
+            for ways to preserve binary compatibility.
+    \endlist
+
+    \note This is not yet mandatory.
+
+    For more information on binary compatibility, see
+    \l{http://techbase.kde.org/Policies/Binary_Compatibility_Issues_With_C++}{Binary Compatibility Issues With C++}.
+
+    \section1 Code Constructs
+
+    Follow the guidelines for code constructs to make the code faster and
+    clearer. In addition, the guidelines allow you to take advantage of the strong
+    type checking in C++.
+
+    \list
+        \o  Prefer preincrement to postincrement whenever possible.
+            Preincrement is potentially faster than postincrement. Just
+            think about the obvious implementations of pre/post-increment. This
+            rule applies to decrement too:
+
+            \code
+            ++T;
+            --U;
+
+            -NOT-
+
+            T++;
+            U--;
+            \endcode
+
+        \o  Try to minimize evaluation of the same code over and over. This is
+            aimed especially at loops:
+
+            \code
+
+            Container::iterator end = large.end();
+            for (Container::iterator it = large.begin(); it != end; ++it) {
+                    ...;
+            }
+
+            -NOT-
+
+            for (Container::iterator it = large.begin();
+                 it != large.end(); ++it) {
+                    ...;
+            }
+            \endcode
+
+
+        \o  You can use the Qt \c foreach loop in non-time-critical code with a Qt
+            container. It is a nice way to keep line noise down and to give the
+            loop variable a proper name:
+
+            \code
+                foreach (QWidget *widget, container)
+                    doSomething(widget);
+
+                -NOT-
+
+                Container::iterator end = container.end();
+                for (Container::iterator it = container.begin(); it != end; ++it)
+                    doSomething(*it);
+            \endcode
+
+            Make the loop variable const, if possible. This might prevent
+            unnecessary detaching of shared data:
+
+            \code
+                foreach (const QString &name, someListOfNames)
+                    doSomething(name);
+
+                - NOT -
+
+                foreach (QString name, someListOfNames)
+                    doSomething(name);
+            \endcode
+
+        \endlist
+
+    \section1 Formatting
+
+    \section2 Capitalizing Identifiers
+
+    Use \l{http://en.wikipedia.org/wiki/CamelCase}{camel case} in identifiers.
+
+    Capitalize the first word in an identifier as follows:
+
+    \list
+        \o  Class names begin with a capital letter.
+        \o  Function names begin with a lower case letter.
+        \o  Variable names begin with a lower case letter.
+        \o  Enum names begin with a capital letter. Enum values use lower case and
+            contain some part of the name of the enum type.
+    \endlist
+
+    \section2 Whitespace
+
+    \list
+        \o  Use four spaces for indentation, no tabs.
+        \o  Use blank lines to group statements together where suited.
+        \o  Always use only one blank line.
+    \endlist
+
+    \section3 Pointers and References
+
+    For pointers or references, always use a single space before an asterisk (*)
+    or an ampersand (&), but never after.
+    Avoid C-style casts when possible:
+
+    \code
+    char *blockOfMemory = (char *)malloc(data.size());
+    char *blockOfMemory = reinterpret_cast<char *>(malloc(data.size()));
+
+    -NOT-
+
+    char* blockOfMemory = (char* ) malloc(data.size());
+    \endcode
+
+    Of course, in this particulare case, using \c new might be an even better
+    option.
+
+    \section3  Operator Names and Parentheses
+
+    Do not use spaces between operator names and function names. The equation
+    marks (==) are a part of the function name, and therefore, spaces make the
+    declaration look like an expression:
+
+    \code
+    operator==(type)
+
+    -NOT-
+
+    operator == (type)
+    \endcode
+
+    \section3 Function Names and Parentheses
+
+    Do not use spaces between function names and parentheses:
+
+    \code
+    void mangle()
+
+    -NOT-
+
+    void mangle ()
+    \endcode
+
+    \section3 Keywords
+
+    Always use a single space after a keyword, and before a curly brace:
+
+    \code
+    if (foo) {
+    }
+
+    -NOT-
+
+    if(foo){
+    }
+    \endcode
+
+    \section2 Braces
+
+    As a base rule, place the left curly brace on the same line as the
+    start of the statement:
+
+    \code
+    if (codec) {
+    }
+
+    -NOT-
+
+    if (codec)
+    {
+    }
+    \endcode
+
+    Exception: Function implementations and class declarations always have
+    the left brace in the beginning of a line:
+
+    \code
+    static void foo(int g)
+    {
+        qDebug("foo: %i", g);
+    }
+
+    class Moo
+    {
+    };
+    \endcode
+
+    Use curly braces when the body of a conditional statement contains more
+    than one line, and also if a single line statement is somewhat complex.
+    Otherwise, omit them:
+
+    \code
+    if (address.isEmpty())
+        return false;
+
+    for (int i = 0; i < 10; ++i)
+        qDebug("%i", i);
+
+    -NOT-
+
+    if (address.isEmpty()) {
+        return false;
+    }
+
+    for (int i = 0; i < 10; ++i) {
+        qDebug("%i", i);
+    }
+    \endcode
+
+    Exception 1: Use braces also if the parent statement covers several
+    lines or if it wraps:
+
+    \code
+    if (address.isEmpty()
+            || !isValid()
+            || !codec) {
+        return false;
+    }
+    \endcode
+
+    \note This could be re-written as:
+
+    \code
+    if (address.isEmpty())
+        return false;
+
+    if (!isValid())
+        return false;
+
+    if (!codec)
+        return false;
+    \endcode
+
+    Exception 2: Use braces also in if-then-else blocks where either the
+    if-code or the else-code covers several lines:
+
+    \code
+    if (address.isEmpty()) {
+        --it;
+    } else {
+        qDebug("%s", qPrintable(address));
+        ++it;
+    }
+
+    -NOT-
+
+    if (address.isEmpty())
+        --it;
+    else {
+        qDebug("%s", qPrintable(address));
+        ++it;
+    }
+    \endcode
+
+    \code
+    if (a) {
+        if (b)
+            ...
+        else
+            ...
+    }
+
+    -NOT-
+
+    if (a)
+        if (b)
+            ...
+        else
+            ...
+    \endcode
+
+    Use curly braces when the body of a conditional statement is empty:
+
+    \code
+    while (a) {}
+
+    -NOT-
+
+    while (a);
+    \endcode
+
+    \section2 Parentheses
+
+    Use parentheses to group expressions:
+
+    \code
+    if ((a && b) || c)
+
+    -NOT-
+
+    if (a && b || c)
+    \endcode
+
+    \code
+    (a + b) & c
+
+    -NOT-
+
+    a + b & c
+    \endcode
+
+    \section2 Line Breaks
+
+    \list
+        \o  Keep lines shorter than 100 characters.
+        \o  Insert line breaks if necessary.
+        \o  Commas go at the end of a broken line.
+        \o  Operators start at the beginning of the new line.
+            \code
+            if (longExpression
+                || otherLongExpression
+                || otherOtherLongExpression) {
+            }
+
+            -NOT-
+
+            if (longExpression ||
+                otherLongExpression ||
+                otherOtherLongExpression) {
+            }
+            \endcode
+    \endlist
+
+    \section2 Declarations
+
+    \list
+        \o  Use this order for the access sections of your class: public,
+            protected, private. The public section is interesting for every
+            user of the class. The private section is only of interest for the
+            implementors of the class (you).
+
+        \o  Avoid declaring global objects in the declaration file of the class.
+            If the same variable is used for all objects, use a static member.
+
+        \o  Use \c{class} instead of \c{struct}. Some compilers mangle that
+            difference into the symbol names and spit out warnings if a struct
+            declaration is followed by a class definition. To avoid ongoing
+            changes from one to the other we declare \c{class} the prefered way.
+
+    \endlist
+
+    \section3 Declaring Variables
+
+    \list
+        \o  Avoid global variables of class type to rule out initialization order problems.
+            Consider using \c Q_GLOBAL_STATIC if they cannot be avoided.
+        \o  Declare global string literals as
+            \code
+            const char aString[] = "Hello";
+            \endcode
+        \o  Avoid short names (such as, a, rbarr, nughdeget) whenever possible.
+            Use single-character variable names only for counters and
+            temporaries, where the purpose of the variable is obvious.
+        \o  Declare each variable on a separate line:
+            \code
+            QString a = "Joe";
+            QString b = "Foo";
+
+            -NOT-
+
+            QString a = "Joe", b = "Foo";
+            \endcode
+
+            \note \c{QString a = "Joe"} formally calls a copy constructor on a
+            temporary that is constructed from a string literal. Therefore, it is
+            potentially more expensive than direct construction by
+            \c {QString a("Joe")}. However, the compiler is allowed to elide the
+            copy (even if this has side effects), and modern compilers typically do
+            so. Given these equal costs, Qt Creator code favours the '=' idiom as
+            it is in
+            line with the traditional C-style initialization, it cannot be
+            mistaken as function declaration, and it reduces the level of nested
+            parantheses in more initializations.
+
+        \o  Avoid abbreviations:
+
+            \code
+            int height;
+            int width;
+            char *nameOfThis;
+            char *nameOfThat;
+
+            -NOT-
+
+            int a, b;
+            char *c, *d;
+            \endcode
+
+        \o  Wait with declaring a variable until it is needed. This is especially
+            important when initialization is done at the same time.
+    \endlist
+
+    \section1 Patterns and Practices
+
+    \section2 Namespacing
+
+    Read \l {http://wiki.qt-project.org/index.php/Qt_In_Namespace}{Qt In Namespace}
+    and keep in mind that all of Qt Creator is \e{namespace aware} code.
+
+    The namespacing policy within Qt Creator is as follows:
+    \list
+        \o Classes/Symbols of a library or plugin that are exported for use of
+           other libraries or plugins are in a namespace specific to that
+           library/plugin, e.g. \c{MyPlugin}.
+        \o Classes/Symbols of a library or plugin that are not exported are in
+           an additional \c{Internal} namespace, e.g. \c{MyPlugin::Internal}.
+    \endlist
+
+    \section2 Passing File Names
+
+    Qt Creator API expects file names in portable format, that is, with slashes (/)
+    instead of backslashes (\\) even on Windows. To pass a file name from the user
+    to the API, convert it with QDir::fromNativeSeparators first. To present a file
+    name to the user, convert it back to native format with
+    QDir::toNativeSeparators.
+
+    When comparing file names, consider using FileManager::fixFileName which
+    makes sure that paths are clean and absolute and also takes Windows
+    case-insensitivity into account (even if it is an expensive operation).
+
+    \section2 Plugin Extension Points
+
+    A plugin extension point is an interface that is provided by one plugin
+    to be implemented by others. The plugin then retrieves all
+    implementations of the interface and uses them. That is, they \e extend the
+    functionality of the plugin. Typically, the
+    implementations of the interface are put into the global object pool
+    during plugin initialization, and the plugin retrieves them from the
+    object pool at the end of plugin initialization.
+
+    For example, the Find plugin provides the FindFilter interface for
+    other plugins to implement. With the FindFilter interface, additional search
+    scopes can be added, that appear in the \gui {Advanced Search} dialog. The
+    Find plugin retrieves all FindFilter implementations from the global
+    object pool and presents them in the dialog. The plugin forwards the
+    actual search request to the correct FindFilter implementation, which
+    then performs the search.
+
+    \section2 Using the Global Object Pool
+
+    You can add objects to the global object pool via
+    \l{ExtensionSystem::PluginManager::addObject()}, and retrieve objects
+    of a specific type again via
+    \l{ExtensionSystem::PluginManager::getObjects()}.  This should mostly
+    be used for implementations of \l{Plugin Extension Points}.
+
+    \note Do not put a singleton into the pool, and do not retrieve
+    it from there. Use the singleton pattern instead.
+
+    \section2 C++ Features
+
+    \list
+        \o  Do not use exceptions, unless you know what you do.
+
+        \o  Do not use RTTI (Run-Time Type Information; that is, the typeinfo
+            struct, the dynamic_cast or the typeid operators, including throwing
+            exceptions), unless you know what you do.
+
+        \o  Do not use virtual inheritance, unless you know what you do.
+
+        \o  Use templates wisely, not just because you can.
+
+            Hint: Use the compile autotest to see whether a C++ feature is supported
+            by all compilers in the test farm.
+
+        \o  All code is ASCII only (7-bit characters only, run \c {man ascii} if unsure)
+            \list
+                \o  Rationale: We have too many locales inhouse and an unhealthy
+                    mix of UTF-8 and Latin1 systems. Usually, characters > 127 can
+                    be broken without you even knowing by clicking Save in your
+                    favourite editor.
+                \o  For strings: Use \\nnn (where nnn is the octal representation
+                    of whatever locale you want your string in) or \xnn (where nn
+                    is hexadecimal).
+                    For example: QString s = QString::fromUtf8("\\213\\005");
+              \o  For umlauts in documentation, or other non-ASCII characters,
+                  either use the qdoc \c {\unicode} command or use the relevant macro.
+                  For example: \c{\uuml} for \uuml.
+           \endlist
+
+        \o  Use static keywords instead of anonymous namespaces whenever possible.
+            A name localized to the compilation unit with static is
+            guaranteed to have internal linkage. For names declared in anonymous
+            namespaces, the C++ standard unfortunately mandates external linkage
+            (ISO/IEC 14882, 7.1.1/6, or see various discussions about this on the gcc
+            mailing lists).
+    \endlist
+
+    \section3 Null Pointers
+
+    Using a plain zero (0) for null pointer constants is always correct and
+    least effort to type.
+
+    \code
+    void *p = 0;
+
+    -NOT-
+
+    void *p = NULL;
+
+    -NOT-
+
+    void *p = '\0';
+
+    -NOT-
+
+    void *p = 42 - 7 * 6;
+    \endcode
+
+    \note As an exception, imported third party code as well as code
+    interfacing the native APIs (src/support/os_*) can use NULL.
+
+    \section2 Using QObject
+
+    \list
+        \o  Every QObject subclass must have a Q_OBJECT macro, even if it
+            does not have signals or slots, if it is intended to be used
+            with qobject_cast<>. See also \l{Casting}.
+        \o  Normalize the arguments for signals and slots
+            (see \l{http://doc.qt.nokia.com/4.7/qmetaobject.html#normalizedSignature}{QMetaObject::normalizedSignature}
+            inside connect statements
+            to safely make signal and slot lookup a few cycles faster.
+            You can use $QTDIR/util/normalize to normalize existing code.
+    \endlist
+
+    \section2 File Headers
+
+    If you create a new file, the top of the file should include a
+    header comment equal to the one found in other source files of Qt Creator.
+
+    \section2 Including Headers
+
+    \list
+        \o  Use the following format to include Qt headers:
+            \c{#include <QtCore/QWhatEver>}.
+        \o  Arrange includes in an order that goes from specific to generic to
+            ensure that the headers are self-contained. For example:
+        \list
+            \o  \c{#include "myclass.h"}
+            \o  \c{#include "otherclassinplugin.h"}
+            \o  \c{#include <otherplugin/someclass.h>}
+            \o  \c{#include <QtModule/QtClass>}
+            \o  \c{#include <stdthing>}
+            \o  \c{#include <system.h>}
+        \endlist
+        \o  Enclose headers from other plugins in square brackets (<>) rather than
+            quotation marks ("") to make it easier to spot external dependencies in
+            the sources.
+        \o  Add empty lines between long blocks of \e peer headers and try to
+            arrange the headers in alphabetic order within a block.
+    \endlist
+
+    \section2 Casting
+
+    \list
+        \o  Avoid C casts, prefer C++ casts (\c static_cast, \c const_cast,
+            \c reinterpret_cast) Both \c reinterpret_cast and
+            C-style casts are dangerous, but at least \c reinterpret_cast
+            will not remove the const modifier.
+        \o  Do not use \c dynamic_cast, use \c {qobject_cast} for QObjects, or
+            refactor your design, for example by introducing a \c {type()}
+            method (see QListWidgetItem), unless you know what you do.
+    \endlist
+
+    \section2 Compiler and Platform-specific Issues
+
+    \list
+        \o  Be extremely careful when using the question mark operator.
+            If the returned types are not identical, some compilers generate
+            code that crashes at runtime (you will not even get a compiler warning):
+            \code
+            QString s;
+            // crash at runtime - QString vs. const char *
+            return condition ? s : "nothing";
+            \endcode
+
+        \o  Be extremely careful about alignment.
+
+            Whenever a pointer is cast such that the required alignment of
+            the target is increased, the resulting code might crash at runtime
+            on some architectures. For example, if a \c {const char *} is cast to a
+            \c {const int *}, it will crash on machines where integers have to be
+            aligned at two-byte or four-byte boundaries.
+
+            Use a union to force the compiler to align variables correctly.
+            In the example below, you can be sure that all instances of
+            AlignHelper are aligned at integer-boundaries:
+            \code
+            union AlignHelper
+            {
+                char c;
+                int i;
+            };
+            \endcode
+
+        \o  Anything that has a constructor or needs to run code to be
+            initialized cannot be used as global object in library code,
+            since it is undefined when that constructor or code will be run
+            (on first usage, on library load, before \c {main()} or not at all).
+
+            Even if the execution time of the initializer is defined for
+            shared libraries, you will get into trouble when moving that code
+            in a plugin or if the library is compiled statically:
+
+            \code
+            // global scope
+
+            -NOT-
+
+            // Default constructor needs to be run to initialize x:
+            static const QString x;
+
+            -NOT-
+
+            // Constructor that takes a const char * has to be run:
+            static const QString y = "Hello";
+
+            -NOT-
+
+            QString z;
+
+            -NOT-
+
+            // Call time of foo() undefined, might not be called at all:
+            static const int i = foo();
+            \endcode
+
+            Things you can do:
+
+            \code
+            // global scope
+            // No constructor must be run, x set at compile time:
+            static const char x[] = "someText";
+
+            // y will be set at compile time:
+            static int y = 7;
+
+            // Will be initialized statically, no code being run.
+            static MyStruct s = {1, 2, 3};
+
+            // Pointers to objects are OK, no code needed to be run to
+            // initialize ptr:
+            static QString *ptr = 0;
+
+            // Use Q_GLOBAL_STATIC to create static global objects instead:
+
+            Q_STATIC_GLOBAL(QString, s)
+
+            void foo()
+            {
+                s()->append("moo");
+            }
+            \endcode
+
+            \note Static objects in function scope are no problem. The constructor
+            will be run the first time the function is entered. The code is not
+            reentrant, though.
+
+        \o  A \c char is signed or unsigned dependent on the architecture. Use signed
+            \c char or \c uchar if you explicitely want a signed or unsigned char.
+            The following code will break on PowerPC, for example:
+
+            \code
+            // Condition is always true on platforms where the
+            // default is unsigned:
+            if (c >= 0) {
+                ...
+            }
+            \endcode
+
+        \o  Avoid 64-bit enum values. The AAPCS (Procedure Call Standard
+            for the ARM Architecture) embedded ABI hard codes
+            all enum values to a 32-bit integer.
+
+        \o  Do not mix const and non-const iterators. This will silently crash
+            on broken compilers.
+            \code
+            for (Container::const_iterator it = c.constBegin(); it != c.constEnd(); ++it)
+
+            -NOT-
+
+            for (Container::const_iterator it = c.begin(); it != c.end(); ++it)
+            \endcode
+    \endlist
+
+    \section2 Esthetics
+
+    \list
+        \o Prefer enums to define const over static const int or defines.
+           Enumeration values will be replaced by the compiler at compile time,
+           resulting in faster code. Defines are not namespace safe.
+        \o Prefer verbose argument names in headers.
+           Qt Creator will show the argument names in their completion box.
+           It will look better in the documentation.
+    \endlist
+
+    \section2 Inheriting from Template or Tool Classes
+
+    Inheriting from template or tool classes has the following potential
+    pitfalls:
+
+    \list
+        \o  The destructors are not virtual, which can lead to memory leaks.
+        \o  The symbols are not exported (and mostly inline), which can lead to
+            symbol clashes.
+    \endlist
+
+    For example, library A has class \c {Q_EXPORT X: public QList<QVariant> {};}
+    and library B has class \c {Q_EXPORT Y: public QList<QVariant> {};}.
+    Suddenly, QList symbols are exported from two libraries which results in a
+    clash.
+
+    \section2 Conventions for Public Header Files
+
+    Our public header files have to survive the strict settings of
+    some of our users. All installed headers have to follow these rules:
+
+    \list
+
+        \o  No C style casts (\c{-Wold-style-cast}). Use \c static_cast, \c const_cast
+            or \c reinterpret_cast, for basic types, use the constructor form:
+            \c {int(a)} instead of \c {(int)a}. For more information, see \l{Casting}.
+
+        \o  No float comparisons (\c{-Wfloat-equal}). Use \c qFuzzyCompare to compare
+            values with a delta. Use \c qIsNull to check whether a float is
+            binary 0, instead of comparing it to 0.0, or, prefered, move
+            such code into an implementation file.
+
+       \o  Do not hide virtual methods in subclasses (\{-Woverloaded-virtual}).
+           If the baseclass A has a virtual \c {int val()} and subclass B an
+           overload with the same name, \c {int val(int x)}, the A \c val function
+           is hidden. Use the \c using keyword to make it visible again, and
+           add the following silly workaround for broken compilers:
+           \code
+               class B: public A
+               {
+               #ifdef Q_NO_USING_KEYWORD
+               inline int val() { return A::val(); }
+               #else
+               using A::val;
+               #endif
+               };
+           \endcode
+
+        \o  Do not shadow variables (\c{-Wshadow}).
+
+        \o  Avoid things like \c {this->x = x;} if possible.
+
+        \o  Do not give variables the same name as functions declared in
+            your class.
+
+        \o  To improve code readability, always check whether a preprocessor
+            variable is defined before probing its value (\c{-Wundef}).
+
+            \code
+              #if defined(Foo) && Foo == 0
+
+              -NOT-
+
+              #if Foo == 0
+
+              -NOT-
+
+              #if Foo - 0 == 0
+           \endcode
+
+    \endlist
+
+    \section1 Class Member Names
+
+    We use the "m_" prefix convention, except for public struct members
+    (typically in *Private classes and the very rare cases of really
+    public structures). The \c{d} and \c{q} pointers are exempt from
+    the "m_" rule.
+
+    The \c{d} pointers ("Pimpls") are named "d", not "m_d". The type of the
+    \c{d} pointer in \c{class Foo} is \c{FooPrivate *}, where \c{FooPrivate}
+    is declared in the same namespace as \c{Foo}, or if \c{Foo} is
+    exported, in the corresponding \{Internal} namespace.
+
+    If needed (for example when the private object needs to emit signals of
+    the proper class), \c{FooPrivate} can be a friend of \c{Foo}.
+
+    If the private class needs a backreference to the real class,
+    the pointer is named \c{q}, and its type is \c{Foo *}. (Same convention
+    as in Qt: "q" looks like an inverted "d".)
+
+    Do not use smart pointers to guard the \c{d} pointer as it imposes
+    a compile and link time overhead and creates fatter object
+    code with more symbols, leading, for instance to slowed down
+    debugger startup:
+
+        \code
+
+            ############### bar.h
+
+            #include <QScopedPointer>
+            //#include <memory>
+
+            struct BarPrivate;
+
+            struct Bar
+            {
+                Bar();
+                ~Bar();
+                int value() const;
+
+                QScopedPointer<BarPrivate> d;
+                //std::auto_ptr<BarPrivate> d;
+            };
+
+            ############### bar.cpp
+
+            #include "bar.h"
+
+            struct BarPrivate { BarPrivate() : i(23) {} int i; };
+
+            Bar::Bar() : d(new BarPrivate) {}
+
+            Bar::~Bar() {}
+
+            int Bar::value() const { return d->i; }
+
+            ############### baruser.cpp
+
+            #include "bar.h"
+
+            int barUser() { Bar b; return b.value(); }
+
+            ############### baz.h
+
+            struct BazPrivate;
+
+            struct Baz
+            {
+                Baz();
+                ~Baz();
+                int value() const;
+
+                BazPrivate *d;
+            };
+
+            ############### baz.cpp
+
+            #include "baz.h"
+
+            struct BazPrivate { BazPrivate() : i(23) {} int i; };
+
+            Baz::Baz() : d(new BazPrivate) {}
+
+            Baz::~Baz() { delete d; }
+
+            int Baz::value() const { return d->i; }
+
+            ############### bazuser.cpp
+
+            #include "baz.h"
+
+            int bazUser() { Baz b; return b.value(); }
+
+            ############### main.cpp
+
+            int barUser();
+            int bazUser();
+
+            int main() { return barUser() + bazUser(); }
+
+        \endcode
+
+        Results:
+
+        \code
+
+            Object file size:
+
+             14428 bar.o
+              4744 baz.o
+
+              8508 baruser.o
+              2952 bazuser.o
+
+            Symbols in bar.o:
+
+                00000000 W _ZN3Foo10BarPrivateC1Ev
+                00000036 T _ZN3Foo3BarC1Ev
+                00000000 T _ZN3Foo3BarC2Ev
+                00000080 T _ZN3Foo3BarD1Ev
+                0000006c T _ZN3Foo3BarD2Ev
+                00000000 W _ZN14QScopedPointerIN3Foo10BarPrivateENS_21QScopedPointerDeleterIS2_EEEC1EPS2_
+                00000000 W _ZN14QScopedPointerIN3Foo10BarPrivateENS_21QScopedPointerDeleterIS2_EEED1Ev
+                00000000 W _ZN21QScopedPointerDeleterIN3Foo10BarPrivateEE7cleanupEPS2_
+                00000000 W _ZN7qt_noopEv
+                         U _ZN9qt_assertEPKcS1_i
+                00000094 T _ZNK3Foo3Bar5valueEv
+                00000000 W _ZNK14QScopedPointerIN3Foo10BarPrivateENS_21QScopedPointerDeleterIS2_EEEptEv
+                         U _ZdlPv
+                         U _Znwj
+                         U __gxx_personality_v0
+
+            Symbols in baz.o:
+
+                00000000 W _ZN3Foo10BazPrivateC1Ev
+                0000002c T _ZN3Foo3BazC1Ev
+                00000000 T _ZN3Foo3BazC2Ev
+                0000006e T _ZN3Foo3BazD1Ev
+                00000058 T _ZN3Foo3BazD2Ev
+                00000084 T _ZNK3Foo3Baz5valueEv
+                         U _ZdlPv
+                         U _Znwj
+                         U __gxx_personality_v0
+
+          \endcode
+
+
+
+    \section1 Documentation
+
+    The documentation is generated from source and header files. You document
+    for the other developers, not for yourself. In the header files, document
+    interfaces. That is, what the function does, not the implementation.
+
+    In the .cpp files, you can document the implementation if the
+    implementation is not obvious.
+
+*/

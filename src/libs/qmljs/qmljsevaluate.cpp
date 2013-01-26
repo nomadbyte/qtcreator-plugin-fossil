@@ -1,0 +1,613 @@
+/**************************************************************************
+**
+** This file is part of Qt Creator
+**
+** Copyright (c) 2011 Nokia Corporation and/or its subsidiary(-ies).
+**
+** Contact: Nokia Corporation (qt-info@nokia.com)
+**
+**
+** GNU Lesser General Public License Usage
+**
+** This file may be used under the terms of the GNU Lesser General Public
+** License version 2.1 as published by the Free Software Foundation and
+** appearing in the file LICENSE.LGPL included in the packaging of this file.
+** Please review the following information to ensure the GNU Lesser General
+** Public License version 2.1 requirements will be met:
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Nokia gives you certain additional
+** rights. These rights are described in the Nokia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+** Other Usage
+**
+** Alternatively, this file may be used in accordance with the terms and
+** conditions contained in a signed written agreement between you and Nokia.
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at qt-info@nokia.com.
+**
+**************************************************************************/
+
+#include "qmljsevaluate.h"
+#include "qmljscontext.h"
+#include "qmljsvalueowner.h"
+#include "qmljsscopechain.h"
+#include "parser/qmljsast_p.h"
+#include <QtCore/QDebug>
+
+using namespace QmlJS;
+
+Evaluate::Evaluate(const ScopeChain *scopeChain, ReferenceContext *referenceContext)
+    : _valueOwner(scopeChain->context()->valueOwner()),
+      _context(scopeChain->context()),
+      _referenceContext(referenceContext),
+      _scopeChain(scopeChain),
+      _scope(_valueOwner->globalObject()),
+      _result(0)
+{
+}
+
+Evaluate::~Evaluate()
+{
+}
+
+const Value *Evaluate::operator()(AST::Node *ast)
+{
+    return value(ast);
+}
+
+const Value *Evaluate::value(AST::Node *ast)
+{
+    const Value *result = reference(ast);
+
+    if (const Reference *ref = value_cast<const Reference *>(result)) {
+        if (_referenceContext)
+            result = _referenceContext->lookupReference(ref);
+        else
+            result = _context->lookupReference(ref);
+    }
+
+    if (! result)
+        result = _valueOwner->undefinedValue();
+
+    return result;
+}
+
+const Value *Evaluate::reference(AST::Node *ast)
+{
+    // save the result
+    const Value *previousResult = switchResult(0);
+
+    // process the expression
+    accept(ast);
+
+    // restore the previous result
+    return switchResult(previousResult);
+}
+
+const Value *Evaluate::switchResult(const Value *result)
+{
+    const Value *previousResult = _result;
+    _result = result;
+    return previousResult;
+}
+
+const ObjectValue *Evaluate::switchScope(const ObjectValue *scope)
+{
+    const ObjectValue *previousScope = _scope;
+    _scope = scope;
+    return previousScope;
+}
+
+void Evaluate::accept(AST::Node *node)
+{
+    AST::Node::accept(node, this);
+}
+
+bool Evaluate::visit(AST::UiProgram *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::UiImportList *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::UiImport *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::UiPublicMember *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::UiSourceElement *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::UiObjectDefinition *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::UiObjectInitializer *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::UiObjectBinding *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::UiScriptBinding *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::UiArrayBinding *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::UiObjectMemberList *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::UiArrayMemberList *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::UiQualifiedId *ast)
+{
+    if (ast->name.isEmpty())
+         return false;
+
+    const Value *value = _scopeChain->lookup(ast->name.toString());
+    if (! ast->next) {
+        _result = value;
+
+    } else {
+        const ObjectValue *base = value_cast<const ObjectValue *>(value);
+
+        for (AST::UiQualifiedId *it = ast->next; base && it; it = it->next) {
+            const QString &name = it->name.toString();
+            if (name.isEmpty())
+                break;
+
+            const Value *value = base->lookupMember(name, _context);
+            if (! it->next)
+                _result = value;
+            else
+                base = value_cast<const ObjectValue *>(value);
+        }
+    }
+
+    return false;
+}
+
+bool Evaluate::visit(AST::UiSignature *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::UiFormalList *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::UiFormal *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::ThisExpression *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::IdentifierExpression *ast)
+{
+    if (ast->name.isEmpty())
+        return false;
+
+    _result = _scopeChain->lookup(ast->name.toString());
+    return false;
+}
+
+bool Evaluate::visit(AST::NullExpression *)
+{
+    _result = _valueOwner->nullValue();
+    return false;
+}
+
+bool Evaluate::visit(AST::TrueLiteral *)
+{
+    _result = _valueOwner->booleanValue();
+    return false;
+}
+
+bool Evaluate::visit(AST::FalseLiteral *)
+{
+    _result = _valueOwner->booleanValue();
+    return false;
+}
+
+bool Evaluate::visit(AST::StringLiteral *)
+{
+    _result = _valueOwner->stringValue();
+    return false;
+}
+
+bool Evaluate::visit(AST::NumericLiteral *)
+{
+    _result = _valueOwner->numberValue();
+    return false;
+}
+
+bool Evaluate::visit(AST::RegExpLiteral *)
+{
+    _result = _valueOwner->regexpCtor()->construct();
+    return false;
+}
+
+bool Evaluate::visit(AST::ArrayLiteral *)
+{
+    _result = _valueOwner->arrayCtor()->construct();
+    return false;
+}
+
+bool Evaluate::visit(AST::ObjectLiteral *)
+{
+    // ### properties
+    _result = _valueOwner->newObject();
+    return false;
+}
+
+bool Evaluate::visit(AST::ElementList *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::Elision *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::PropertyNameAndValueList *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::NestedExpression *)
+{
+    return true; // visit the child expression
+}
+
+bool Evaluate::visit(AST::IdentifierPropertyName *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::StringLiteralPropertyName *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::NumericLiteralPropertyName *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::ArrayMemberExpression *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::FieldMemberExpression *ast)
+{
+    if (ast->name.isEmpty())
+        return false;
+
+    if (const Value *base = _valueOwner->convertToObject(value(ast->base))) {
+        if (const ObjectValue *obj = base->asObjectValue()) {
+            _result = obj->lookupMember(ast->name.toString(), _context);
+        }
+    }
+
+    return false;
+}
+
+bool Evaluate::visit(AST::NewMemberExpression *ast)
+{
+    if (const FunctionValue *ctor = value_cast<const FunctionValue *>(value(ast->base))) {
+        _result = ctor->construct();
+    }
+    return false;
+}
+
+bool Evaluate::visit(AST::NewExpression *ast)
+{
+    if (const FunctionValue *ctor = value_cast<const FunctionValue *>(value(ast->expression))) {
+        _result = ctor->construct();
+    }
+    return false;
+}
+
+bool Evaluate::visit(AST::CallExpression *ast)
+{
+    if (const Value *base = value(ast->base)) {
+        if (const FunctionValue *obj = base->asFunctionValue()) {
+            _result = obj->returnValue();
+        }
+    }
+    return false;
+}
+
+bool Evaluate::visit(AST::ArgumentList *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::PostIncrementExpression *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::PostDecrementExpression *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::DeleteExpression *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::VoidExpression *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::TypeOfExpression *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::PreIncrementExpression *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::PreDecrementExpression *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::UnaryPlusExpression *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::UnaryMinusExpression *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::TildeExpression *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::NotExpression *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::BinaryExpression *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::ConditionalExpression *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::Expression *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::Block *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::StatementList *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::VariableStatement *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::VariableDeclarationList *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::VariableDeclaration *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::EmptyStatement *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::ExpressionStatement *)
+{
+    return true;
+}
+
+bool Evaluate::visit(AST::IfStatement *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::DoWhileStatement *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::WhileStatement *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::ForStatement *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::LocalForStatement *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::ForEachStatement *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::LocalForEachStatement *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::ContinueStatement *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::BreakStatement *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::ReturnStatement *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::WithStatement *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::SwitchStatement *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::CaseBlock *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::CaseClauses *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::CaseClause *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::DefaultClause *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::LabelledStatement *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::ThrowStatement *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::TryStatement *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::Catch *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::Finally *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::FunctionDeclaration *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::FunctionExpression *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::FormalParameterList *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::FunctionBody *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::Program *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::SourceElements *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::FunctionSourceElement *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::StatementSourceElement *)
+{
+    return false;
+}
+
+bool Evaluate::visit(AST::DebuggerStatement *)
+{
+    return false;
+}

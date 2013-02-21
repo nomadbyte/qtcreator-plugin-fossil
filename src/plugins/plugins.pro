@@ -33,6 +33,7 @@ SUBDIRS   = plugin_coreplugin \
             plugin_glsleditor \
             plugin_mercurial \
             plugin_bazaar \
+            plugin_fossil \
             plugin_classview \
             plugin_tasklist \
             plugin_analyzerbase \
@@ -263,6 +264,11 @@ plugin_bazaar.subdir = bazaar
 plugin_bazaar.depends = plugin_vcsbase
 plugin_bazaar.depends += plugin_projectexplorer
 plugin_bazaar.depends += plugin_coreplugin
+
+plugin_fossil.subdir = fossil
+plugin_fossil.depends = plugin_vcsbase
+plugin_fossil.depends += plugin_projectexplorer
+plugin_fossil.depends += plugin_coreplugin
 
 plugin_classview.subdir = classview
 plugin_classview.depends = plugin_coreplugin

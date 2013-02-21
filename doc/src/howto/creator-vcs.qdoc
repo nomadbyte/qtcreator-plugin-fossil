@@ -48,6 +48,10 @@
             \i  \l{http://www.cvshome.org}
             \i
         \row
+            \i  Fossil
+            \i  \l{http://www.fossil-scm.org}
+            \i  Fossil version 1.26 and later
+        \row
             \i  Git
             \i  \l{http://git-scm.com/}
             \i
@@ -144,7 +148,7 @@
     \section1 Creating VCS Repositories for New Projects
 
     \QC allows you to create repositories for version control systems that
-    support local repository creation, such as Git, Mercurial, or Bazaar.
+    support local repository creation, such as Git, Mercurial, Fossil, or Bazaar.
     When creating a new project by selecting \gui File > \gui{New File or
     Project}, you can choose a version control system on the final wizard page.
 
@@ -321,6 +325,35 @@
         \row
             \i  \gui{Unedit}
             \i  Discard the changes that you made in a file.
+
+    \endtable
+
+    \section2 Using Additional Fossil Functions
+
+    Fossil is a free and open-source distributed version control system, designed
+    and developed by creator of SQLite. Reliable, simple, and versatile -- a
+    stand-alone executable contains SCM engine, web-interface, bug-tracking, wiki,
+    and built-in web-server. Fossil is available for Linux, Windows and Mac.
+
+    The \gui Fossil submenu contains the following additional items:
+
+    \table
+        \header
+            \o  Menu Item
+            \o  Description
+        \row
+            \i  \gui{Pull}
+            \i  Pull changes from the remote repository.
+        \row
+            \i  \gui{Push}
+            \i  Push committed changes to the remote repository.
+        \row
+            \i  \gui{Update}
+            \i  Change the version of the current checkout. Any uncommitted
+                changes are retained and applied to the new checkout.
+        \row
+            \i  \gui{Settings}
+            \i  Configure settings of the local repository.
 
     \endtable
 

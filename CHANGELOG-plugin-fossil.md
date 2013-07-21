@@ -1,6 +1,15 @@
 qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
 =================================
 
+## 2.4.1_2 - 2013-07-21
+
+- client min. version `fossil 1.26`
+
+- __FIXED__:`Diff` does not show contents of added/deleted files, only lists
+  file status ADDED/DELETED. This is a limitation of the current `fossil` client
+  version.
+
+
 ## 2.4.1_1 - 2013-02-16
 
 - Based on `Qt Creator 2.4.1` VCSBase framework

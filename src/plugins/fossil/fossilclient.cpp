@@ -600,12 +600,9 @@ void FossilClient::view(const QString &source, const QString &id, const QStringL
 
     RevisionInfo revisionInfo = synchronousRevisionQuery(workingDirectory,id);
 
-    // NOTE: fossil diff does not show the contents of the added or deleted files,
-    //       just the status ADDED, DELETED.
-    //       So, technically, such diff may not be fully used for patching.
-
     args << QLatin1String("--from") << revisionInfo.parentId
          << QLatin1String("--to") << revisionInfo.id
+         << QLatin1String("-v")
          << extraOptions;
 
     const QString kind = vcsEditorKind(DiffCommand);

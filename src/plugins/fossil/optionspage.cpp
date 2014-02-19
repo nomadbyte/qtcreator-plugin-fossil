@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013, Artur Shepilko.
+**  Copyright (c) 2013 - 2014, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -58,6 +58,7 @@ FossilSettings OptionsPageWidget::settings() const
     s.setValue(FossilSettings::userNameKey, m_ui.defaultUsernameLineEdit->text().trimmed());
     s.setValue(FossilSettings::sslIdentityFileKey, m_ui.sslIdentityFilePathChooser->path());
     s.setValue(FossilSettings::logCountKey, m_ui.logEntriesCount->value());
+    s.setValue(FossilSettings::timelineWidthKey, m_ui.logEntriesWidth->value());
     s.setValue(FossilSettings::timeoutKey, m_ui.timeout->value());
     s.setValue(FossilSettings::promptOnSubmitKey, m_ui.promptOnSubmitCheckBox->isChecked());
     s.setValue(FossilSettings::disableAutosyncKey, m_ui.disableAutosyncCheckBox->isChecked());
@@ -71,6 +72,7 @@ void OptionsPageWidget::setSettings(const FossilSettings &s)
     m_ui.defaultUsernameLineEdit->setText(s.stringValue(FossilSettings::userNameKey));
     m_ui.sslIdentityFilePathChooser->setPath(s.stringValue(FossilSettings::sslIdentityFileKey));
     m_ui.logEntriesCount->setValue(s.intValue(FossilSettings::logCountKey));
+    m_ui.logEntriesWidth->setValue(s.intValue(FossilSettings::timelineWidthKey));
     m_ui.timeout->setValue(s.intValue(FossilSettings::timeoutKey));
     m_ui.promptOnSubmitCheckBox->setChecked(s.boolValue(FossilSettings::promptOnSubmitKey));
     m_ui.disableAutosyncCheckBox->setChecked(s.boolValue(FossilSettings::disableAutosyncKey));

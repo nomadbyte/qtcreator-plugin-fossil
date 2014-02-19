@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013, Artur Shepilko.
+**  Copyright (c) 2013 - 2014, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -41,6 +41,8 @@ public:
     static const QLatin1String defaultRepoPathKey;
     static const QLatin1String sslIdentityFileKey;
     static const QLatin1String diffIgnoreWhiteSpaceKey;
+    static const QLatin1String annotateShowCommittersKey;
+    static const QLatin1String timelineWidthKey;
     static const QLatin1String timelineLineageFilterKey;
     static const QLatin1String timelineVerboseKey;
     static const QLatin1String timelineItemTypeKey;

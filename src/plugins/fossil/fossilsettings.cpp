@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013, Artur Shepilko.
+**  Copyright (c) 2013 - 2014, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -35,6 +35,8 @@ namespace Internal {
 const QLatin1String FossilSettings::defaultRepoPathKey("defaultRepoPath");
 const QLatin1String FossilSettings::sslIdentityFileKey("sslIdentityFile");
 const QLatin1String FossilSettings::diffIgnoreWhiteSpaceKey("diffIgnoreWhiteSpace");
+const QLatin1String FossilSettings::annotateShowCommittersKey("annotateShowCommitters");
+const QLatin1String FossilSettings::timelineWidthKey("timelineWidth");
 const QLatin1String FossilSettings::timelineLineageFilterKey("timelineLineageFilter");
 const QLatin1String FossilSettings::timelineVerboseKey("timelineVerbose");
 const QLatin1String FossilSettings::timelineItemTypeKey("timelineItemType");
@@ -48,6 +50,8 @@ FossilSettings::FossilSettings()
     declareKey(defaultRepoPathKey, QLatin1String(""));
     declareKey(sslIdentityFileKey, QLatin1String(""));
     declareKey(diffIgnoreWhiteSpaceKey, false);
+    declareKey(annotateShowCommittersKey, false);
+    declareKey(timelineWidthKey, 0);
     declareKey(timelineLineageFilterKey, QLatin1String("|LINEAGE|"));
     declareKey(timelineVerboseKey, false);
     declareKey(timelineItemTypeKey, QLatin1String("all"));

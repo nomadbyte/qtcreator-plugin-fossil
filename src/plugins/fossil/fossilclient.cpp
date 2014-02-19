@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013, Artur Shepilko.
+**  Copyright (c) 2013 - 2014, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -49,6 +49,28 @@
 namespace Fossil {
 namespace Internal {
 
+unsigned FossilClient::makeVersionNumber(int major, int minor, int patch)
+{
+    const unsigned version = (QString().setNum(major).toUInt(0,16) << 16) +
+                             (QString().setNum(minor).toUInt(0,16) << 8) +
+                             (QString().setNum(patch).toUInt(0,6));
+
+    return version;
+}
+
+QString FossilClient::makeVersionString(unsigned version)
+{
+    if (!version)
+        return QString();
+
+    // maj.min.patch
+    QString result;
+    QTextStream(&result) << (version >> 16)
+                         << '.' << (0xFF & (version >> 8))
+                         << '.' << (version & 0xFF);
+    return result;
+}
+
 QString FossilClient::buildPath(const QString &path, const QString &baseName, const QString &suffix)
 {
     // Intended use: handle the path in POSIX format, convert via QDir::toNativeSeparators() at use site.
@@ -78,6 +100,35 @@ FossilClient::FossilClient(FossilSettings *settings)
 FossilSettings *FossilClient::settings() const
 {
     return dynamic_cast<FossilSettings *>(VCSBase::VCSBaseClient::settings());
+}
+
+unsigned int FossilClient::synchronousBinaryVersion()
+{
+    if (settings()->stringValue(FossilSettings::binaryPathKey).isEmpty())
+        return 0;
+
+    QStringList args;
+    args << QLatin1String("version");
+
+    QByteArray outputData;
+    if (!vcsFullySynchronousExec(QString(), args, &outputData))
+        return 0;
+
+    QString output = QString::fromLocal8Bit(outputData);
+    output.remove(QLatin1Char('\r'));
+
+    if (output.endsWith(QLatin1Char('\n')))
+        output.truncate(output.size()-1);
+
+    // fossil version:
+    // "This is fossil version 1.27 [ccdefa355b] 2013-09-30 11:47:18 UTC"
+    QRegExp versionPattern(QLatin1String("^[^\\d]+(\\d+)\\.(\\d+).*$"));
+    QTC_ASSERT(versionPattern.isValid(), return 0);
+    QTC_ASSERT(versionPattern.exactMatch(output), return 0);
+    const int major = versionPattern.cap(1).toInt();
+    const int minor = versionPattern.cap(2).toInt();
+    const int patch = 0;
+    return makeVersionNumber(major,minor,patch);
 }
 
 BranchInfo FossilClient::synchronousBranchQuery(const QString &workingDirectory, QList<BranchInfo> *allBranches)
@@ -576,8 +627,44 @@ void FossilClient::annotate(const QString &workingDir, const QString &file,
                             const QString revision, int lineNumber,
                             const QStringList &extraOptions)
 {
-    VCSBaseClient::annotate(workingDir, file, revision, lineNumber,
-                            QStringList(extraOptions) << QLatin1String("--log"));
+    // 'fossil annotate' command has a variant 'fossil blame'
+    // blame command attributes committing username to source lines
+    // annotate shows line numbers
+
+    Q_UNUSED(lineNumber)
+    QString vcsCmdString = vcsCommandString(AnnotateCommand);
+    const QString kind = vcsEditorKind(AnnotateCommand);
+    const QString id = VCSBase::VCSBaseEditorWidget::getSource(workingDir, QStringList(file));
+    const QString title = vcsEditorTitle(vcsCmdString, id);
+    const QString source = VCSBase::VCSBaseEditorWidget::getSource(workingDir, file);
+
+    VCSBase::VCSBaseEditorWidget *editor = createVCSEditor(kind, title, source, true,
+                                                           vcsCmdString.toLatin1().constData(), id);
+
+    VCSBase::VCSBaseEditorParameterWidget *paramWidget =
+            createAnnotateEditor(workingDir,file, revision, lineNumber, extraOptions);
+    if (paramWidget != 0)
+        editor->setConfigurationWidget(paramWidget);
+
+    VCSBase::Command *cmd = createCommand(workingDir, editor);
+    cmd->setCookie(lineNumber);
+
+    // here we introduce a "|BLAME|" meta-option to allow both annotate and blame modes
+    QRegExp blameMetaOptionRx = QRegExp(QLatin1String("\\|BLAME\\|"));
+    Q_ASSERT(blameMetaOptionRx.isValid());
+    QStringList paramArgs = paramWidget != 0 ? paramWidget->arguments() : QStringList();
+
+    int foundAt = paramArgs.indexOf(blameMetaOptionRx);
+    if (foundAt != -1) {
+        vcsCmdString = QLatin1String("blame");
+        paramArgs.removeAt(foundAt);
+    }
+    QStringList args;
+    args << vcsCmdString
+         << revisionSpec(revision)
+         << extraOptions << paramArgs << QLatin1String("--log") << file;
+
+    enqueueJob(cmd, args);
 }
 
 QString FossilClient::findTopLevelForFile(const QFileInfo &file) const
@@ -589,6 +676,57 @@ QString FossilClient::findTopLevelForFile(const QFileInfo &file) const
                                                                    repositoryCheckFile) :
                 VCSBase::VCSBasePlugin::findRepositoryForDirectory(file.absolutePath(),
                                                                    repositoryCheckFile);
+}
+
+unsigned int FossilClient::binaryVersion()
+{
+    static unsigned int cachedBinaryVersion = 0;
+    static QString cachedBinaryPath;
+
+    const QString currentBinaryPath = settings()->stringValue(FossilSettings::binaryPathKey);
+
+    if (currentBinaryPath.isEmpty())
+        return 0;
+
+    // Invalidate cache on failed version result.
+    // Assume that fossil client options have been changed and will change again.
+    if (!cachedBinaryVersion
+        || currentBinaryPath != cachedBinaryPath) {
+        cachedBinaryVersion = synchronousBinaryVersion();
+        if (cachedBinaryVersion)
+            cachedBinaryPath = currentBinaryPath;
+        else
+            cachedBinaryPath.clear();
+    }
+
+    return cachedBinaryVersion;
+}
+
+QString FossilClient::binaryVersionString()
+{
+    const unsigned int version = binaryVersion();
+
+    // Fossil itself does not report patch version, only maj.min
+    // Here we include the patch part for general convention consistency
+
+    return makeVersionString(version);
+}
+
+FossilClient::SupportedFeatures FossilClient::supportedFeatures()
+{
+    // use for legacy client support to test for feature presence
+    // e.g. supportedFeatures().testFlag(TimelineWidthFeature)
+
+    SupportedFeatures features = AllSupportedFeatures; // all inclusive by default (~0U)
+
+    const unsigned int version = binaryVersion();
+
+    if (version < makeVersionNumber(1,28,0)) {
+        features &= ~AnnotateBlameFeature;
+        features &= ~TimelineWidthFeature;
+    }
+
+    return features;
 }
 
 void FossilClient::view(const QString &source, const QString &id, const QStringList &extraOptions)
@@ -804,6 +942,10 @@ FossilClient::StatusItem FossilClient::parseStatusLine(const QString &line) cons
         flags = QLatin1String("Added by Merge");
     else if (label == QLatin1String("UPDATED_BY_MERGE"))
         flags = QLatin1String("Updated by Merge");
+    else if (label == QLatin1String("ADDED_BY_INTEGRATE"))
+        flags = QLatin1String("Added by Integrate");
+    else if (label == QLatin1String("UPDATED_BY_INTEGRATE"))
+        flags = QLatin1String("Updated by Integrate");
     else if (label == QLatin1String("CONFLICT"))
         flags = QLatin1String("Conflict");
     else if (label == QLatin1String("NOT_A_FILE"))
@@ -827,14 +969,19 @@ struct FossilCommandParameters
 {
     FossilCommandParameters(const QString &workDir,
                             const QStringList &inFiles,
-                            const QStringList &options) :
-        workingDir(workDir), files(inFiles), extraOptions(options)
+                            const QStringList &options,
+                            const QString &inRevision = QString(),
+                            int inLineNumber = -1) :
+        workingDir(workDir), files(inFiles), extraOptions(options),
+        revision(inRevision), lineNumber(inLineNumber)
     {
     }
 
     QString workingDir;
     QStringList files;
     QStringList extraOptions;
+    QString revision;
+    int lineNumber;
 };
 
 // Parameter widget controlling whitespace diff mode, associated with a parameter
@@ -872,6 +1019,57 @@ VCSBase::VCSBaseEditorParameterWidget *FossilClient::createDiffEditor(
 {
     const FossilCommandParameters parameters(workingDir, files, extraOptions);
     return new FossilDiffParameterWidget(this, parameters);
+}
+
+
+// Parameter widget controlling annotate/blame mode
+class FossilAnnotateParameterWidget : public VCSBase::VCSBaseEditorParameterWidget
+{
+    Q_OBJECT
+public:
+    FossilAnnotateParameterWidget(FossilClient *client,
+                              const FossilCommandParameters &p, QWidget *parent = 0) :
+        VCSBase::VCSBaseEditorParameterWidget(parent), m_client(client), m_params(p)
+    {
+        FossilSettings *settings = m_client->settings();
+        FossilClient::SupportedFeatures features = m_client->supportedFeatures();
+
+        if (features.testFlag(FossilClient::AnnotateBlameFeature)) {
+            mapSetting(addToggleButton(QLatin1String("|BLAME|"), tr("Show Committers")),
+                       settings->boolPointer(FossilSettings::annotateShowCommittersKey));
+        }
+    }
+
+    QStringList arguments() const
+    {
+        // pass args to Fossil verbatim
+        return VCSBaseEditorParameterWidget::arguments();
+    }
+
+    void executeCommand()
+    {
+        QString file;
+        if (!m_params.files.isEmpty())
+            file = m_params.files[0];
+        m_client->annotate(m_params.workingDir, file, m_params.revision,
+                           m_params.lineNumber, m_params.extraOptions);
+    }
+
+private:
+    FossilClient *m_client;
+    const FossilCommandParameters m_params;
+};
+
+VCSBase::VCSBaseEditorParameterWidget *FossilClient::createAnnotateEditor(
+        const QString &workingDir,
+        const QString &file,
+        const QString &revision,
+        int lineNumber,
+        const QStringList &extraOptions)
+{
+    const FossilCommandParameters parameters(workingDir, QStringList(file), extraOptions,
+                                             revision, lineNumber);
+    return new FossilAnnotateParameterWidget(this, parameters);
 }
 
 class FossilLogParameterWidget : public VCSBase::VCSBaseEditorParameterWidget

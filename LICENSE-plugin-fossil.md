@@ -1,7 +1,7 @@
 qtcreator-plugin-fossil License {#qtc-fossil-license}
 ===============================
 
-Copyright (c) 2013, Artur Shepilko.
+Copyright (c) 2013 - 2014, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013, Artur Shepilko.
+**  Copyright (c) 2013 - 2014, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -45,12 +45,24 @@ class FossilClient : public VCSBase::VCSBaseClient
     Q_OBJECT
 
 public:
+    enum SupportedFeature {
+        AnnotateBlameFeature = 0x2,
+        TimelineWidthFeature = 0x4,
+        AllSupportedFeatures =  // | all defined features
+            AnnotateBlameFeature
+            | TimelineWidthFeature
+    };
+    Q_DECLARE_FLAGS(SupportedFeatures, SupportedFeature)
+
+    static unsigned makeVersionNumber(int major, int minor, int patch);
+    static QString makeVersionString(unsigned version);
     static QString buildPath(const QString &path, const QString &baseName, const QString &suffix);
 
     FossilClient(FossilSettings *settings);
 
     FossilSettings *settings() const;
 
+    unsigned int synchronousBinaryVersion();
     BranchInfo synchronousBranchQuery(const QString &workingDirectory, QList<BranchInfo> *allBranches = 0);
     RevisionInfo synchronousRevisionQuery(const QString &workingDirectory, const QString &id = QString());
     QStringList synchronousTagQuery(const QString &workingDirectory, const QString &id = QString());
@@ -87,6 +99,9 @@ public:
     void revertAll(const QString &workingDir, const QString &revision = QString(),
                    const QStringList &extraOptions = QStringList());
     QString findTopLevelForFile(const QFileInfo &file) const;
+    unsigned int binaryVersion();
+    QString binaryVersionString();
+    SupportedFeatures supportedFeatures();
 
 protected:
     QString vcsCommandString(VCSCommand cmd) const;
@@ -95,6 +110,11 @@ protected:
     VCSBase::VCSBaseEditorParameterWidget *createDiffEditor(const QString &workingDir,
                                                             const QStringList &files,
                                                             const QStringList &extraOptions);
+    VCSBase::VCSBaseEditorParameterWidget *createAnnotateEditor(const QString &workingDir,
+                                                                const QString &file,
+                                                                const QString &revision,
+                                                                int lineNumber,
+                                                                const QStringList &extraOptions);
     VCSBase::VCSBaseEditorParameterWidget *createLogEditor(const QString &workingDir,
                                                            const QStringList &files,
                                                            const QStringList &extraOptions);
@@ -106,6 +126,8 @@ protected:
 private:
     friend class CloneWizard;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(FossilClient::SupportedFeatures)
 
 } // namespace Internal
 } // namespace Fossil

@@ -1,6 +1,15 @@
 qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
 =================================
 
+## 2.4.1_3 - 2014-02-19
+
+- client min. version `fossil 1.28`
+- Add support of legacy client versions.
+- `Timeline`: allow control of the timeline entries width (see `fossil timeline -W`)
+- `Annotate Current File`: add annotate/blame toggle (Show Committers)
+  (see `fossil blame`)
+
+
 ## 2.4.1_2 - 2013-07-21
 
 - client min. version `fossil 1.26`

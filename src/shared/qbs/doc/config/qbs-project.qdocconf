@@ -1,0 +1,33 @@
+project     = "Qt Build Suite"
+description = "QBS Manual"
+
+headerdirs = 
+sourcedirs = $SRCDIR
+imagedirs = $SRCDIR/images $SRCDIR/templates/images
+outputdir = $OUTDIR
+exampledirs = $SRCDIR
+
+include(macros.qdocconf)
+include(qt-cpp-ignore.qdocconf)
+
+sources.fileextensions  = "*.qdoc"
+
+
+qhp.projects            = Qbs
+qhp.Qbs.file             = qbs.qhp
+qhp.Qbs.namespace        = org.qt-project.qbs.$QBS_VERSION_TAG
+qhp.Qbs.virtualFolder    = doc
+qhp.Qbs.indexTitle       = Qt Build Suite
+qhp.Qbs.filterAttributes = qbs $QBS_VERSION
+qhp.Qbs.customFilters.Qbs.name = Qt Build Suite $QBS_VERSION
+qhp.Qbs.customFilters.Qbs.filterAttributes = qbs $QBS_VERSION
+qhp.Qbs.indexRoot        =
+
+qhp.Qbs.subprojects = manual
+qhp.Qbs.subprojects.manual.title = Qbs Manual
+qhp.Qbs.subprojects.manual.indexTitle = Qbs Manual
+qhp.Qbs.subprojects.manual.type = manual
+
+# Doxygen compatibility commands
+macro.see                       = "\\sa"
+macro.function                  = "\\fn"

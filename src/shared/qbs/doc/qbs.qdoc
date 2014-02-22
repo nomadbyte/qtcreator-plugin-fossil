@@ -1,0 +1,774 @@
+/****************************************************************************
+**
+** Copyright (C) 2014 Digia Plc and/or its subsidiary(-ies).
+** Contact: http://www.qt-project.org/legal
+**
+** This file is part of the Qt Build Suite.
+**
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and Digia.  For licensing terms and
+** conditions see http://qt.digia.com/licensing.  For further information
+** use the contact form at http://qt.digia.com/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 2.1 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU Lesser General Public License version 2.1 requirements
+** will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Digia gives you certain additional
+** rights.  These rights are described in the Digia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+****************************************************************************/
+
+// **********************************************************************
+// NOTE: the sections are not ordered by their logical order to avoid
+// reshuffling the file each time the index order changes (i.e., often).
+// Run the fixnavi.pl script to adjust the links to the index order.
+// **********************************************************************
+
+
+/*!
+    \contentspage{index.html}{Qt Build Suite}
+    \page index.html
+    \nextpage overview.html
+
+    \title Qbs Manual
+
+    \section1 Version \qbsversion
+
+    Qt Build Suite (Qbs) is a tool that helps simplify the build process for
+    developing projects across multiple platforms. Qbs can be used for any
+    software project, whether it is written in Qt or not.
+
+    Qbs is an all-in-one tool that generates a build graph from a high-level
+    project description (like qmake or cmake) and additionally undertakes the
+    task of executing the commands in the low-level build graph (like make).
+
+    \note Please report bugs and suggestions to the
+    \l{http://bugreports.qt-project.org/}{Qt Bug Tracker}.
+
+    \list
+       \li  \l{Introducing Qbs}
+       \li  \l{Setting Up Qbs}
+           \list
+               \li  \l{System Requirements}
+               \li  \l{Building Qbs}
+               \li  \l{Configuring Qbs}
+               \li  \l{Managing Qt Versions}
+           \endlist
+       \li  \l{Using Qbs}
+           \list
+               \li  \l{Language Introduction}
+               \li  \l{Building Applications with Qbs}
+               \li  \l{Running Applications}
+               \li  \l{Installing Files}
+               \li  \l{Using Qbs Shell}
+           \endlist
+       \li  \l{Reference}
+    \endlist
+*/
+
+
+/*!
+    \contentspage index.html
+    \previouspage index.html
+    \page overview.html
+    \nextpage setup.html
+
+    \title Introducing Qbs
+
+    Qbs builds applications based on the information in a project file that you
+    specify in a QML dialect. Each project file specifies one project that can
+    contain several \l{Product Item}{products}. You specify the type of the product: application,
+    library, and so on.
+*/
+
+
+/*!
+    \contentspage index.html
+    \previouspage overview.html
+    \page setup.html
+    \nextpage system-requirements.html
+
+    \title Setting Up Qbs
+
+    \list
+        \li  \l{System Requirements}
+        \li  \l{Building Qbs}
+        \li  \l{Configuring Qbs}
+        \li  \l{Managing Qt Versions}
+    \endlist
+*/
+
+
+/*!
+    \contentspage index.html
+    \previouspage setup.html
+    \page system-requirements.html
+    \nextpage building.html
+
+    \title System Requirements
+
+    To build Qbs from the source, you need the following:
+
+    \list
+
+        \li  Qt >= 4.8
+
+    \endlist
+
+*/
+
+
+/*!
+    \contentspage index.html
+    \previouspage system-requirements.html
+    \page building.html
+    \nextpage configuring.html
+
+    \title Building Qbs
+
+    To build Qbs, enter the following command:
+
+    \code
+        qmake -r qbs.pro && make
+    \endcode
+
+    \section1 Configure Options
+
+    Qbs recognizes the following qmake CONFIG options to customize the build:
+
+    \table
+    \header \li Option              \li Notes
+    \row    \li all_tests           \li Enable additional autotests.
+    \row    \li disable_rpath       \li Disable the use of rpath. This can be used when packaging
+                                        Qbs for distributions which do not permit the use of rpath,
+                                        such as Fedora.
+    \row    \li qbs_no_dev_install  \li Exclude header files from installation, that is, perform a
+                                        non-developer build.
+    \endtable
+
+*/
+
+
+/*!
+    \contentspage index.html
+    \previouspage building.html
+    \page configuring.html
+    \nextpage qt-versions.html
+
+    \title Configuring Qbs
+
+    Open a build shell (on Windows open an MSVC command prompt,
+    on other platforms you can usually open the default shell):
+    \code
+    qbs detect-toolchains
+    \endcode
+
+    The tool chain detector automatically sets up a profile for each detected tool chain.
+    You can list the existing profiles by running:
+    \code
+    qbs config --list profiles
+    \endcode
+
+    Now you should be ready to build your first project with Qbs.
+    Go into qbs/tests/manual/hello and type:
+
+    \code
+    qbs profile:<profile name>
+    \endcode
+
+    If you want to build projects that use Qt, additional steps are necessary. Please refer to
+    \l{Managing Qt Versions} for more information.
+
+*/
+
+/*!
+    \contentspage index.html
+    \previouspage configuring.html
+    \page qt-versions.html
+    \nextpage usage.html
+
+    \title Managing Qt Versions
+
+    \section1 Introduction
+
+    To let Qbs know where the Qt build or Qt version is that you want to use,
+    you must register it.
+
+    Register a Qt version like this:
+    \code
+    qbs setup-qt /usr/bin/qmake myqt
+    \endcode
+
+    This will create the \c myqt profile which can then be used on
+    the command line:
+
+    \code
+    qbs profile:myqt
+    \endcode
+
+    \note If the \c setup-toolchains command has found more than one toolchain, you will need
+    to manually link your Qt profile to one of them, like this:
+    \code
+    qbs config profiles.myqt.baseProfile <profile name>
+    \endcode
+
+
+    \section1 Manual Setup
+
+    Everything that the setup-qt tool does can be done manually, as described in this section.
+
+    Here is an example for registering Qt, installed on Ubuntu GNU/Linux, again using a profile
+    called \c myqt:
+
+    \code
+    qbs config profiles.myqt.Qt.core.binPath /usr/bin
+    qbs config profiles.myqt.Qt.core.incPath /usr/include/qt4
+    qbs config profiles.myqt.Qt.core.libPath /usr/lib/x86_64-linux-gnu
+    qbs config profiles.myqt.Qt.core.mkspecPath /usr/share/qt4/mkspecs/linux-g++
+    qbs config profiles.myqt.Qt.core.version 5.1.0
+    \endcode
+
+    \section1 Multiple Qt Builds
+
+    To support multiple Qt builds, or in fact any combination of related settings, you need to
+    create several profiles. The following example illustrates how to set up
+    three different profiles, each for a different Qt build:
+
+    \code
+    qbs setup-qt ~/dev/qt/4.7/bin/qmake qt47
+    qbs setup-qt ~/dev/qt/4.8/bin/qmake qt48
+    qbs setup-qt ~/dev/qt/5.0/qtbase/bin/qmake qt5
+    \endcode
+
+    You can set the default Qt build like this:
+
+    \code
+    qbs config defaultProfile qt5
+    \endcode
+
+    To choose a Qt build that is different from the default, use:
+
+    \code
+    qbs build profile:qt48
+    \endcode
+
+    You can set other properties in a profile (not just Qt ones), in the same way
+    you override them from the command line. For example:
+
+    \code
+    qbs setup-qt C:\Qt\5.0.0\qtbase\bin\qmake.exe qt5
+    qbs config profiles.qt5.qbs.architecture x86_64
+    qbs config profiles.qt5.baseProfile msvc2010
+    \endcode
+
+    The last example uses the inheritance feature of profiles. All settings in the profile
+    set as \c baseProfile are known in the derived profile as well.
+    They can of course be overridden there.
+
+    \section1 Customized Qt Settings
+
+    If you have built your Qt with the option \c {-qtnamespace MyNamespace}
+    then you must set the following \c config value:
+
+    \code
+    qbs config profiles.myqt.Qt.core.namespace MyNamespace
+    \endcode
+
+    The same goes for the -qtlibinfix option.
+
+    \code
+    qbs config profiles.myqt.Qt.core.libInfix MyInfix
+    \endcode
+*/
+
+/*!
+    \contentspage index.html
+    \previouspage qt-versions.html
+    \page usage.html
+    \nextpage language-introduction.html
+
+    \title Using Qbs
+
+    \list
+        \li  \l{Language Introduction}
+        \li  \l{Building Applications with Qbs}
+        \li  \l{Running Applications}
+        \li  \l{Installing Files}
+        \li  \l{Using Qbs Shell}
+    \endlist
+
+*/
+
+
+/*!
+    \contentspage index.html
+    \previouspage usage.html
+    \page language-introduction.html
+    \nextpage building-applications.html
+
+    \title Language Introduction
+
+    Qbs uses project files (*.qbs) to describe the contents of a project.
+    A project contains one or more \l{Product Item}{products}. A product is the target of a build
+    process, typically an application, library or maybe a tar ball.
+
+    \section1 The Obligatory Hello World Example
+
+    Qbs project files are written using a QML dialect.
+    A very simple C++ hello world project looks like this:
+    \code ---helloworld.qbs---
+        import qbs 1.0
+
+        Application {
+            name: "helloworld"
+            files: "main.cpp"
+            Depends { name: "cpp" }
+        }
+    \endcode
+
+    The import statement gives us access to some built-in types and specifies the
+    used language version.
+
+    \a Application describes the product we want to build. In this case, an
+    application. This is just a shortcut for writing
+    \code
+        Product {
+            type: "application"
+            // ...
+        }
+    \endcode
+
+    The \a name is the name of the product. In this case it is also the
+    name of the produced executable (on Windows, the ".exe" extension is added by default).
+    In the property \a files, we specify the source files for our product.
+    Unlike QML, the right-hand side can be either a string or a string list.
+    A single string is converted to a stringlist containing just one element.
+
+    \a Depends adds the dependency to the module \l{Module cpp}{cpp}. This is necessary to let Qbs know that
+    we have a C++ project and want to compile main.cpp with a C++ compiler. For more information
+    about Qbs modules, see \l{Modules}.
+
+
+    \section1 Reusing Qbs Project File Code
+    QML-like inheritance works also in Qbs.
+
+    \code
+    ---CrazyProduct.qbs---
+    import qbs 1.0
+
+    Product {
+        property string craziness: "low"
+    }
+
+    ---hellocrazyworld.qbs---
+    import "CrazyProduct.qbs" as CrazyProduct
+
+    CrazyProduct {
+        craziness: "enormous"
+        name: "hellocrazyworld"
+        // ...
+    }
+    \endcode
+
+    You can put JS code into separate \c{.js} files and then import them.
+    \code
+    ---helpers.js---
+    function planetsCorrectlyAligned()
+    {
+        // implementation
+    }
+
+    ---myproject.qbs---
+    import qbs 1.0
+    import "helpers.js" as Helpers
+
+    Product {
+        name: "myproject"
+        Group {
+            condition: Helpers.planetsCorrectlyAligned()
+            file: "magic_hack.cpp"
+        }
+        // ...
+    }
+    \endcode
+
+
+    \section1 Modules
+
+    A \e module is a collection of properties and language items that are used for
+    building a product if the product depends on (or loads) the module.
+
+    For example, the \a cpp module looks like this (simplified):
+    \code
+    Module {
+        name: "cpp"
+        property string warningLevel
+        property string optimization
+        property bool debugInformation
+        property path precompiledHeader
+        // ...
+        FileTagger {
+            pattern: "*.cpp"
+            fileTags: ["cpp"]
+        }
+        Rule {...}  // compiler
+        Rule {...}  // application linker
+        Rule {...}  // static lib linker
+        Rule {...}  // dynamic lib linker
+    }
+    \endcode
+
+    The properties that can be set for the \a cpp module are used to control the behavior of
+    your C++ tool chain.
+    In addition, you can use FileTaggers and Rules that are explained later.
+
+    As soon as your product depends on a module, it can set the properties of the
+    module. You specify the optimization level for your product (and all build variants) like this:
+
+    \code ---helloworld.qbs---
+        import qbs 1.0
+
+        Application {
+            name: "helloworld"
+            files: ["main.cpp"]
+            cpp.optimization: "ludicrousSpeed"
+            Depends { name: "cpp" }
+        }
+    \endcode
+
+    A module can implicitly depend on other modules. For example, the \c Qt.core module depends
+    on \c{cpp}. But to set the properties of a module you must explicitly import
+    it.
+
+    \code
+        // THIS DOES NOT WORK
+        Application {
+            name: "helloworld"
+            files: ["main.cpp"]
+            Depends { name: "Qt.core" }
+            cpp.optimization: "ludicrousSpeed"
+            // ERROR! We do not know about "cpp" here,
+            // though "Qt.core" depends on "cpp".
+        }
+
+        // THIS WORKS
+        Application {
+            name: "helloworld"
+            files: ["main.cpp"]
+            Depends { name: "Qt.core" }
+            Depends { name: "cpp" }
+            cpp.optimization: "ludicrousSpeed"
+        }
+    \endcode
+
+    \section2 Different Properties for a Single File
+
+    Not only the product, but all the source files of the product can have their own
+    set of module properties. For example, assume you have some files that are known to crash
+    your compiler if you turn on optimizations. You want to turn off
+    optimizations for just these files and this is how you do it:
+
+    \code
+        Application {
+            name: "helloworld"
+            files: "main.cpp"
+            Group {
+                files: ["bad_file.cpp", "other_bad_file.cpp"]
+                cpp.optimization: "none"
+            }
+            Depends { name: "cpp" }
+        }
+    \endcode
+
+    \section2 Selecting Files by Properties
+
+    The classical (pre-lighthouse) Qt case is that you have a file that is only going to
+    be compiled on a certain platform. This is how you do it:
+    \code
+        Group {
+            condition: qbs.targetOS.contains("windows")
+            files: [
+                "harddiskdeleter_win.cpp",
+                "blowupmonitor_win.cpp",
+                "setkeyboardonfire_win.cpp"
+            ]
+        }
+        Group {
+            condition: qbs.targetOS.contains("linux")
+            files: [
+                "harddiskdeleter_linux.cpp",
+                "blowupmonitor_linux.cpp",
+                "setkeyboardonfire_linux.cpp"
+            ]
+        }
+    \endcode
+
+    In the above example, \a qbs.targetOS is a property of the \a target of the the \a qbs
+    module. The \a qbs module is always implicitly loaded. Its main properties
+    are:
+
+    \table
+    \header
+        \li Property
+        \li Type
+        \li Default
+        \li Description
+    \row
+        \li buildVariant
+        \li string
+        \li "debug"
+        \li Name of the current build variant. By default, "debug" and "release"
+        are valid values but the user can add more in a project file.
+    \row
+        \li hostOS
+        \li stringlist
+        \li platform-dependent
+        \li The host operating system.
+            May contain "windows", "linux", "osx", "darwin", "unix", etc.
+    \row
+        \li targetOS
+        \li stringlist
+        \li platform-dependent
+        \li The target operating system.
+            May contain "windows", "linux", "osx", "darwin", "unix",
+            "ios", "android", "blackberry", "qnx", etc.
+    \endtable
+
+    You can set these properties on the command line or by using a profile. The property \a
+    qbs.buildVariant is handled in a special way.
+
+    \code
+    $ qbs                   # qbs.buildVariant:debug, profile:<default profile>
+    $ qbs release           # qbs.buildVariant:release, profile:<default profile>
+    $ qbs profile:Maemo     # qbs.buildVariant:debug, profile:Maemo
+    $ qbs debug release     # builds two variants of the project
+    \endcode
+
+    To select files by build variant:
+    \code
+        Group {
+            condition: qbs.buildVariant == "debug"
+            files: "debughelper.cpp"
+        }
+    \endcode
+
+    To set properties for a build variant:
+    \code
+        Properties {
+            condition: qbs.buildVariant == "debug"
+            cpp.debugInformation: true
+            cpp.optimization: "none"
+        }
+    \endcode
+    Or, to use a more QML-like style:
+    \code
+        cpp.debugInformation: qbs.buildVariant == "debug" ? true : false
+        cpp.optimization: qbs.buildVariant == "debug" ? "none" : "fast"
+    \endcode
+
+
+    \section1 File Tags and Taggers
+
+    Qbs itself knows nothing about C++ files or file extensions. All source files
+    in a product are handled equally. However, you can assign \a{file tags} to an artifact
+    to act as a marker or to specify a file type.
+
+    An artifact can have multiple file tags.
+    For example, you can use the \a Group item to group files with the same file tags (or a set of
+    properties).
+
+    \code
+        Product {
+            Group {
+                files: ["file1.cpp", "file2.cpp"]
+                fileTags: ["cpp"]
+            }
+            Group {
+                files: "mydsl_scanner.l"
+                fileTags: ["flex", "foobar"]
+            }
+            // ...
+        }
+    \endcode
+
+    When you load the \a cpp module, you also load the following item:
+    \code
+        FileTagger {
+            pattern: "*.cpp"
+            fileTags: ["cpp"]
+        }
+    \endcode
+    This construct means that each source file that matches the pattern \c{*.cpp} (and
+    has not explicitly set a file tag) gets the file tag \c{cpp}.
+
+    The above example can be simplified to
+    \code
+        Product {
+            Depends: "cpp"
+            files: ["file1.cpp", "file2.cpp"]
+            Group {
+                files: "mydsl_scanner.l"
+                fileTags: ["flex", "foobar"]
+            }
+            // ...
+        }
+    \endcode
+
+    The \a FileTagger from the \a cpp module automatically assigns the \c cpp
+    file tag to the source files. Groups that just contain the \a files
+    property can be more simply expressed by using the \a files property of the product.
+
+    File tags are used by \a rules to transform one type of artifact into
+    another. For instance, the C++ compiler rule transforms artifacts with the file tag
+    \c cpp to artifacts with the file tag \c{obj}.
+
+    In addition, it is possible to use file taggers to tag files and specify custom file tags:
+    \code
+        Product {
+            Depends: "cpp"
+            files: ["main.cpp"]         // Gets the file tag "cpp" through a FileTagger item.
+            Group {
+                overrideTags: false     // The overrideTags property defaults to true.
+                files: ["main.cpp"]
+                fileTags: ["foobar"]    // Gets the file tag "foobar" in addition to "cpp".
+            }
+            // ...
+        }
+    \endcode
+
+    \section1 Rules
+
+    Qbs applies a \e rule to a pool of artifacts (in the beginning it is just the set of
+    source files of the project) and chooses the ones that match the input file
+    tags specified by the rule. Then it creates output artifacts in the build graph that have other
+    filenames and file tags. It also creates a script that transforms the input artifact into the
+    output artifact.
+
+    For examples of rules, see the share/qbs/modules directory in the Qbs
+    repository.
+
+    You can define rules in your own module to be provided along with
+    your project. Or you can put a rule directly into your project file.
+
+    For more information, see \l{Rule Item}.
+*/
+
+
+/*!
+    \contentspage index.html
+    \previouspage language-introduction.html
+    \page building-applications.html
+    \nextpage running-applications.html
+
+    \title Building Applications with Qbs
+
+    To build applications from the command line, enter the following commands:
+
+    \code
+    cd tests/manual/collidingmice
+    qbs
+    \endcode
+
+    The application is built for the default target, which is the system on the
+    development PC. To build for other targets, specify options for the build
+    command. For example, to build debug and release configurations for the
+    default target and the Symbian target in parallel, enter the following
+    command:
+
+    \code
+    qbs build debug release profile:Symbian
+    \endcode
+
+    This assumes you have already set up a profile called "Symbian".
+*/
+
+/*!
+    \contentspage index.html
+    \previouspage running-applications.html
+    \page installing-files.html
+    \nextpage shell.html
+
+    \title Installing Files
+
+    To install your project, specify the necessary information in the project file:
+
+    \code
+    Application {
+        Group {
+            name: "Runtime resources"
+            files: "*.qml"
+            qbs.install: true
+            qbs.installDir: "share/myproject"
+        }
+        Group {
+            name: "The App itself"
+            fileTagsFilter: "application"
+            qbs.install: true
+            qbs.installDir: "bin"
+        }
+    }
+    \endcode
+
+    In this example, we want to install a couple of QML files and an executable.
+    The actual installation is then done like this (using the default profile):
+
+    \code
+    qbs install --install-root /tmp/myProjectRoot --remove-first
+    \endcode
+
+    Here, we want the installDir properties from the project file to be interpreted relative
+    to the directory \c{/tmp/myProjectRoot}, and we want that directory to be removed first.
+    If the \c{--install-root} option is not given, a default is used, namely \c{<build root>/install-root}.
+    Qbs understands the special install root value \c{@sysroot}, which stands for the value of
+    the property \c{qbs.sysroot}.
+*/
+
+/*!
+    \contentspage index.html
+    \previouspage building-applications.html
+    \page running-applications.html
+    \nextpage installing-files.html
+
+    \title Running Applications
+
+    Running ./targets/debug/CollidingMice fails if Qt 4.8 is not in your PATH
+    (in Windows) or LD_LIBRARY_PATH (in Linux).
+
+    Therefore, enter the following command to run an application:
+
+    \code
+    qbs run --products CollidingMice
+    \endcode
+
+    This command also builds and installs the given product, if necessary.
+*/
+
+
+/*!
+    \contentspage index.html
+    \previouspage installing-files.html
+    \page shell.html
+    \nextpage reference.html
+
+    \title Using Qbs Shell
+
+    To use the Qbs shell, enter the following command:
+
+    \code
+    qbs shell
+    \endcode
+
+    This is mainly a debugging tool. It opens a shell with the same environment that qbs uses
+    when building the project, so you can, for example, inspect which environment variables
+    will be set up.
+
+*/

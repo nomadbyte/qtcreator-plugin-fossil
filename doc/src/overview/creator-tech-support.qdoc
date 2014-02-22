@@ -1,0 +1,67 @@
+/****************************************************************************
+**
+** Copyright (c) 2014 Digia Plc and/or its subsidiary(-ies).
+** Contact: http://www.qt-project.org/legal
+**
+** This file is part of Qt Creator
+**
+**
+** GNU Free Documentation License
+**
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of this
+** file.
+**
+**
+****************************************************************************/
+
+// **********************************************************************
+// NOTE: the sections are not ordered by their logical order to avoid
+// reshuffling the file each time the index order changes (i.e., often).
+// Run the fixnavi.pl script to adjust the links to the index order.
+// **********************************************************************
+
+/*!
+    \contentspage index.html
+    \previouspage creator-glossary.html
+    \page technical-support.html
+    \nextpage creator-acknowledgements.html
+
+    \title Technical Support
+
+    The following table lists Qt support sites and other useful links.
+
+
+
+    \table
+        \header
+            \li What Do You Want to Do
+            \li Where to Go
+
+        \row
+            \li Learn more about Qt
+            \li \l{http://qt.digia.com/product/learning/}{Learning}
+                from Digia
+
+                \l{http://qt-project.org/wiki/developer-guides}
+                {Qt Developer Guides} from Qt Project
+
+        \row
+            \li Develop Qt applications for desktop and mobile devices
+            \li \l{http://qt-project.org}{Qt Developer Network}
+
+        \row
+            \li Participate in Qt development
+            \li \l{http://qt-project.org/contribute}{Contribute to Qt}
+
+        \row
+            \li Find free Qt-based applications
+            \li \l{http://qt-apps.org/}{Qt Apps}
+
+        \row
+            \li Develop with a commercial Qt license and support - Qt by Digia
+            \li \l{http://qt.digia.com/Product/Licensing/}{Qt Licensing}
+    \endtable
+
+*/

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
+    <mime-type type="text/x-csrc">
+        <sub-class-of type="text/plain"/>
+        <comment>C Source file</comment>
+        <glob pattern="*.c"/>
+        <!-- NVIDIA CUDA files are like C -->
+        <glob pattern="*.cu"/>
+    </mime-type>
+
+    <!-- A C Header file is virtually undistinguishable from the C++ header  -->
+    <mime-type type="text/x-chdr">
+        <sub-class-of type="text/x-csrc"/>
+        <comment>C Header file</comment>
+        <glob pattern="*.h"/>
+    </mime-type>
+
+    <!-- Those are used to find matching headers by the CppTools plugin,
+         so, they should match -->
+    <mime-type type="text/x-c++hdr">
+        <sub-class-of type="text/x-chdr"/>
+        <comment>C++ Header file</comment>
+        <comment>C++ header</comment>
+        <glob pattern="*.h"/>
+        <glob pattern="*.hh"/>
+        <glob pattern="*.hxx"/>
+        <glob pattern="*.h++"/>
+        <glob pattern="*.H"/>
+        <glob pattern="*.hpp"/>
+        <glob pattern="*.hp"/>
+        <!-- Find include guards of header files without extension, for
+             example, STL ones like <string>. Those can have a big initial
+             comment exceeding 1000 chars, though. -->
+        <magic priority="50">
+           <match value="#ifndef " type="string" offset="0:2000"/>
+           <match value="#if " type="string" offset="0:2000"/>
+           <match value="#include " type="string" offset="0:2000"/>
+        </magic>
+    </mime-type>
+
+    <mime-type type="text/x-c++src">
+        <comment>C++ Source file</comment>
+        <sub-class-of type="text/x-csrc"/>
+        <comment>C++ source code</comment>
+        <glob pattern="*.cpp"/>
+        <glob pattern="*.cp"/>
+        <glob pattern="*.cc"/>
+        <glob pattern="*.cxx"/>
+        <glob pattern="*.c++"/>
+        <glob pattern="*.C"/>
+        <glob pattern="*.inl"/>
+        <glob pattern="*.moc"/>
+        <glob pattern="*.qdoc"/>
+        <glob pattern="*.tcc"/>
+        <glob pattern="*.tpp"/>
+        <glob pattern="*.t++"/>
+        <glob pattern="*.txx"/>
+        <magic priority="30">
+        <match value="-*- C++ -*-" type="string" offset="0:30"/>
+        </magic>
+    </mime-type>
+
+    <mime-type type="text/x-objcsrc">
+         <comment>Objective-C source code</comment>
+         <sub-class-of type="text/x-csrc"/>
+         <glob pattern="*.m"/>
+    </mime-type>
+
+    <mime-type type="text/x-objc++src">
+         <comment>Objective-C++ source code</comment>
+         <sub-class-of type="text/x-c++src"/>
+         <sub-class-of type="text/x-objcsrc"/>
+         <glob pattern="*.mm"/>
+    </mime-type>
+
+</mime-info>

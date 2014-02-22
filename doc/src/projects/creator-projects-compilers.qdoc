@@ -1,0 +1,201 @@
+/****************************************************************************
+**
+** Copyright (c) 2014 Digia Plc and/or its subsidiary(-ies).
+** Contact: http://www.qt-project.org/legal
+**
+** This file is part of Qt Creator
+**
+**
+** GNU Free Documentation License
+**
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of this
+** file.
+**
+**
+****************************************************************************/
+
+// **********************************************************************
+// NOTE: the sections are not ordered by their logical order to avoid
+// reshuffling the file each time the index order changes (i.e., often).
+// Run the fixnavi.pl script to adjust the links to the index order.
+// **********************************************************************
+
+/*!
+    \contentspage index.html
+    \previouspage creator-project-qmake.html
+    \page creator-tool-chains.html
+    \nextpage creator-debuggers.html
+
+    \title Adding Compilers
+
+    Qt is supported on a variety of 32-bit and 64-bit platforms, and can
+    usually be built on each platform with GCC, a vendor-supplied compiler, or
+    a third party compiler. In \QC, a \l{glossary-buildandrun-kit}{kit}
+    specifies the compiler and other necessary tools for building and running an
+    application on a particular platform.
+
+    \QC automatically detects the compilers that are registered by your system
+    or by an SDK. You can add compilers to build applications by using other
+    compilers or by using additional versions of the automatically detected
+    compilers:
+
+    \list
+
+        \li GNU Compiler Collection (GCC) is a compiler for Linux and
+            Mac OS X.
+
+        \li MinGW (Minimalist GNU for Windows) is a native software port of GCC
+            and GNU Binutils for use in the development of native Microsoft
+            Windows applications on Windows. MinGW is
+            distributed together with \QC and Qt SDK for Windows.
+
+        \li Linux ICC (Intel C++ Compiler) is a group of C and C++ compilers
+            for Linux.
+
+        \li Clang is a C, C++, Objective C, and Objective C++ front-end for the
+            LLVM compiler for Windows, Linux, and Mac OS X.
+
+    \endlist
+
+    To build an application using GCC, MinGW, or Clang, specify the path
+    to the directory where the compiler is located and select
+    the application binary interface (ABI) version from the list of available
+    versions. You can also create a custom ABI definition.
+
+    You specify the compiler to use for each kit in \gui Tools >
+    \gui Options > \gui {Build & Run} > \gui Kits.
+
+    To add compilers:
+
+    \list 1
+
+        \li Select \gui {Tools > Options > Build & Run > Compilers > Add} and
+            select a compiler in the list.
+
+            \image qtcreator-toolchains.png
+
+            To clone the selected compiler, select \gui {Clone}.
+
+        \li In the \gui Name column, double-click the name to change it.
+
+        \li In the \gui{Compiler path} field, enter the path to the directory
+            where the compiler is located.
+
+        \li In the \gui {Platform codegen flags} field, check the flags passed
+            to the compiler that specify the architecture on the target
+            platform.
+
+        \li In the \gui {Platform linker flags} field, check the flags passed to
+            the linker that specify the architecture on the target platform.
+            The linker flags are used only when building with Qbs.
+
+            The other settings to specify depend on the compiler.
+
+    \endlist
+
+    \section1 Adding Custom Compilers
+
+    To add a compiler that is not listed above or a remote compiler, use the
+    \gui Custom option and specify the paths to the directories where the
+    compiler and make tool are located and options for the compiler.
+
+    \image creator-compilers-custom.png
+
+    To add other compilers:
+
+    \list 1
+
+        \li Select \gui Tools > \gui Options > \gui {Build & Run} >
+            \gui Compilers > \gui Add > \gui Custom.
+
+        \li In the \gui Name field, enter a name for the compiler.
+
+        \li In the \gui {Compiler path} field, enter the path to the directory
+            where the compiler is located.
+
+        \li In the \gui {Make path} field, enter the path to the directory where
+            the make tool is located.
+
+       \li  In the \gui ABI field, specify the ABI version.
+
+        \li In the \gui {Predefined macros} field, specify the macros that the
+            compiler enables by default. Specify each macro on a separate line,
+            in the following format: MACRO[=value].
+
+        \li In the \gui {Header paths} field, specify the paths to directories
+            that the compiler checks for headers. Specify each path on a
+            separate line.
+
+        \li In the \gui {C++11 flags} field, specify the flags that turn on
+            C++11 support in the compiler.
+
+        \li In the \gui {Qt mkspecs} field, specify the path to the directory
+            where mkspecs are located. Usually, the path is specified relative
+            to the Qt mkspecs directory.
+
+        \li In the \gui {Error parser} field, select the error parser to use.
+            Select \gui Custom, and then select \gui {Customer Parser Settings}
+            to specify settings for a custom parser:
+
+            \image qtcreator-custom-parser.png
+
+            \list 1
+
+                \li In the \gui {Error message capture pattern} field, specify
+                    a regular expression to define what is an error. The custom
+                    parser matches the compile output line by line against the
+                    regular expression and displays errors in the \gui Issues
+                    output pane. Create regular expression groups that contain
+                    the file name, line number and error message.
+
+                \li In the \gui {Capture Positions} field, map the regular
+                    expression groups to \gui {File name}, \gui {Line number},
+                    and \gui Message.
+
+                \li In the \gui {Test} group, you can test how the message that
+                    you enter in the \gui {Error message} field is matched when
+                    using the current settings.
+
+            \endlist
+
+    \endlist
+
+    \section1 Troubleshooting MinGW Compilation Errors
+
+    If error messages displayed in the \gui {Compile Output} pane contain
+    paths where slashes are missing (for example, C:QtSDK),
+    check your PATH variable. At the command line, enter the following commands:
+
+    \code
+        where sh.exe
+        where make.exe
+        where mingw32-make.exe
+    \endcode
+
+    If these commands show paths, they have been added to the global PATH
+    variable during the installation of a tool chain based on Cygwin or MinGW,
+    even though this is against Windows conventions.
+
+    To keep working with the third-party tool chain, create a new shell link
+    that adds the required paths (as Visual Studio and Qt do). The shell link
+    must point to cmd.exe, as illustrated by the following example:
+
+    \c {C:\Windows\System32\cmd.exe /K C:\path_to\myenv.bat}
+
+    where the /K parameter carries out the command specified in the bat file.
+
+    Create the myenv.bat file at \e path_to, which should be in a convenient
+    location. In the file, specify the paths to the tool chains. For example,
+
+    \c  {set PATH=C:\path1;C:\path2;%PATH%}
+
+    where \e path1 and \e path2 are paths to the tool chains.
+
+    Finally, remove the paths from the global PATH, reboot the computer, and
+    run the \c where commands again to verify that the global PATH is now clean.
+
+    You can use the shell link to run the tools in the third-party tool chains.
+
+*/

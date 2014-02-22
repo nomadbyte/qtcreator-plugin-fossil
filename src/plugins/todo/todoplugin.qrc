@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/todoplugin">
+        <file>images/todo.png</file>
+        <file>images/info.png</file>
+    </qresource>
+</RCC>

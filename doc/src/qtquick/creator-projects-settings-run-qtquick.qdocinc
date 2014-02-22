@@ -1,0 +1,15 @@
+    \section1 Specifying Run Settings for Qt Quick UI Projects
+
+    You can specify run settings for \l{glossary-buildandrun-kit}{kits} with \gui Desktop device type:
+
+    \list
+
+        \li In the \gui Arguments field, you can specify command line arguments
+            to be passed to the executable.
+
+        \li In the \gui {Main QML file}, select the file that \QQV will be
+            started with.
+
+    \endlist
+
+    \image qmldesigner-run-settings.png "Run settings for Qt Quick UI projects"

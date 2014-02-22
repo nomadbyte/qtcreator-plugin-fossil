@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Gerrit::Internal::GerritPushDialog</class>
+ <widget class="QDialog" name="Gerrit::Internal::GerritPushDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>600</width>
+    <height>520</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Push to Gerrit</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="leftMargin">
+      <number>10</number>
+     </property>
+     <property name="topMargin">
+      <number>3</number>
+     </property>
+     <property name="rightMargin">
+      <number>3</number>
+     </property>
+     <property name="bottomMargin">
+      <number>3</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="repositoryLabel">
+       <property name="text">
+        <string>&lt;b&gt;Local repository:&lt;/b&gt;</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="destinationGroupBox">
+     <property name="title">
+      <string>Destination:</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout">
+      <property name="fieldGrowthPolicy">
+       <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+      </property>
+      <item row="1" column="0">
+       <widget class="QLabel" name="remoteLabel">
+        <property name="text">
+         <string>R&amp;emote:</string>
+        </property>
+        <property name="buddy">
+         <cstring>remoteComboBox</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="remoteComboBox"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="branchLabel">
+        <property name="text">
+         <string>&amp;Branch:</string>
+        </property>
+        <property name="buddy">
+         <cstring>branchComboBox</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="branchComboBox"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="topicLabel">
+        <property name="text">
+         <string>&amp;Topic:</string>
+        </property>
+        <property name="buddy">
+         <cstring>topicLineEdit</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="topicLineEdit"/>
+      </item>
+      <item row="4" column="0">
+       <widget class="QCheckBox" name="draftCheckBox">
+        <property name="text">
+         <string>&amp;Draft</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0" colspan="2">
+       <widget class="QLabel" name="infoLabel">
+        <property name="text">
+         <string>Number of commits</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="commitGroupBox">
+     <property name="title">
+      <string>&amp;Push up to commit:</string>
+     </property>
+     <layout class="QVBoxLayout" name="commitLayout">
+      <item>
+       <widget class="Git::Internal::LogChangeWidget" name="commitView">
+        <property name="toolTip">
+         <string>Pushes the selected commit and all dependent commits.</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QFormLayout" name="reveiwersLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="reviewersLabel">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>&amp;Reviewers:</string>
+       </property>
+       <property name="buddy">
+        <cstring>reviewersLineEdit</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="reviewersLineEdit">
+       <property name="toolTip">
+        <string>Comma-separated list of reviewers.
+
+Partial names can be used if they are unambiguous.</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Git::Internal::LogChangeWidget</class>
+   <extends>QTreeView</extends>
+   <header location="global">git/logchangedialog.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>Gerrit::Internal::GerritPushDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>227</x>
+     <y>330</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>Gerrit::Internal::GerritPushDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>295</x>
+     <y>336</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

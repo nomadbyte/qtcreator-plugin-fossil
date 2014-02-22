@@ -1,0 +1,376 @@
+/****************************************************************************
+**
+** Copyright (c) 2014 Digia Plc and/or its subsidiary(-ies).
+** Contact: http://www.qt-project.org/legal
+**
+** This file is part of Qt Creator
+**
+**
+** GNU Free Documentation License
+**
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of this
+** file.
+**
+**
+****************************************************************************/
+
+// **********************************************************************
+// NOTE: the sections are not ordered by their logical order to avoid
+// reshuffling the file each time the index order changes (i.e., often).
+// Run the fixnavi.pl script to adjust the links to the index order.
+// **********************************************************************
+
+
+/*!
+    \contentspage index.html
+    \previouspage creator-debugging.html
+    \page creator-debugger-engines.html
+    \nextpage creator-debugger-operating-modes.html
+
+    \title Setting Up Debugger
+
+    The main debugger settings are associated with the
+    \l{glossary-buildandrun-kit}{kit} you build and run your project with. To specify the
+    debugger and compiler to use for each kit, select \gui Tools >
+    \gui Options > \gui {Build and Run} > \gui Kits.
+
+    You need to set up the debugger only if the automatic setup
+    fails, because the native debugger is missing (as is usually the
+    case for the CDB debugger on Windows, which you always must install
+    yourself) or because the installed version is not supported (for example,
+    when your system contains no, or an outdated version of GDB and you
+    want to use a locally installed replacement instead).
+
+    \note If you need to change the debugger to use for an automatically
+    detected \l{glossary-buildandrun-kit}{kit},
+    you can \gui{Clone} the kit and change the parameters in
+    the clone. Make sure to select the cloned kit for your project.
+
+    If the debugger you want to use is not automatically detected, select
+    \gui Tools > \gui Options > \gui {Build & Run} > \gui Debuggers > \gui Add
+    to add it.
+
+    \note To use the debugging tools for Windows, you must install them
+    and add the Symbol Server provided by Microsoft to the symbol search
+    path of the debugger. For more information, see \l{Setting the Symbol
+    Server in Windows}.
+
+    \note To use the Free Software Foundation (FSF) version of GDB on
+    Mac OS, you must sign it and modify your \l{glossary-buildandrun-kit}{kit} settings.
+
+    This section explains the options you have for debugging C++ code
+    and provides installation notes for the supported native debuggers.
+    It also applies for code in other compiled languages such as C,
+    FORTRAN, Ada.
+
+    For more information on the debugger modes, see
+    \l{Launching the Debugger in Different Modes}.
+
+    \section1 Supported Native Debugger Versions
+
+    Qt Creator supports native debuggers when working with
+    compiled code. On most supported platforms, the GNU Symbolic Debugger
+    GDB can be used. On Microsoft Windows, when using the Microsoft tool chain
+    the Microsoft Console Debugger CDB, is needed. On Mac OS X, the LLDB
+    debugger can be used. Basic support for LLDB is also available on Linux,
+    but it is restricted by LLDB's capabilities there, and considered
+    experimental.
+
+    The following table summarizes the support for debugging C++ code:
+
+    \table
+        \header
+            \li Platform
+            \li Compiler
+            \li Native Debugger
+        \row
+            \li Linux
+            \li GCC, ICC
+            \li GDB, LLDB (experimental)
+        \row
+            \li Unix
+            \li GCC, ICC
+            \li GDB
+        \row
+            \li Mac OS X
+            \li GCC, Clang
+            \li Apple GDB, FSF GDB (experimental), LLDB
+        \row
+            \li Windows/MinGW
+            \li GCC
+            \li GDB
+        \row
+            \li Windows/MSVC
+            \li Microsoft Visual C++ Compiler
+            \li Debugging Tools for Windows/CDB
+    \endtable
+
+    \section2 Supported GDB Versions
+
+    GDB comes in two varieties with common roots.
+
+    One is used on Mac OS X and does not support Python as scripting language.
+    The minimal supported versions in is GDB 6.3.50-20050815, build 1469.
+
+    The second is maintained by the Free Software Foundation, and can
+    use Python as scripting language. The minimal supported version
+    in this case is FSF GDB 7.4.1, using Python version 2.6 or 2.7.
+    Note that Python 3.x is not supported by GDB.
+
+    The Python enabled versions are very convenient to interface,
+    and much of \QC's advanced data display options depend on the
+    availability of Python scripting. Since Python enabled versions
+    of GDB are bundled with all recent Linux versions, active
+    support for non-Python builds has been dropped for platforms
+    other than Mac OS X.
+
+    The non-Python versions use the compiled version of the debugging
+    helpers, that you must enable separately. For more information, see
+    \l{Debugging Helpers Based on C++}.
+
+    The Python version uses a script version of the debugging helpers
+    that does not need any special setup.
+
+    FSF GDB can also be compiled for Mac OS, but the build is currently
+    unstable, and thererefore, this is not recommended.
+
+    \section2 Supported CDB Versions
+
+    The CDB native debugger has similar functionality to the non-Python GDB
+    debugger engine. Specifically, it also uses compiled C++ code for the
+    debugging helper library.
+
+    \section2 Supported LLDB Versions
+
+    The LLDB native debugger has similar functionality to the GDB debugger.
+    LLDB is the default debugger in Xcode on Mac OS X for supporting C++ on the
+    desktop. LLDB is typically used with the Clang compiler (even though you
+    can use it with GCC, too).
+
+    You can use the LLDB version delivered with Xcode, but we recommend that you
+    build it from sources using Xcode. The minimal supported version is LLDB
+    300.2.51.
+
+    \omit
+
+    \section2 GDB Adapter Modes
+
+    [Advanced Topic]
+
+    The GDB native debugger used internally by the debugger plugin runs in
+    different adapter modes to cope with the variety of supported platforms and
+    environments. All GDB adapters inherit from  AbstractGdbAdapter:
+
+    \list
+
+        \li PlainGdbAdapter debugs locally started GUI processes. It is
+            physically split into parts that are relevant only when Python is
+            available, parts relevant only when Python is not available, and
+            mixed code.
+
+        \li TermGdbAdapter debugs locally started processes that need a
+            console.
+
+        \li AttachGdbAdapter debugs local processes started outside \QC.
+
+        \li CoreGdbAdapter debugs core files generated from crashes.
+
+        \li RemoteGdbAdapter interacts with the GDB server running on Linux.
+
+    \endlist
+
+    \endomit
+
+    \section1 Installing Native Debuggers
+
+    Check the table below for the supported versions and other important
+    information about installing native debuggers.
+
+    \table
+        \header
+            \li Native Debugger
+            \li Notes
+        \row
+            \li GDB
+            \li On Linux and Windows, use the Python-enabled GDB versions that
+                are installed when you install \QC and Qt SDK. On Mac OS X,
+                use the GDB provided with Xcode.
+                You can also build your own Python-enabled GDB. Follow the instructions in
+                \l{http://qt-project.org/wiki/QtCreatorBuildGdb}
+                {Building GDB}.
+
+        \row
+            \li Debugging tools for Windows
+            \li To use this engine, you must install the
+                \e{Debugging tools for Windows}. You can download them from
+                \l{http://msdn.microsoft.com/en-us/windows/hardware/gg463009/}
+                {Download and Install Debugging Tools for Windows}.
+
+                \note Visual Studio does not include the Debugging tools needed,
+                and therefore, you must install them separately.
+
+                The pre-built \QSDK for Windows makes use of the library if it
+                is present on the system. When manually building \QC using
+                the Microsoft Visual C++ Compiler, the build process checks for
+                the required files in
+                \c{"%ProgramFiles%\Debugging Tools for Windows"}.
+
+                It is highly recommended that you add the Symbol Server provided
+                by Microsoft to the symbol search path of the debugger. The
+                Symbol Server provides you with debugging informaton for the
+                operating system libraries for debugging Windows applications.
+                For more information, see
+                \l{Setting the Symbol Server in Windows}.
+
+       \row
+            \li Debugging tools for Mac OS X
+            \li The Qt binary distribution contains both debug and release
+                variants of the libraries. But you have to explicitly tell the
+                runtime linker that you want to use the debug libraries even if
+                your application is compiled as debug, as release is the default
+                library.
+
+                If you use a qmake based project in \QC,  you can set a
+                flag in your \l{glossary-run-config}{run configuration}, in
+                \gui Projects mode. In the run configuration, select
+                \gui{Use debug version of frameworks}.
+
+                For more detailed information about debugging on the Mac OS X,
+                see: \l{http://developer.apple.com/library/mac/#technotes/tn2124/_index.html#//apple_ref/doc/uid/DTS10003391}
+                {Mac OS X Debugging Magic}.
+
+              \note The Mac OS X Snow Leopard (10.6) has a bug that might cause the
+              application to crash. For a workaround, see:
+              \l{http://bugreports.qt-project.org/browse/QTBUG-4962}{QTBUG-4962}.
+
+       \row
+            \li LLDB
+            \li We recommend using the LLDB version that is delivered with Xcode 5.
+    \endtable
+
+    \section1 Mapping Source Paths
+
+    To enable the debugger to step into the code and display the source code
+    when using a copy of the source tree at a location different from the one
+    at which the libraries where built, map the source paths to target paths:
+
+    \list 1
+
+        \li Select \gui Tools > \gui Options > \gui Debugger > \gui General >
+            \gui Add.
+
+        \li In the \gui {Source path} field, specify the source path in the
+            debug information of the executable as reported by the debugger.
+
+        \li In the \gui {Target path} field, specify the actual location of the
+            source tree on the local machine.
+
+    \endlist
+
+    \section1 Setting the Symbol Server in Windows
+
+    To obtain debugging information for the operating system libraries for
+    debugging Windows applications, add the Symbol Server provided
+    by Microsoft to the symbol search path of the debugger:
+
+    \list 1
+
+        \li Select \gui Tools > \gui Options > \gui Debugger > \gui CDB.
+
+        \li In the \gui {Symbol paths} field, open the \gui Insert menu
+            and select \gui{Symbol Server}.
+
+        \li Select a directory where you want to store the cached information
+            and click \gui OK.
+
+            Use a subfolder in a temporary directory, such as
+            \c {C:\temp\symbolcache}.
+
+    \endlist
+
+    \note Populating the cache might take a long time on a slow network
+    connection.
+
+    \note The first time you start debugging by using the Debugging tools for
+    Windows, \QC prompts you to add the Symbol Server.
+
+    \section1 Setting up FSF GDB for Mac OS
+
+    To use FSF GDB on Mac OS, you must sign it and add it to the \QC
+    \l{glossary-buildandrun-kit}{kits}.
+
+    \list 1
+
+        \li To create a key for signing FSF GDB, select \gui {Keychain Access >
+            Certificate Assistant > Create a Certificate}:
+
+        \list 1
+
+            \li In the \gui {Name} field, input \gui {fsfgdb} to replace
+                the existing content.
+
+            \li In the \gui {Certificate Type} field, select
+                \gui {Code Signing}.
+
+            \li Select the \gui {Let me override defaults} check box.
+
+            \li Select \gui Continue, and follow the instructions of the
+                wizard (use the default settings), until the \gui {Specify a
+                Location For The Certificate} dialog opens.
+
+            \li In the \gui Keychain field, select \gui System.
+
+            \li Select \gui {Keychain Access > System}, and locate the
+                certificate.
+
+            \li Double click the certificate to view certificate information.
+
+            \li In the \gui Trust section, select \gui {Always Trust} in the
+                \gui {When using this certificate} field, and then close
+                the dialog.
+
+        \endlist
+
+        \li To sign the binary, enter the following command in the terminal:
+
+            \code
+            codesign -f -s "fsfgdb" $INSTALL_LOCATION/fsfgdb
+            \endcode
+
+        \li In \QC, select \gui {Qt Creator > Preferences > Build & Run >
+            Kits} > \gui Add to create a kit that uses FSF GDB.
+
+            \li In the \gui Debugger field, specify the path to FSF GDB
+                (\c $HOME/gdb72/bin/fsfgdb, but with an explicit value for
+                \c $HOME).
+
+        \li To use the debugger, add the kit in the \gui {Build Settings}
+            of the project.
+
+    \endlist
+
+    \section1 Setting Up Experimental LLDB Support
+
+    To use the experimental interface to LLDB, you must set up a kit that uses
+    the LLDB engine and select the kit for your project:
+
+    \list 1
+
+        \li Select \gui Tools > \gui Options > \gui {Build & Run} > \gui Kits.
+
+        \li Select an automatically created kit in the list, and then select
+            \gui Clone to create a copy of the kit.
+
+        \li In the \gui Debugger field, select an LLDB Engine. If an LLDB Engine
+            is not listed, select \gui Manage to add it in \gui Tools >
+            \gui Options > \gui {Build & Run} > \gui Debuggers. For more
+            information, see \l {Adding Debuggers}.
+
+        \li To use the debugger, add the kit in the \gui {Build Settings}
+            of the project.
+
+    \endlist
+
+*/

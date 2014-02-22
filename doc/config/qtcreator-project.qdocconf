@@ -1,0 +1,55 @@
+project     = "QtCreator"
+description = "Qt Creator Manual"
+
+headerdirs =
+sourcedirs = $SRCDIR/src
+imagedirs = $SRCDIR/images $SRCDIR/templates/images
+outputdir = $OUTDIR
+exampledirs = $SRCDIR/examples \
+              $SRCDIR/snippets
+indexes +=    $QT_INSTALL_DOCS/qtwidgets/qtwidgets.index \
+              $QT_INSTALL_DOCS/qtcore/qtcore.index \
+              $QT_INSTALL_DOCS/qtqml/qtqml.index \
+              $QT_INSTALL_DOCS/qtquick/qtquick.index \
+              $QT_INSTALL_DOCS/qmake/qmake.index \
+              $QT_INSTALL_DOCS/qtdesigner/qtdesigner.index \
+              $QT_INSTALL_DOCS/qtdoc/qtdoc.index \
+              $QT_INSTALL_DOCS/qtgui/qtgui.index \
+              $QT_INSTALL_DOCS/qthelp/qthelp.index \
+              $QT_INSTALL_DOCS/qtquickcontrols/qtquickcontrols.index \
+              $QT_INSTALL_DOCS/qtquicklayouts/qtquicklayouts.index \
+              $QT_INSTALL_DOCS/qtlinguist/qtlinguist.index \
+              $QT_INSTALL_DOCS/qtscript/qtscript.index \
+              $QT_INSTALL_DOCS/qtsensors/qtsensors.index \
+              $QT_INSTALL_DOCS/qtuitools/qtuitools.index \
+              $QT_INSTALL_DOCS/qtwebkit/qtwebkit.index \
+              $QT_INSTALL_DOCS/qtxml/qtxml.index
+
+include(macros.qdocconf)
+include(qt-cpp-ignore.qdocconf)
+include(qt-defines.qdocconf)
+
+sources.fileextensions         = "*.qdoc"
+
+qhp.projects            = QtCreator
+qhp.QtCreator.file             = qtcreator.qhp
+qhp.QtCreator.namespace        = org.qt-project.qtcreator.$QTC_VERSION_TAG
+qhp.QtCreator.virtualFolder    = doc
+qhp.QtCreator.indexTitle       = Qt Creator Manual $QTC_VERSION
+qhp.QtCreator.filterAttributes = qtcreator $QTC_VERSION
+qhp.QtCreator.customFilters.QtCreator.name = Qt Creator $QTC_VERSION
+qhp.QtCreator.customFilters.QtCreator.filterAttributes = qtcreator $QTC_VERSION
+qhp.QtCreator.indexRoot        =
+
+qhp.QtCreator.subprojects = manual
+qhp.QtCreator.subprojects.manual.title = Qt Creator Manual
+qhp.QtCreator.subprojects.manual.indexTitle = Qt Creator Manual
+qhp.QtCreator.subprojects.manual.type = manual
+
+# Doxygen compatibility commands
+
+macro.see                       = "\\sa"
+macro.function                  = "\\fn"
+
+navigation.landingpage = "Qt Creator Manual"
+buildversion = "Qt Creator Manual $QTC_VERSION"

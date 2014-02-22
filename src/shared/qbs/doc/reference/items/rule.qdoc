@@ -1,0 +1,161 @@
+/****************************************************************************
+**
+** Copyright (C) 2014 Digia Plc and/or its subsidiary(-ies).
+** Contact: http://www.qt-project.org/legal
+**
+** This file is part of the Qt Build Suite.
+**
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and Digia.  For licensing terms and
+** conditions see http://qt.digia.com/licensing.  For further information
+** use the contact form at http://qt.digia.com/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 2.1 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU Lesser General Public License version 2.1 requirements
+** will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Digia gives you certain additional
+** rights.  These rights are described in the Digia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+****************************************************************************/
+/*!
+    \contentspage list-of-items.html
+    \previouspage propertyoptions-item.html
+    \page rule-item.html
+    \nextpage staticlibrary-item.html
+    \ingroup list-of-items
+
+    \title Rule Item
+    \brief Creates transformers for input tags.
+
+    A \e {multiplex rule} creates one \e transformer that takes all
+    input artifacts with the matching input file tag and creates
+    one or more artifacts (e.g. C++ linker).
+    A \e {non-multiplex rule} creates one transformer per matching input file (e.g. C++
+    compiler).
+    As a real-world example of a non-multiplex rule, here is a simplified version of qbs' rule for
+    transforming C++ sources into object files using gcc:
+    \code
+    Rule {
+        id: compiler
+        inputs: ['cpp']
+        auxiliaryInputs: ['hpp']
+
+        Artifact {
+            fileTags: ['obj']
+            fileName: '.obj/' + product.name + '/' + input.baseDir + '/' + input.fileName + '.o'
+        }
+
+        prepare: {
+            var args = [];
+            if (product.moduleProperty('cpp', 'debugInformation'))
+                args.push('-g');
+            var warnings = product.moduleProperty('cpp', 'warningLevel')
+            if (warnings === 'none')
+                args.push('-w');
+            if (warnings === 'all') {
+                args.push('-Wall');
+                args.push('-Wextra');
+            }
+            if (product.moduleProperty('cpp', 'treatWarningsAsErrors'))
+                args.push('-Werror');
+            var includePaths = product.moduleProperties('cpp', 'includePaths');
+            for (i in includePaths)
+                args.push('-I' + includePaths[i]);
+            var defines = product.moduleProperties('cpp', 'defines');
+            for (i in defines)
+                args.push('-D' + defines[i]);
+            args.push('-c');
+            args.push(input.fileName);
+            args.push('-o');
+            args.push(output.fileName);
+            var compilerPath = ModUtils.moduleProperty(product, 'compilerPath');
+            var cmd = new Command(compilerPath, args);
+            cmd.description = 'compiling ' + FileInfo.fileName(input.fileName);
+            cmd.highlight = 'compiler';
+            return cmd;
+        }
+    }
+    \endcode
+
+    \section1 Rule Properties
+
+    \table
+    \header
+        \li Property
+        \li Type
+        \li Default
+        \li Description
+    \row
+        \li multiplex
+        \li bool
+        \li false
+        \li Determines whether this is a multiplex rule.
+    \row
+        \li inputs
+        \li string list
+        \li undefined
+        \li File tags the input artifacts must match.
+           All output artifacts will depend on all artifacts in the product with
+           the given input file tags. Also these artifacts are available in the
+           inputs variable of the prepare script.
+    \row
+        \li auxiliaryInputs
+        \li string list
+        \li undefined
+        \li A list of file tags. This rule will be dependent on every other rule and
+            transformer that produces artifacts that are compatible with \a{auxiliaryInputs}.
+            Unlike \a{inputs}, the property \a{auxiliaryInputs} has no effect on the content of the
+            \a{inputs} variable in the \a{prepare} script.
+    \row
+        \li usings
+        \li string list
+        \li undefined
+        \li File tags the artifacts of product dependencies must match.
+           For example, the product \a foo might appear as follows in the current product:
+           \code
+            Depends {
+                name: "foo"
+            }
+           \endcode
+           All artifacts of \a foo that match the given
+           file tags will appear in the \a inputs variable of the prepare
+           script. Also, each output artifact of this rule will be dependent on
+           those artifacts.
+    \row
+        \li condition
+        \li bool
+        \li true
+        \li If true, the rule is enabled, otherwise it does nothing.
+    \row
+        \li explicitlyDependsOn
+        \li string list
+        \li undefined
+        \li Each artifact that matches the file tags in \a explicitlyDependsOn
+           is added to the dependencies of each output node.
+    \row
+        \li scanners
+        \li string list
+        \li undefined
+        \li List of dependency scanner ids for this rule. The scanners are
+           run just before the prepare script is executed.
+    \row
+        \li prepare
+        \li script
+        \li undefined
+        \li Script that prepares the commands to transform the inputs to outputs.
+            The code in this script is treated as a function with the signature
+            \c{function(project, product, inputs, outputs, input, output)}.
+            The argument \c{input} is \c{undefined} if there's more than one input artifact for this
+            rule. Similarly, \c{output} is only defined if there's exactly one output artifact.
+    \endtable
+
+*/

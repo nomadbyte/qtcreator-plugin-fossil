@@ -1,0 +1,72 @@
+/****************************************************************************
+**
+** Copyright (C) 2014 Digia Plc and/or its subsidiary(-ies).
+** Contact: http://www.qt-project.org/legal
+**
+** This file is part of the Qt Build Suite.
+**
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and Digia.  For licensing terms and
+** conditions see http://qt.digia.com/licensing.  For further information
+** use the contact form at http://qt.digia.com/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 2.1 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU Lesser General Public License version 2.1 requirements
+** will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Digia gives you certain additional
+** rights.  These rights are described in the Digia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+****************************************************************************/
+
+/*!
+    \contentspage index.html
+    \page jsextension-file.html
+    \ingroup list-of-builtin-services
+
+    \title File Service
+    \brief Provides operations on the file system.
+
+    The \c File service offers limited access to the file system for operations such as copying
+    or removing files.
+
+    \section1 Making the Service Available
+    To gain access to file system operations, import the service using the
+    following statement at the top of your project file:
+    \code
+    import qbs.File
+    \endcode
+
+    \section1 Available Operations
+
+    \section2 copy
+    \code
+    File.copy(sourceFilePath, targetFilePath)
+    \endcode
+    Copies \c sourceFilePath to \c targetFilePath. Any directory components in \c targetFilePath
+    that do not yet exist will be created. If \c sourceFilePath is a directory, a recursive
+    copy will be made. If an error occurs, a JavaScript exception will be thrown.
+    \note \c targetFilePath must be the counterpart of \c sourceFilePath at the new location,
+    \b{not} the new parent directory. This allows the copy to have a different name and is true
+    even if \c sourceFilePath is a directory.
+
+    \section2 exists
+    \code
+    File.exists(filePath)
+    \endcode
+    Returns true if and only if there is a file at \c filePath.
+
+    \section2 remove
+    \code
+    File.remove(filePath)
+    \endcode
+    Removes the file at \c filePath. In case of a directory, it will be removed recursively.
+*/

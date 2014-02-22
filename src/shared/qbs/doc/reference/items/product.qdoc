@@ -1,0 +1,153 @@
+/****************************************************************************
+**
+** Copyright (C) 2014 Digia Plc and/or its subsidiary(-ies).
+** Contact: http://www.qt-project.org/legal
+**
+** This file is part of the Qt Build Suite.
+**
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and Digia.  For licensing terms and
+** conditions see http://qt.digia.com/licensing.  For further information
+** use the contact form at http://qt.digia.com/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 2.1 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU Lesser General Public License version 2.1 requirements
+** will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Digia gives you certain additional
+** rights.  These rights are described in the Digia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+****************************************************************************/
+/*!
+    \contentspage list-of-items.html
+    \previouspage probe-item.html
+    \page product-item.html
+    \nextpage project-item.html
+    \ingroup list-of-items
+
+    \title Product Item
+    \brief Represents the result of a build process.
+
+    A \e product typically represents the result of a build process. It specifies a set of
+    input and output files and a way to transform the former into the latter. For example, the
+    following product sets up a very simple C++ application:
+    \code
+    Product {
+        name: "helloworld"
+        type: "application"
+        files: "main.cpp"
+        Depends { name: "cpp" }
+    }
+    \endcode
+    The \c type property specifies what will be built (an executable). The \c files property specifies
+    the input files (one C++ source file), and the \c Depends item pulls in the logic from the \c cpp module
+    about how to do the necessary transformations.
+    For some often-used types of products, Qbs pre-defines special derived items that save
+    users some typing. These are:
+    \list
+        \li Application
+        \li CppApplication
+        \li DynamicLibrary
+        \li StaticLibrary
+    \endlist
+    Therefore, the above example could also be written like this:
+    \code
+    CppApplication {
+        name: "helloworld"
+        files: "main.cpp"
+    }
+    \endcode
+    Any property \c prop attached to this item is available in sub-items as \c product.prop, as
+    well as in modules that are loaded from this product.
+
+    \table
+        \header
+            \li Property
+            \li Type
+            \li Default
+            \li Description
+        \row
+            \li condition
+            \li bool
+            \li true
+            \li If false, the product will not be built.
+        \row
+            \li name
+            \li string
+            \li empty string
+            \li The name of the product. Used to identify the product in a \c Depends item, for example.
+        \row
+            \li type
+            \li stringList
+            \li empty list
+            \li The file tags matching the product's target artifacts.
+        \row
+            \li targetName
+            \li string
+            \li \c name
+            \li The base file name of the product's target artifacts.
+        \row
+            \li destinationDirectory
+            \li string
+            \li "."
+            \li The directory where the target artifacts will be located. Relative to the build directory.
+        \row
+            \li files
+            \li stringList
+            \li empty list
+            \li A list of source files. Syntactic sugar to save a \c Group item for simple products.
+        \row
+            \li excludeFiles
+            \li stringList
+            \li empty list
+            \li A list of source files not to include. Useful with wildcards.
+                For more information, see \l {Group Item}.
+
+        \row
+            \li consoleApplication
+            \li bool
+            \li linker-dependent
+            \li If true, a console application is generated. If false, a GUI application is generated.
+                Only takes effect on Windows.
+        \row
+            \li qbsSearchPaths
+            \li stringList
+            \li project.qbsSearchPaths
+            \li See the documentation of the \l {Project Item} property of the same name.
+                Setting this property here will overwrite the default value inherited from
+                the project, so use the \c concat() function if you want to add something.
+        \row
+            \li version
+            \li string
+            \li undefined
+            \li The version number of the product. Used in shared library filenames and generated
+                Info.plist files in OS X and iOS application and framework bundles, for example.
+    \endtable
+
+    The following properties are automatically set by qbs and usually are not changed by the user:
+
+    \table
+        \header
+            \li Property
+            \li Type
+            \li Description
+        \row
+            \li buildDirectory
+            \li string
+            \li The build directory for this product. This is the directory where generated files
+                are placed.
+        \row
+            \li sourceDirectory
+            \li string
+            \li The source directory for this product. This is the directory of the file where this
+                product is defined.
+    \endtable
+*/

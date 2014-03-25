@@ -31,10 +31,10 @@
 #include <vcsbase/vcsbaseclientsettings.h>
 #include <vcsbase/vcsbaseconstants.h>
 
-#include <QtCore/QFileInfo>
-#include <QtCore/QVariant>
-#include <QtCore/QStringList>
-#include <QtCore/QDir>
+#include <QFileInfo>
+#include <QVariant>
+#include <QStringList>
+#include <QDir>
 
 using namespace Fossil::Internal;
 
@@ -48,9 +48,9 @@ QString FossilControl::displayName() const
     return tr("Fossil");
 }
 
-QString FossilControl::id() const
+Core::Id FossilControl::id() const
 {
-    return QLatin1String(Constants::VCS_ID_FOSSIL);
+    return Core::Id(Constants::VCS_ID_FOSSIL);
 }
 
 bool FossilControl::managesDirectory(const QString &directory, QString *topLevel) const
@@ -62,9 +62,14 @@ bool FossilControl::managesDirectory(const QString &directory, QString *topLevel
     return !topLevelFound.isEmpty();
 }
 
+bool FossilControl::managesFile(const QString &workingDirectory, const QString &fileName) const
+{
+    return m_client->managesFile(workingDirectory, fileName);
+}
+
 bool FossilControl::isConfigured() const
 {
-    const QString binary = m_client->settings()->stringValue(FossilSettings::binaryPathKey);
+    const QString binary = m_client->settings()->binaryPath();
     if (binary.isEmpty())
         return false;
 
@@ -97,7 +102,6 @@ bool FossilControl::supportsOperation(Operation operation) const
     case Core::IVersionControl::GetRepositoryRootOperation:
         break;
     case Core::IVersionControl::CheckoutOperation:
-    case Core::IVersionControl::OpenOperation:
     case Core::IVersionControl::SnapshotOperations:
         supported = false;
         break;
@@ -137,31 +141,18 @@ bool FossilControl::vcsCreateRepository(const QString &directory)
     return m_client->synchronousCreateRepository(directory);
 }
 
-QString FossilControl::vcsCreateSnapshot(const QString &)
-{
-    return QString();
-}
-
-QStringList FossilControl::vcsSnapshots(const QString &)
-{
-    return QStringList();
-}
-
-bool FossilControl::vcsRestoreSnapshot(const QString &, const QString &)
-{
-    return false;
-}
-
-bool FossilControl::vcsRemoveSnapshot(const QString &, const QString &)
-{
-    return false;
-}
-
 bool FossilControl::vcsAnnotate(const QString &file, int line)
 {
     const QFileInfo fi(file);
     m_client->annotate(fi.absolutePath(), fi.fileName(), QString(), line);
     return true;
+}
+
+QString FossilControl::vcsTopic(const QString &directory)
+{
+    // @TODO::return current branch name
+    Q_UNUSED(directory);
+    return QString();
 }
 
 bool FossilControl::vcsCheckout(const QString &directory, const QByteArray &url)

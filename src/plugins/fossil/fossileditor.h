@@ -29,24 +29,25 @@
 
 #include <vcsbase/vcsbaseeditor.h>
 
-#include <QtCore/QRegExp>
+#include <QRegExp>
 
 namespace Fossil {
 namespace Internal {
 
-class FossilEditor : public VCSBase::VCSBaseEditorWidget
+class FossilEditor : public VcsBase::VcsBaseEditorWidget
 {
     Q_OBJECT
 
 public:
-    explicit FossilEditor(const VCSBase::VCSBaseEditorParameters *type, QWidget *parent);
+    explicit FossilEditor(const VcsBase::VcsBaseEditorParameters *type, QWidget *parent);
+
+//private slots:
+//    void slotChangeContents();
 
 private:
     QSet<QString> annotationChanges() const;
     QString changeUnderCursor(const QTextCursor &cursor) const;
-    VCSBase::DiffHighlighter *createDiffHighlighter() const;
-    VCSBase::BaseAnnotationHighlighter *createAnnotationHighlighter(const QSet<QString> &changes) const;
-    QString fileNameFromDiffSpecification(const QTextBlock &diffFileSpec) const;
+    VcsBase::BaseAnnotationHighlighter *createAnnotationHighlighter(const QSet<QString> &changes) const;
 
     const QRegExp m_exactChangesetId;
     const QRegExp m_exactDiffFileId;

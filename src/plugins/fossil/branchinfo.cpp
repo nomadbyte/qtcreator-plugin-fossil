@@ -26,7 +26,7 @@
 
 #include "branchinfo.h"
 
-#include <QtCore/QDebug>
+#include <QDebug>
 
 namespace Fossil {
 namespace Internal {

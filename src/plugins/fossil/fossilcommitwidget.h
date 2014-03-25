@@ -29,7 +29,7 @@
 
 #include "ui_fossilcommitpanel.h"
 
-#include <utils/submiteditorwidget.h>
+#include <vcsbase/submiteditorwidget.h>
 
 QT_BEGIN_NAMESPACE
 class QValidator;
@@ -45,7 +45,7 @@ class BranchInfo;
   Some extra fields have been added to the standard SubmitEditorWidget,
   to help to conform to the commit style that is used by both git and Fossil*/
 
-class FossilCommitWidget : public Utils::SubmitEditorWidget
+class FossilCommitWidget : public VcsBase::SubmitEditorWidget
 {
     Q_OBJECT
 

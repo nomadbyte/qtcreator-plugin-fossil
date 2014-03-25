@@ -30,15 +30,15 @@
 
 #include <utils/qtcassert.h>
 
-#include <QtCore/QUrl>
-#include <QtCore/QDir>
-#include <QtCore/QFileInfo>
-#include <QtCore/QDebug>
+#include <QUrl>
+#include <QDir>
+#include <QFileInfo>
+#include <QDebug>
 
 using namespace Fossil::Internal;
 
 CloneWizardPage::CloneWizardPage(QWidget *parent)
-    : VCSBase::BaseCheckoutWizardPage(parent),
+    : VcsBase::BaseCheckoutWizardPage(parent),
       m_repositoryPanel(new CloneRepositoryPanel),
       m_optionsPanel(new CloneOptionsPanel)
 {
@@ -144,7 +144,7 @@ QString CloneWizardPage::directoryFromRepository(const QString &repository) cons
         result = m_repositoryPanel->cloneRepositoryName();
 
     if (!result.isEmpty() && !branch.isEmpty())
-        result.append(QString("-%1").arg(branch));
+        result.append(QString(QLatin1String("-%1")).arg(branch));
 
     return result;
 }
@@ -162,7 +162,7 @@ void CloneWizardPage::slotCloneRepositoryNameEdited(const QString &name)
     QString branch = m_repositoryPanel->checkoutBranch();
 
     if (!result.isEmpty() && !branch.isEmpty())
-        result.append(QString("-%1").arg(branch));
+        result.append(QString(QLatin1String("-%1")).arg(branch));
 
     setDirectory(result);
 }

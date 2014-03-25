@@ -34,36 +34,22 @@
 #include "fossilsettings.h"
 
 #include <coreplugin/iversioncontrol.h>
-#include <vcsbase/checkoutjobs.h>
 #include <vcsbase/vcsbaseconstants.h>
 #include <vcsbase/vcsconfigurationpage.h>
 
-#include <QtCore/QUrl>
-#include <QtCore/QDir>
-#include <QtCore/QDebug>
+#include <QUrl>
+#include <QDir>
+#include <QDebug>
 
 using namespace Fossil::Internal;
 
-CloneWizard::CloneWizard(QObject *parent)
-    : VCSBase::BaseCheckoutWizard(parent),
-      m_icon(QIcon(QLatin1String(":/fossil/images/fossil.png")))
+CloneWizard::CloneWizard()
 {
     setId(QLatin1String(Constants::VCS_ID_FOSSIL));
-}
-
-QIcon CloneWizard::icon() const
-{
-    return m_icon;
-}
-
-QString CloneWizard::description() const
-{
-    return tr("Clones a Fossil branch and tries to load the contained project.");
-}
-
-QString CloneWizard::displayName() const
-{
-    return tr("Fossil Clone");
+    setCustomLabels(tr("Cloning"), tr("Cloning started..."));
+    setIcon(QIcon(QLatin1String(":/fossil/images/fossil.png")));
+    setDescription(tr("Clones a Fossil repository and tries to load the contained project."));
+    setDisplayName(tr("Fossil Clone"));
 }
 
 QList<QWizardPage *> CloneWizard::createParameterPages(const QString &path)
@@ -71,20 +57,20 @@ QList<QWizardPage *> CloneWizard::createParameterPages(const QString &path)
     QList<QWizardPage *> wizardPageList;
     const Core::IVersionControl *vc = FossilPlugin::instance()->versionControl();
     if (!vc->isConfigured())
-        wizardPageList.append(new VCSBase::VcsConfigurationPage(vc));
+        wizardPageList.append(new VcsBase::VcsConfigurationPage(vc));
     CloneWizardPage *page = new CloneWizardPage;
     page->setPath(path);
     wizardPageList.append(page);
     return wizardPageList;
 }
 
-QSharedPointer<VCSBase::AbstractCheckoutJob> CloneWizard::createJob(const QList<QWizardPage *> &parameterPages,
-                                                                    QString *checkoutPath)
+VcsBase::Command *CloneWizard::createCommand(const QList<QWizardPage *> &parameterPages,
+                                             QString *checkoutPath)
 {
     const CloneWizardPage *page = qobject_cast<const CloneWizardPage *>(parameterPages.front());
 
     if (!page)
-        return QSharedPointer<VCSBase::AbstractCheckoutJob>();
+        return 0;
 
     const FossilClient *client = FossilPlugin::instance()->client();
     const FossilSettings &settings = FossilPlugin::instance()->settings();
@@ -143,7 +129,8 @@ QSharedPointer<VCSBase::AbstractCheckoutJob> CloneWizard::createJob(const QList<
     checkoutDir.mkpath(*checkoutPath);
 
     // Setup the wizard page job
-    VCSBase::ProcessCheckoutJob *job = new VCSBase::ProcessCheckoutJob;
+    VcsBase::Command *command = new VcsBase::Command(settings.binaryPath(), checkoutDir.path(),
+                                                     client->processEnvironment());
 
     QStringList extraOptions;
     QStringList args;
@@ -179,7 +166,7 @@ QSharedPointer<VCSBase::AbstractCheckoutJob> CloneWizard::createJob(const QList<
              << page->repository()
              << cloneRepositoryFileNative;
 
-        job->addStep(settings.stringValue(FossilSettings::binaryPathKey), args, *checkoutPath);
+        command->addJob(args, -1);
     }
 
     // check out the cloned repository file into the working copy directory;
@@ -194,7 +181,7 @@ QSharedPointer<VCSBase::AbstractCheckoutJob> CloneWizard::createJob(const QList<
         args << checkoutBranch;
     args << extraOptions;
 
-    job->addStep(settings.stringValue(FossilSettings::binaryPathKey), args, *checkoutPath);
+    command->addJob(args, -1);
 
     // set user default to admin user if specified
     if (!isLocalCheckoutOnly
@@ -208,7 +195,7 @@ QSharedPointer<VCSBase::AbstractCheckoutJob> CloneWizard::createJob(const QList<
         args << QLatin1String("user") << QLatin1String("default") << currentUser
              << QLatin1String("--user") << adminUser;
 
-        job->addStep(settings.stringValue(FossilSettings::binaryPathKey), args, *checkoutPath);
+        command->addJob(args, -1);
     }
 
     // turn-off autosync if requested
@@ -220,8 +207,8 @@ QSharedPointer<VCSBase::AbstractCheckoutJob> CloneWizard::createJob(const QList<
         args << QLatin1String("settings")
              << QLatin1String("autosync") << QLatin1String("off");
 
-        job->addStep(settings.stringValue(FossilSettings::binaryPathKey), args, *checkoutPath);
+        command->addJob(args, -1);
     }
 
-    return QSharedPointer<VCSBase::AbstractCheckoutJob>(job);
+    return command;
 }

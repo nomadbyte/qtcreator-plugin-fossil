@@ -29,7 +29,9 @@
 
 #include "fossilsettings.h"
 
-#include <QtCore/QDir>
+#include <utils/pathchooser.h>
+
+#include <QDir>
 
 namespace Fossil {
 namespace Internal {

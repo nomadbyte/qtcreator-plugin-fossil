@@ -32,7 +32,7 @@
 #include "revisioninfo.h"
 #include <vcsbase/vcsbaseclient.h>
 
-#include <QtCore/QList>
+#include <QList>
 
 
 namespace Fossil {
@@ -40,7 +40,7 @@ namespace Internal {
 
 class FossilSettings;
 
-class FossilClient : public VCSBase::VCSBaseClient
+class FossilClient : public VcsBase::VcsBaseClient
 {
     Q_OBJECT
 
@@ -62,7 +62,7 @@ public:
 
     FossilSettings *settings() const;
 
-    unsigned int synchronousBinaryVersion();
+    unsigned int synchronousBinaryVersion() const;
     BranchInfo synchronousBranchQuery(const QString &workingDirectory, QList<BranchInfo> *allBranches = 0);
     RevisionInfo synchronousRevisionQuery(const QString &workingDirectory, const QString &id = QString());
     QStringList synchronousTagQuery(const QString &workingDirectory, const QString &id = QString());
@@ -99,26 +99,27 @@ public:
     void revertAll(const QString &workingDir, const QString &revision = QString(),
                    const QStringList &extraOptions = QStringList());
     QString findTopLevelForFile(const QFileInfo &file) const;
-    unsigned int binaryVersion();
-    QString binaryVersionString();
-    SupportedFeatures supportedFeatures();
+    bool managesFile(const QString &workingDirectory, const QString &fileName) const;
+    unsigned int binaryVersion() const;
+    QString binaryVersionString() const;
+    SupportedFeatures supportedFeatures() const;
 
 protected:
-    QString vcsCommandString(VCSCommand cmd) const;
-    QString vcsEditorKind(VCSCommand cmd) const;
+    QString vcsCommandString(VcsCommand cmd) const;
+    Core::Id vcsEditorKind(VcsCommand cmd) const;
     QStringList revisionSpec(const QString &revision) const;
-    VCSBase::VCSBaseEditorParameterWidget *createDiffEditor(const QString &workingDir,
+    VcsBase::VcsBaseEditorParameterWidget *createDiffEditor(const QString &workingDir,
                                                             const QStringList &files,
                                                             const QStringList &extraOptions);
-    VCSBase::VCSBaseEditorParameterWidget *createAnnotateEditor(const QString &workingDir,
+    VcsBase::VcsBaseEditorParameterWidget *createAnnotateEditor(const QString &workingDir,
                                                                 const QString &file,
                                                                 const QString &revision,
                                                                 int lineNumber,
                                                                 const QStringList &extraOptions);
-    VCSBase::VCSBaseEditorParameterWidget *createLogEditor(const QString &workingDir,
+    VcsBase::VcsBaseEditorParameterWidget *createLogEditor(const QString &workingDir,
                                                            const QStringList &files,
                                                            const QStringList &extraOptions);
-    VCSBase::VCSBaseEditorParameterWidget *createLogRepositoryEditor(const QString &workingDir,
+    VcsBase::VcsBaseEditorParameterWidget *createLogRepositoryEditor(const QString &workingDir,
                                                                      const QStringList &files,
                                                                      const QStringList &extraOptions);
     StatusItem parseStatusLine(const QString &line) const;

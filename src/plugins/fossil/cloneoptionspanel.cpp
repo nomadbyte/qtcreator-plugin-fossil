@@ -32,8 +32,6 @@
 
 #include <utils/pathchooser.h>
 
-#include <QtCore/QtDebug>
-
 namespace Fossil {
 namespace Internal {
 

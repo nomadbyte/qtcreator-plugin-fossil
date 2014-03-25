@@ -28,24 +28,19 @@
 #include "commiteditor.h"
 #include "fossilcommitwidget.h"
 
+#include <coreplugin/idocument.h>
 #include <vcsbase/submitfilemodel.h>
 
-#include <QtCore/QDebug>
+#include <QDebug>
 
 
 using namespace Fossil::Internal;
 
-CommitEditor::CommitEditor(const VCSBase::VCSBaseSubmitEditorParameters *parameters, QWidget *parent)
-        : VCSBase::VCSBaseSubmitEditor(parameters, new FossilCommitWidget(parent)),
-        m_fileModel(0)
+CommitEditor::CommitEditor(const VcsBase::VcsBaseSubmitEditorParameters *parameters, QWidget *parent)
+        : VcsBase::VcsBaseSubmitEditor(parameters, new FossilCommitWidget(parent)),
+          m_fileModel(0)
 {
-    setDisplayName(tr("Commit Editor"));
-}
-
-const FossilCommitWidget *CommitEditor::commitWidget() const
-{
-    CommitEditor *nonConstThis = const_cast<CommitEditor *>(this);
-    return static_cast<const FossilCommitWidget *>(nonConstThis->widget());
+    document()->setDisplayName(tr("Commit Editor"));
 }
 
 FossilCommitWidget *CommitEditor::commitWidget()
@@ -55,7 +50,7 @@ FossilCommitWidget *CommitEditor::commitWidget()
 
 void CommitEditor::setFields(const QString &repositoryRoot, const BranchInfo &branch,
                              const QStringList &tags, const QString &userName,
-                             const QList<VCSBase::VCSBaseClient::StatusItem> &repoStatus)
+                             const QList<VcsBase::VcsBaseClient::StatusItem> &repoStatus)
 {
     FossilCommitWidget *fossilWidget = commitWidget();
     if (!fossilWidget)
@@ -63,9 +58,9 @@ void CommitEditor::setFields(const QString &repositoryRoot, const BranchInfo &br
 
     fossilWidget->setFields(repositoryRoot, branch, tags, userName);
 
-    m_fileModel = new VCSBase::SubmitFileModel(this);
-    foreach (const VCSBase::VCSBaseClient::StatusItem &item, repoStatus)
+    m_fileModel = new VcsBase::SubmitFileModel(this);
+    foreach (const VcsBase::VcsBaseClient::StatusItem &item, repoStatus)
         if (item.flags != QLatin1String("Unknown"))
-            m_fileModel->addFile(item.file, item.flags, true);
-    setFileModel(m_fileModel);
+            m_fileModel->addFile(item.file, item.flags);
+    setFileModel(m_fileModel,repositoryRoot);
 }

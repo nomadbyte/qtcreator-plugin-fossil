@@ -34,7 +34,7 @@ namespace Internal {
 class CloneRepositoryPanel;
 class CloneOptionsPanel;
 
-class CloneWizardPage : public VCSBase::BaseCheckoutWizardPage
+class CloneWizardPage : public VcsBase::BaseCheckoutWizardPage
 {
     Q_OBJECT
 public:

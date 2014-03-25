@@ -32,25 +32,26 @@
 
 #include <coreplugin/editormanager/editormanager.h>
 #include <utils/qtcassert.h>
+#include <utils/synchronousprocess.h>
 #include <vcsbase/diffhighlighter.h>
 
-#include <QtCore/QRegExp>
-#include <QtCore/QString>
-#include <QtGui/QTextCursor>
-#include <QtGui/QTextBlock>
-#include <QtCore/QDir>
-#include <QtCore/QFileInfo>
-#include <QtCore/QDebug>
+#include <QRegExp>
+#include <QString>
+#include <QTextCursor>
+#include <QTextBlock>
+#include <QDir>
+#include <QFileInfo>
+#include <QDebug>
 
 using namespace Fossil::Internal;
 using namespace Fossil;
 
-FossilEditor::FossilEditor(const VCSBase::VCSBaseEditorParameters *type, QWidget *parent)
-    : VCSBase::VCSBaseEditorWidget(type, parent),
+FossilEditor::FossilEditor(const VcsBase::VcsBaseEditorParameters *type, QWidget *parent)
+    : VcsBase::VcsBaseEditorWidget(type, parent),
       m_exactChangesetId(QLatin1String(Constants::CHANGESET_ID_EXACT)),
       m_exactDiffFileId(QLatin1String(Constants::DIFFFILE_ID_EXACT)),
-      m_firstChangesetId(QString("\n%1 ").arg(QLatin1String(Constants::CHANGESET_ID))),
-      m_nextChangesetId(QString("\n%1 ").arg(QLatin1String(Constants::CHANGESET_ID)))
+      m_firstChangesetId(QString(QLatin1String("\n%1 ")).arg(QLatin1String(Constants::CHANGESET_ID))),
+      m_nextChangesetId(QString(QLatin1String("\n%1 ")).arg(QLatin1String(Constants::CHANGESET_ID)))
 {
     QTC_ASSERT(m_exactChangesetId.isValid(), return);
     QTC_ASSERT(m_exactDiffFileId.isValid(), return);
@@ -58,8 +59,28 @@ FossilEditor::FossilEditor(const VCSBase::VCSBaseEditorParameters *type, QWidget
     QTC_ASSERT(m_nextChangesetId.isValid(), return);
 
     setAnnotateRevisionTextFormat(tr("Annotate %1"));
-    setAnnotatePreviousRevisionTextFormat(tr("Annotate parent revision %1"));
+    setAnnotatePreviousRevisionTextFormat(tr("Annotate Parent Revision %1"));
+
+    setDiffFilePattern(m_exactDiffFileId);
+    setLogEntryPattern(QRegExp(QLatin1String(Constants::CHANGESET_ID)));
+
+    //VcsBase::DiffHighlighter *dh = createDiffHighlighter(); // own implementation
+    //baseTextDocument()->setSyntaxHighlighter(dh);
+
+    //connect(this, SIGNAL(textChanged()), this, SLOT(slotChangeContents()));
 }
+
+//void FossilEditor::slotChangeContents()
+//{
+//    QPlainTextEdit te(toPlainText().replace(QLatin1Char('\n'), QLatin1String("\r\n")));
+//    QByteArray qba(toPlainText().toStdString().c_str());
+//    disconnect(this, SIGNAL(textChanged()), this, SLOT(slotChangeContents()));
+//    //setPlainText(toPlainText());
+//    connect(this, SIGNAL(textChanged()), this, SLOT(slotChangeContents()));
+//    qDebug() << "slotChangeContents():: document:" << Utils::SynchronousProcess::normalizeNewlines(toPlainText());
+//    //qDebug() << "slotChangeContents():: document:" << qba.toHex();
+//}
+
 
 QSet<QString> FossilEditor::annotationChanges() const
 {
@@ -94,25 +115,8 @@ QString FossilEditor::changeUnderCursor(const QTextCursor &cursorIn) const
     return QString();
 }
 
-VCSBase::DiffHighlighter *FossilEditor::createDiffHighlighter() const
-{
-    return new VCSBase::DiffHighlighter(m_exactDiffFileId);
-}
 
-VCSBase::BaseAnnotationHighlighter *FossilEditor::createAnnotationHighlighter(const QSet<QString> &changes) const
+VcsBase::BaseAnnotationHighlighter *FossilEditor::createAnnotationHighlighter(const QSet<QString> &changes) const
 {
     return new FossilAnnotationHighlighter(changes);
-}
-
-QString FossilEditor::fileNameFromDiffSpecification(const QTextBlock &inBlock) const
-{
-    // Check for:
-    // +++ filename.cpp
-    for (QTextBlock  block = inBlock; block.isValid(); block = block.previous()) {
-        const QString line = block.text();
-        if (m_exactDiffFileId.exactMatch(line))
-            return findDiffFile(m_exactDiffFileId.cap(1), FossilPlugin::instance()->versionControl());
-    }
-
-    return QString();
 }

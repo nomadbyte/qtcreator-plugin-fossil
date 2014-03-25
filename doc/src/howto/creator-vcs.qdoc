@@ -1,10 +1,9 @@
 /****************************************************************************
 **
+** Copyright (c) 2014 Digia Plc and/or its subsidiary(-ies).
+** Contact: http://www.qt-project.org/legal
+**
 ** This file is part of Qt Creator
-**
-** Copyright (c) 2011 Nokia Corporation and/or its subsidiary(-ies).
-**
-** Contact: Nokia Corporation (qt-info@nokia.com)
 **
 **
 ** GNU Free Documentation License
@@ -14,8 +13,6 @@
 ** Foundation and appearing in the file included in the packaging of this
 ** file.
 **
-** If you have questions regarding the use of this file, please contact
-** Nokia at qt-info@nokia.com.
 **
 ****************************************************************************/
 
@@ -27,46 +24,50 @@
 
 /*!
     \contentspage index.html
-    \previouspage creator-project-generic.html
+    \previouspage creator-project-wizards.html
     \page creator-version-control.html
-    \nextpage adding-plugins.html
+    \nextpage creator-configuring-projects.html
 
     \title Using Version Control Systems
 
     Version control systems supported by \QC are:
     \table
         \header
-            \i Version Control System
-            \i Address
-            \i Notes
+            \li  Version Control System
+            \li  Address
+            \li  Notes
         \row
-            \i  Bazaar
-            \i  \l{http://bazaar.canonical.com/}
-            \i  \QC 2.2 and later
+            \li Bazaar
+            \li \l{http://bazaar.canonical.com/}
+            \li \QC 2.2 and later
         \row
-            \i  CVS
-            \i  \l{http://www.cvshome.org}
-            \i
+            \li ClearCase
+            \li \l{http://www-01.ibm.com/software/awdtools/clearcase/}
+            \li  \QC 2.6 and later
         \row
-            \i  Fossil
-            \i  \l{http://www.fossil-scm.org}
-            \i  Fossil version 1.26 and later
+            \li CVS
+            \li \l{http://www.cvshome.org}
+            \li
         \row
-            \i  Git
-            \i  \l{http://git-scm.com/}
-            \i
+            \li Fossil
+            \li \l{http://www.fossil-scm.org}
+            \li Fossil version 1.26 and later
         \row
-            \i  Mercurial
-            \i  \l{http://mercurial.selenic.com/}
-            \i  \QC 2.0 and later
+            \li Git
+            \li \l{http://git-scm.com/}
+            \li Git version 1.7.2, or later
         \row
-            \i  Perforce
-            \i  \l{http://www.perforce.com}
-            \i  Server version 2006.1 and later
+            \li Mercurial
+            \li \l{http://mercurial.selenic.com/}
+            \li \QC 2.0 and later
         \row
-            \i  Subversion
-            \i  \l{http://subversion.apache.org/}
-            \i
+            \li Perforce
+            \li \l{http://www.perforce.com}
+            \li Server version 2006.1 and later
+        \row
+            \li Subversion
+            \li \l{http://subversion.apache.org/}
+            \li Subversion version 1.6.17 and later
     \endtable
 
     \section1 Setting Up Version Control Systems
@@ -104,13 +105,13 @@
 
     \list
 
-        \o  \gui{Submit message check script} is a script or program that
+        \li \gui{Submit message check script} is a script or program that
             can be used to perform checks on the submit message before
             submitting. The submit message is passed in as the script's first
             parameter. If there is an error, the script should output a
             message on standard error and return a non-zero exit code.
 
-        \o  \gui{User/alias configuration file} takes a file in mailmap format
+        \li \gui{User/alias configuration file} takes a file in mailmap format
             that lists user names and aliases. For example:
 
             \code
@@ -124,7 +125,7 @@
             displays a context menu with \gui{Insert name} that pops up a
             dialog letting the user select a name.
 
-        \o  \gui{User fields configuration file} is a simple text file
+        \li \gui{User fields configuration file} is a simple text file
             consisting of lines specifying submit message fields that take
             user names, for example:
 
@@ -138,10 +139,15 @@
             \e{User/alias configuration file} as well as a button that opens the
             aforementioned user name dialog.
 
-        \o  \gui{SSH prompt command} specifies an ssh-askpass command that you
+        \li \gui{SSH prompt command} specifies an ssh-askpass command that you
             can use (on Linux) to prompt the user for a password when using SSH.
             For example, \c ssh-askpass or \c x11-ssh-askpass, depending on the
             ssh-askpass implementation that you use.
+
+        \li \gui {Patch command} specifies the path to the patch utility that is
+            used to apply changes in the format used to represent the diff
+            output. The \gui Revert command uses the patch utility to revert
+            partial changes.
 
     \endlist
 
@@ -194,6 +200,12 @@
 
     \image qtcreator-vcs-diff.png
 
+    With Git, the diff is displayed side-by-side in a \l{Comparing Files}
+    {diff editor} by default. To use the inline diff view instead, select the
+    \gui {Switch to Text Diff Editor} option from the toolbar. In the inline
+    diff view, you can use context menu commands to apply, revert, stage, and
+    unstage hunks, as well as send them to a code pasting service.
+
     \section2 Viewing Versioning History and Change Details
 
     Display the versioning history of a file by selecting \gui{Log}
@@ -202,6 +214,7 @@
     display a description of the change including the diff.
     Right-clicking on an identifier brings up a context menu that lets you
     show annotation views of previous versions (see \l{Annotating Files}).
+    With Git you can also choose to cherry-pick or revert a change.
 
     \image qtcreator-vcs-log.png
 
@@ -216,7 +229,7 @@
     version identifier at the beginning of a line and choose one of the
     revisions shown at the bottom of the context menu. This allows you to
     navigate through the history of the file and obtain previous versions of
-    it. It also works for Git and Mercurial using SHA's.
+    it. It also works for Git and Mercurial using SHA-1.
 
     The same context menu is available when right-clicking on a version
     identifier in the file log view of a single file.
@@ -235,12 +248,13 @@
 
     The \gui{Diff Selected Files} button brings up a diff view of the
     files selected in the file list. Since the commit page is just another
-    editor, you can go back to it by closing the diff view. You can also check
-    a diff view from the editor combo box showing the \gui{Opened files}.
+    editor, you can go back to it by closing the diff view. You can also switch
+    to an open diff view by selecting it in the \gui{Open Documents} pane in the
+    sidebar.
 
     \section2 Reverting Changes
 
-    All supported version control system support reverting your project to
+    All supported version control systems support reverting your project to
     known states. This functionality is generally called \e reverting.
 
     The changes discarded depend on the version control system.
@@ -251,18 +265,29 @@
     \section3 Reverting Changes Using Git
 
     The Git version control system has an index that is used to stage
-    changes. The index is commited on the next commit. Git allows you to revert
+    changes. The index is committed on the next commit. Git allows you to revert
     back to the state of the last commit as well as to the state staged in the
     index.
 
     \list
 
-        \o  \gui{Undo Unstaged Changes} reverts all changes and resets the
-            working directory to the state of the index.
+        \li \gui Git > \gui {Current File} > \gui{Undo Unstaged Changes} reverts
+            all changes and resets the current file to the state of the
+            index.
 
-        \o  \gui{Undo Uncommitted Changes} reverts all changes, discarding the
-            index. This returns your working copy to the state it was in right
+        \li \gui Git > \gui {Current File} > \gui {Undo Uncommitted Changes}
+            reverts all changes, discarding the
+            index. This returns the current file to the state it was in right
             after the last commit.
+
+        \li \gui Git > \gui {Local Repository} > \gui Reset opens a dialog
+            where you can select the SHA-1 to reset the working directory to.
+            This is useful after applying patches for review, for example. You
+            can choose between a \gui Soft reset that does not touch the index
+            file nor the working tree at all, a \gui Hard reset that discards
+            all changes to tracked files in working tree, and a \gui Mixed
+            reset that resets HEAD and the index (nothing remains staged)
+            without touching the working directory.
 
     \endlist
 
@@ -291,42 +316,54 @@
 
     Bazaar is a free version control system sponsored by Canonical.
 
-    The \gui Bazaar submenu contains the following additional items:
+    In addition to the standard version control system functions, you can
+    select \gui Tools > \gui Bazaar > \gui Pull to turn the branch into a
+    mirror of another branch. To update a mirror of the branch, select
+    \gui Push.
+
+    \section2 Using Additional ClearCase Functions
+
+    IBM Rational ClearCase is a version control, workspace management, parallel
+    development support, and build automation solution developed by IBM. The
+    ClearCase client plugin is available on Linux and Windows for accessing a
+    ClearCase server.
+
+    The \gui ClearCase submenu contains the following additional items:
 
     \table
         \header
-            \o  Menu Item
-            \o  Description
+            \li Menu Item
+            \li Description
         \row
-            \i  \gui{Pull}
-            \i  Turn the branch into a mirror of another branch.
+            \li \gui{Check In}
+            \li Create a permanent new version of the current file or all files
+                in the versioned object base (VOB).
         \row
-            \i  \gui{Push}
-            \i  Update a mirror of the branch.
-
+            \li \gui{Check In Activity}
+            \li Check in checked-out versions in the change set of the current
+                Unified Change Management (UCM) activity.
+        \row
+            \li \gui{Check Out}
+            \li Create a writable copy of a branch. If you check out files in a
+                UCM view, they are added to the change set of the UCM activity.
+        \row
+            \li \gui{Undo Check Out}
+            \li Cancel the checkout for a file and delete the checked-out
+                version.
+        \row
+            \li \gui{Undo Hijack}
+            \li Resolve hijacked files. If you change the read-only attribute of
+                a file that is loaded into a snapshot view and modify the file
+                without checking it out, you \e hijack the file.
     \endtable
 
-    \section2 Using Additional CVS Functions
+\section2 Using Additional CVS Functions
 
     CVS is an open source version control system.
 
-    The \gui CVS submenu contains the following additional items:
-
-    \table
-        \header
-            \o  Menu Item
-            \o  Description
-        \row
-            \i  \gui{Edit}
-            \i  Open a file for editing.
-        \row
-            \i  \gui{Push}
-            \i  Push changes to the remote repository.
-        \row
-            \i  \gui{Unedit}
-            \i  Discard the changes that you made in a file.
-
-    \endtable
+    In addition to the standard version control system functions, you can
+    select \gui Tools > \gui CVS > \gui Edit to open a file for editing.
+    To discard the changes that you made in a file, select \gui Unedit.
 
     \section2 Using Additional Fossil Functions
 
@@ -335,26 +372,25 @@
     stand-alone executable contains SCM engine, web-interface, bug-tracking, wiki,
     and built-in web-server. Fossil is available for Linux, Windows and Mac.
 
-    The \gui Fossil submenu contains the following additional items:
+    The \uicontrol Fossil submenu contains the following additional items:
 
     \table
         \header
-            \o  Menu Item
-            \o  Description
+            \li Menu Item
+            \li Description
         \row
-            \i  \gui{Pull}
-            \i  Pull changes from the remote repository.
+            \li \uicontrol Pull
+            \li Pull changes from the remote repository.
         \row
-            \i  \gui{Push}
-            \i  Push committed changes to the remote repository.
+            \li \uicontrol Push
+            \li Push committed changes to the remote repository.
         \row
-            \i  \gui{Update}
-            \i  Change the version of the current checkout. Any uncommitted
+            \li \uicontrol Update
+            \li Change the version of the current checkout. Any uncommitted
                 changes are retained and applied to the new checkout.
         \row
-            \i  \gui{Settings}
-            \i  Configure settings of the local repository.
-
+            \li \uicontrol Settings
+            \li Configure settings of the local repository.
     \endtable
 
     \section2 Using Additional Git Functions
@@ -362,58 +398,50 @@
     Git is a fast decentralized version control system. Git is available
     for Windows, Linux and Mac.
 
-    The \gui Git submenu contains the following additional items:
+    You can use the \l{http://code.google.com/p/gerrit/}{Gerrit} code review
+    tool for projects that use Git. You can apply and check out changes from
+    Gerrit in \QC 2.6 and later.
 
-    \table
-        \header
-            \o  Menu Item
-            \o  Description
-        \row
-            \i  \gui {Patch > Apply from Editor/Apply from File}
-            \i  Patches are rewriting instructions that can be applied to a set
-                of files. You can either apply a patch file that is open in \QC
-                or select the patch file to apply from the file system.
-        \row
-            \i  \gui{Pull}
-            \i  Pull changes from the remote repository. If there are locally
-                modified files, you are prompted to stash those changes. Select
-                \gui{Tools > Options > Version Control > Git} and select the
-                \gui {Pull with rebase} check box to perform a rebase operation
-                while pulling.
+    \section3 Working with the Current File
 
-        \row
-            \i  \gui{Clean/Clean Project}
-            \i  All files that are not under version control (with the exception
-                of patches and project files) are displayed in the \gui {Clean
-                Repository} dialog. Select the files to delete and click
-                \gui Delete. This allows you to clean a build completely.
-        \row
-            \i  \gui{Launch gitk}
-            \i  Start the commit viewer for Git, gitk.
-        \row
-            \i  \gui{Branches}
-            \i  Manage local and remote branches.
-        \row
-            \i  \gui Remotes
-            \i  Manage remote repositories available in Git.
-        \row
-            \i  \gui {Stage File for Commit}
-            \i  Mark new or modified files for committing to the repository.
-                To undo this function, select \gui {Unstage File from Commit}.
-        \row
-            \i  \gui{Show Commit}
-            \i  Select a commit to view. Enter the SHA of the commit
-                in the \gui Change field.
-        \row
-            \i  \gui Stash
-            \i  Store local changes temporarily.
-        \row
-            \i  \gui{Amend Last Commit}
-            \i  Revert the last commit.
+    In addition to the standard version control system functions, you can
+    select \gui Tools > \gui Git > \gui {Current File} > \gui {Stage File for
+    Commit} to mark a new or modified file for committing to the repository.
 
-    \endtable
+    To undo this function, select \gui {Unstage File from Commit}.
 
-    \section3 Working with Branches
+    \section3 Working with the Current Project
+
+    In addition to the standard version control system functions, you can
+    select \gui Tools > \gui Git > \gui {Current Project} > \gui {Clean Project}
+    to clean the working directory. All files that are not under version control
+    are displayed in the \gui {Clean Repository} dialog. Ignored files are
+    deselected by default. Select the files to delete and click \gui Delete.
+
+    \section3 Working with Local Repositories
+
+    In addition to the standard version control system functions, you can
+    select \gui Tools > \gui Git > \gui {Local Repository} > \gui Clean to clean
+    the repository.
+
+    To apply latest changes to the last commit, select \gui Tools > \gui Git >
+    \gui {Local Repository} > \gui {Amend Last Commit}. You can also edit the
+    commit message.
+
+    To amend an earlier comment in a series of related commits, select
+    \gui Tools > \gui Git > \gui {Local Repository} >
+    \gui {Fixup Previous Commit}. This operation is done using interactive
+    rebase. In case of conflicts, a merge tool is suggested.
+
+    To change a series of commits in the local repository, select \gui Tools >
+    \gui Git > \gui {Local Repository} > \gui {Interactive Rebase}. You can
+    reorder or discard commits, squash them into a single commit, or edit the
+    commit messages.
+
+    The following sections describe how to manage local and remote branches,
+    apply patches, and use stashes.
+
+    \section4 Working with Branches
 
     To work with Git branches, select \gui{Branches}. The checked out branch
     is shown in bold and underlined in the list of branches. Double-click branch
@@ -425,90 +453,188 @@
 
     \table
         \header
-            \o  Menu Item
-            \o  Description
+            \li Menu Item
+            \li Description
         \row
-            \i  \gui{Add}
-            \i  Create new tracking and non-tracking branches.
+            \li \gui{Refresh}
+            \li Refresh the list of branches.
         \row
-            \i  \gui{Checkout}
-            \i  Check out the selected branch and make it current.
+            \li \gui{Add}
+            \li Create new tracking and non-tracking branches.
         \row
-            \i  \gui{Remove}
-            \i  Remove a local branch. You cannot delete remote branches.
+            \li \gui{Remove}
+            \li Remove a local branch. You cannot delete remote branches.
         \row
-            \i  \gui{Diff}
-            \i  Show the differences between the selected and the current
+            \li \gui Rename
+            \li Rename a local branch.
+        \row
+            \li \gui{Checkout}
+            \li Check out the selected branch and make it current. You can stash
+                changes you have made to tracked files.
+        \row
+            \li \gui{Diff}
+            \li Show the differences between the selected and the current
                 branch.
         \row
-            \i  \gui{Log}
-            \i  Show the changes in a branch.
+            \li \gui{Log}
+            \li Show the changes in a branch.
         \row
-            \i  \gui{Refresh}
-            \i  Refresh the list of branches.
+            \li \gui Merge
+            \li Join the development histories in two branches together.
+        \row
+            \li \gui Rebase
+            \li Copy local commits to the updated upstream head.
+        \row
+            \li \gui {Cherry Pick}
+            \li Cherry pick the top commit from the selected branch.
+        \row
+            \li \gui Track
+            \li Set the current branch to track the selected one.
     \endtable
 
-    \section3 Working with Remote Repositories
+    \section4 Applying Patches
 
-    To manage remote repositories available in Git, select \gui{Remotes}.
-    Double-click the names and URLs of the remote repositories to edit them.
+    Patches are rewriting instructions that can be applied to a set of files.
+    To apply a patch file that is open in \QC, select \gui Tools > \gui Git >
+    \gui {Local Repository} > \gui {Apply from Editor}.
 
-    The following operations are supported:
+    To select the patch file to apply from the file system, select
+    \gui {Apply from File}.
 
-    \table
-        \header
-            \o  Menu Item
-            \o  Description
-        \row
-            \i  \gui{Add}
-            \i  Add a new remote repository.
-        \row
-            \i  \gui{Fetch}
-            \i  Fetch all the branches and change information from a remote
-                repository.
-        \row
-            \i  \gui{Remove}
-            \i  Remove a remote repository.
-        \row
-            \i  \gui{Refresh}
-            \i  Refresh the list of remote repositories.
-    \endtable
-
-
-    \section3 Using Stashes
+    \section4 Using Stashes
 
     With Git, you can put your current set of changes onto a virtual shelf
     called a \e stash. Stashes are useful, for example, to put aside a set of
     changes to work on higher priority tasks or to pull in new chages from
     another repository.
 
-    \QC exposes this functionality in the \gui{Tools > Git > Stash} menu.
+    To stash all local changes, select \gui Tools > \gui Git >
+    \gui {Local Repository} > \gui Stash > \gui Stash. The working copy is reset
+    to the state it had after the last commit.
+
+    To display a dialog that shows all known stashes with options to restore,
+    display or delete them, select \gui Stashes.
+
+    To save a snapshot of your current work under a name for later reference,
+    select \gui {Take Snapshot}. The working copy is unchanged. For example, if
+    you want to try something and find out later that it does not work, you can
+    discard the changes and return to the state of the snapshot.
+
+    To remove a single stashed state from the stash list and apply it on top of
+    the current working tree state, select \gui {Stash Pop}.
+
+    \section3 Applying Actions to Commits
+
+    To browse a directory or the commit history and to apply actions on the
+    commits, select \gui Tools > \gui Git > \gui {Actions on Commits}. You can
+    checkout, revert, or cherry-pick commits or view them in the diff editor.
+
+    \image creator-git-commit-actions.png "Select a Git Commit dialog"
+
+    \section3 Working with Remote Repositories
+
+    In addition to the standard version control system functions, you can
+    select \gui Tools > \gui Git > \gui {Remote Repository} > \gui Pull to
+    pull changes from the remote repository. If there are locally modified
+    files, you are prompted to stash the changes. Select \gui Tools >
+    \gui Options > \gui {Version Control} > \gui Git and then select the
+    \gui {Pull with rebase} check box to perform a rebase operation while
+    pulling.
+
+    \section4 Managing Remote Repositories
+
+    To manage remote repositories available in Git, select \gui Tools > \gui Git
+    > \gui {Remote Repository} > \gui{Manage Remotes}. Double-click the names
+    and URLs of the remote repositories to edit them.
+
+    The following operations are supported:
 
     \table
         \header
-            \o  Menu Item
-            \o  Description
+            \li Menu Item
+            \li Description
         \row
-            \i  \gui{Stashes}
-            \i  Display a dialog that shows all known stashes with options to
-                restore, display or delete them.
+            \li \gui{Refresh}
+            \li Refresh the list of remote repositories.
         \row
-            \i  \gui{Stash}
-            \i  Stash all local changes. The working copy is then reset to
-                the state it had right after the last commit.
+            \li \gui{Add}
+            \li Add a new remote repository.
         \row
-            \i  \gui{Stash Snapshot}
-            \i  Save a snapshot of your current work under a name for later
-                reference. The working copy is unchanged.
+            \li \gui{Fetch}
+            \li Fetch all the branches and change information from a remote
+                repository.
+        \row
+            \li \gui Push
+            \li Push committed changes to the remote repository.
+        \row
+            \li \gui{Remove}
+            \li Remove a remote repository.
 
-                For example, if you want to try something and find out later
-                that it does not work, you can discard it and return to the
-                state of the snapshot.
-        \row
-            \i  \gui{Stash Pop}
-            \i  Remove a single stashed state from the stash list and apply it
-                on top of the current working tree state.
     \endtable
+
+    \section4 Using Git with Subversion
+
+    You can use Git as a client for a Subversion server. To fetch changes from a
+    Subversion repository to a Git repository, select \gui Tools > \gui Git >
+    \gui {Remote Repository} > \gui Subversion > \gui Fetch.
+
+    To view the Git Subversion log, select \gui Log.
+
+    \section4 Reviewing Code with Gerrit
+
+    If your Git project uses Gerrit for code reviews, you can view your changes
+    in \QC.
+
+    Select \gui Tools > \gui Options > \gui {Version Control} > \gui Gerrit to
+    specify the connection to the Gerrit server.
+
+    \image qtcreator-gerrit-options.png
+
+    To push committed changes to Gerrit, select \gui Tools > \gui Git >
+    \gui {Remote Repository} > \gui {Push to Gerrit}.
+
+    To view the same information about each change as in the Gerrit
+    web interface, select \gui Tools > \gui Git > \gui {Remote Repository} >
+    \gui Gerrit.
+
+    \image qtcreator-gerrit.png
+
+    To view details of the selected change, select \gui Show.
+
+    To cherry-pick the selected change to the local repository, select
+    \gui {Cherry Pick}. To remove the change after testing it, select \gui Tools >
+    \gui Git > \gui {Local Repository} > \gui Reset. In the
+    \gui {Undo Changes to} dialog, select the
+    state to reset the working directory to, and then select \gui OK.
+
+    To check out the change in a headless state, select \gui Checkout.
+
+    To refresh the list of changes, select \gui Refresh.
+
+    \section3 Working with Git Tools
+
+    To start a graphical interface to Git, select \gui Tools > \gui Git >
+    \gui {Git Tools} > \gui {Git Gui}.
+
+    \note On Mac OS X, the default Git installation does not contain Git Gui. To
+    use Git Gui, install it separately. To start Git Gui from \QC, select
+    \gui Preferences > \gui {Version Control} > \gui Git, and set the path to
+    the environment that contains Git Gui in the \gui {Prepend to PATH} field.
+
+    To start the commit viewer for Git, select \gui Tools > \gui Git >
+    \gui {Git Tools} > \gui Gitk. You can also start the tool to view commits in
+    the current document or in the folder that contains the current document.
+    To specify arguments for running Gitk, select \gui Tools > \gui Options >
+    \gui {Version Control} > \gui Git.
+
+    To use some other application for viewing Git history, such as GitX or
+    QGit viewer, select \gui Tools > \gui Options > \gui {Version Control} >
+    \gui Git and specify the path to the application executable in the
+    \gui {Command} field. To start the application, select \gui Tools > \gui Git
+    > \gui {Git Tools} > \gui {Repository Browser}.
+
+    To resolve merge conflicts, select \gui Tools > \gui Git > \gui {Git Tools}
+    > \gui {Merge Tool}.
 
     \section2 Using Additional Mercurial Functionality
 
@@ -518,25 +644,25 @@
 
     \table
         \header
-            \o  Menu Item
-            \o  Description
+            \li Menu Item
+            \li Description
         \row
-            \i  \gui{Import}
-            \i  Apply changes from a patch file.
+            \li \gui{Import}
+            \li Apply changes from a patch file.
         \row
-            \i  \gui{Incoming}
-            \i  Monitor the status of a remote repository by listing
+            \li \gui{Incoming}
+            \li Monitor the status of a remote repository by listing
                 the changes that will be pulled.
         \row
-            \i  \gui{Outgoing}
-            \i  Monitor the status of a remote repository by listing
+            \li \gui{Outgoing}
+            \li Monitor the status of a remote repository by listing
                 the changes that will be pushed.
         \row
-            \i  \gui{Pull}
-            \i  Pull changes from the remote repository.
+            \li \gui{Pull}
+            \li Pull changes from the remote repository.
         \row
-            \i  \gui{Push}
-            \i  Push changes to the remote repository.
+            \li \gui{Push}
+            \li Push changes to the remote repository.
      \endtable
 
     \section2 Using Additional Perforce Functions
@@ -562,35 +688,28 @@
 
     \table
         \header
-            \o  Menu Item
-            \o  Description
+            \li Menu Item
+            \li Description
         \row
-            \i  \gui{Describe}
-            \i  View information about changelists and the files in them.
+            \li \gui{Describe}
+            \li View information about changelists and the files in them.
         \row
-            \i  \gui{Edit File}
-            \i  Open a file for editing.
+            \li \gui{Edit File}
+            \li Open a file for editing.
         \row
-            \i  \gui{Opened}
-            \i  List files that are open for editing.
+            \li \gui{Opened}
+            \li List files that are open for editing.
         \row
-            \i  \gui{Pending Changes}
-            \i  Group files for commit.
+            \li \gui{Pending Changes}
+            \li Group files for commit.
     \endtable
 
     \section2 Using Additional Subversion Functions
 
     Subversion is an open source version control system.
 
-    The \gui Subversion submenu contains the following additional items:
-
-    \table
-        \header
-            \o  Menu Item
-            \o  Description
-        \row
-            \i  \gui{Describe}
-            \i  Display commit log messages for a revision.
-    \endtable
+    In addition to the standard version control system functions, you can
+    select \gui Tools > \gui Subversion > \gui Describe to display commit log
+    messages for a revision.
 
 */

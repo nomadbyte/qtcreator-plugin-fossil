@@ -27,7 +27,7 @@
 #ifndef CLONEREPOSITORYPANEL_H
 #define CLONEREPOSITORYPANEL_H
 
-#include <QtGui/QWidget>
+#include <QWidget>
 
 namespace Fossil {
 namespace Internal {

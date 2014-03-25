@@ -27,7 +27,7 @@
 #include "fossilsettings.h"
 #include "constants.h"
 
-#include <QtCore/QSettings>
+#include <QSettings>
 
 namespace Fossil {
 namespace Internal {
@@ -52,7 +52,7 @@ FossilSettings::FossilSettings()
     declareKey(diffIgnoreWhiteSpaceKey, false);
     declareKey(annotateShowCommittersKey, false);
     declareKey(timelineWidthKey, 0);
-    declareKey(timelineLineageFilterKey, QLatin1String("|LINEAGE|"));
+    declareKey(timelineLineageFilterKey, QLatin1String(""));
     declareKey(timelineVerboseKey, false);
     declareKey(timelineItemTypeKey, QLatin1String("all"));
     declareKey(disableAutosyncKey, true);

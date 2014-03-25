@@ -34,9 +34,9 @@
 #include <vcsbase/vcsbaseplugin.h>
 #include <coreplugin/icontext.h>
 
-#include <QtCore/QFileInfo>
-#include <QtCore/QHash>
-#include <QtCore/qglobal.h>
+#include <QFileInfo>
+#include <QHash>
+#include <qglobal.h>
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -48,7 +48,7 @@ class ActionManager;
 class ActionContainer;
 class ICore;
 class Id;
-class IVersionControl;
+class IRevisionControl;
 class IEditorFactory;
 class IEditor;
 } // namespace Core
@@ -57,8 +57,8 @@ namespace Utils {
 class ParameterAction;
 } // namespace Utils
 
-namespace VCSBase {
-class VCSBaseSubmitEditor;
+namespace VcsBase {
+class VcsBaseSubmitEditor;
 }
 
 namespace Locator {
@@ -73,9 +73,10 @@ class FossilClient;
 class FossilControl;
 class FossilEditor;
 
-class FossilPlugin : public VCSBase::VCSBasePlugin
+class FossilPlugin : public VcsBase::VcsBasePlugin
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QtCreatorPlugin" FILE "Fossil.json")
 
 public:
     FossilPlugin();
@@ -109,24 +110,22 @@ private slots:
     void update();
     void configureRepository();
     void commit();
-    void showCommitWidget(const QList<VCSBase::VCSBaseClient::StatusItem> &status);
+    void showCommitWidget(const QList<VcsBase::VcsBaseClient::StatusItem> &status);
     void commitFromEditor();
     void diffFromEditorSelected(const QStringList &files);
     void createRepository();
 
 protected:
-    void updateActions(VCSBase::VCSBasePlugin::ActionState);
-    bool submitEditorAboutToClose(VCSBase::VCSBaseSubmitEditor *submitEditor);
+    void updateActions(VcsBase::VcsBasePlugin::ActionState);
+    bool submitEditorAboutToClose();
 
 private:
     // Methods
     void createMenu();
     void createSubmitEditorActions();
-    void createSeparator(const Core::Context &context, const Core::Id &id);
     void createFileActions(const Core::Context &context);
     void createDirectoryActions(const Core::Context &context);
     void createRepositoryActions(const Core::Context &context);
-    void deleteCommitLog();
 
     // Variables
     static FossilPlugin *m_instance;
@@ -134,13 +133,10 @@ private:
     OptionsPage *m_optionsPage;
     FossilClient *m_client;
 
-    Core::ICore *m_core;
     Locator::CommandLocator *m_commandLocator;
-    Core::ActionManager *m_actionManager;
     Core::ActionContainer *m_fossilContainer;
 
     QList<QAction *> m_repositoryActionList;
-    QTemporaryFile *m_changeLog;
 
     // Menu Items (file actions)
     Utils::ParameterAction *m_addAction;
@@ -160,6 +156,14 @@ private:
     QAction *m_menuAction;
 
     QString m_submitRepository;
+    bool m_submitActionTriggered;
+
+#ifdef WITH_TESTS
+private slots:
+    void testDiffFileResolving_data();
+    void testDiffFileResolving();
+    void testLogResolving();
+#endif
 };
 
 } // namespace Internal

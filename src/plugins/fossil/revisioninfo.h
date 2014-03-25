@@ -29,9 +29,9 @@
 
 #include "branchinfo.h"
 
-#include <QtCore/QString>
-#include <QtCore/QStringList>
-#include <QtCore/QDebug>
+#include <QString>
+#include <QStringList>
+#include <QDebug>
 
 namespace Fossil {
 namespace Internal {

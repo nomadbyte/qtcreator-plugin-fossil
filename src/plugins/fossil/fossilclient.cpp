@@ -27,7 +27,6 @@
 #include "fossilclient.h"
 #include "constants.h"
 
-#include <vcsbase/vcsbaseclientsettings.h>
 #include <vcsbase/vcsbaseplugin.h>
 #include <vcsbase/vcsbaseeditor.h>
 #include <vcsbase/vcsbaseeditorparameterwidget.h>
@@ -37,14 +36,15 @@
 #include <utils/synchronousprocess.h>
 #include <utils/qtcassert.h>
 
-#include <QtGui/QSyntaxHighlighter>
+#include <QSyntaxHighlighter>
 
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QTextStream>
-#include <QtCore/QtDebug>
-#include <QtCore/QMap>
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QTextStream>
+#include <QMap>
+
+#include <QDebug>
 
 namespace Fossil {
 namespace Internal {
@@ -58,17 +58,17 @@ unsigned FossilClient::makeVersionNumber(int major, int minor, int patch)
     return version;
 }
 
+static inline QString versionPart(unsigned part)
+{
+    return QString::number(part & 0xff, 16);
+}
+
 QString FossilClient::makeVersionString(unsigned version)
 {
-    if (!version)
-        return QString();
-
-    // maj.min.patch
-    QString result;
-    QTextStream(&result) << (version >> 16)
-                         << '.' << (0xFF & (version >> 8))
-                         << '.' << (version & 0xFF);
-    return result;
+    return QString::fromLatin1("%1.%2.%3")
+                    .arg(versionPart(version >> 16))
+                    .arg(versionPart(version >> 8))
+                    .arg(versionPart(version));
 }
 
 QString FossilClient::buildPath(const QString &path, const QString &baseName, const QString &suffix)
@@ -93,18 +93,18 @@ QString FossilClient::buildPath(const QString &path, const QString &baseName, co
 }
 
 FossilClient::FossilClient(FossilSettings *settings)
-    : VCSBase::VCSBaseClient(settings)
+    : VcsBase::VcsBaseClient(settings)
 {
 }
 
 FossilSettings *FossilClient::settings() const
 {
-    return dynamic_cast<FossilSettings *>(VCSBase::VCSBaseClient::settings());
+    return dynamic_cast<FossilSettings *>(VcsBase::VcsBaseClient::settings());
 }
 
-unsigned int FossilClient::synchronousBinaryVersion()
+unsigned int FossilClient::synchronousBinaryVersion() const
 {
-    if (settings()->stringValue(FossilSettings::binaryPathKey).isEmpty())
+    if (settings()->binaryPath().isEmpty())
         return 0;
 
     QStringList args;
@@ -490,7 +490,7 @@ QString FossilClient::synchronousGetRepositoryURL(const QString &workingDirector
 
 bool FossilClient::synchronousCreateRepository(const QString &workingDirectory, const QStringList &extraOptions)
 {
-    VCSBase::VCSBaseOutputWindow *outputWindow = VCSBase::VCSBaseOutputWindow::instance();
+    VcsBase::VcsBaseOutputWindow *outputWindow = VcsBase::VcsBaseOutputWindow::instance();
 
     // init repository file of the same name as the working directory
     // use the configured default repository location for path
@@ -519,7 +519,6 @@ bool FossilClient::synchronousCreateRepository(const QString &workingDirectory, 
     output.remove(QLatin1Char('\r'));
     outputWindow->append(output);
 
-
     // check out the created repository file into the working directory
 
     args.clear();
@@ -532,7 +531,6 @@ bool FossilClient::synchronousCreateRepository(const QString &workingDirectory, 
     output = QString::fromLocal8Bit(outputData);
     output.remove(QLatin1Char('\r'));
     outputWindow->append(output);
-
 
     // set user default to admin if specified
 
@@ -586,9 +584,9 @@ bool FossilClient::synchronousPull(const QString &workingDir, const QString &src
     args << vcsCommandString(PullCommand) << remoteLocation << extraOptions;
     // Disable UNIX terminals to suppress SSH prompting
     const unsigned flags =
-            VCSBase::VCSBasePlugin::SshPasswordPrompt
-            | VCSBase::VCSBasePlugin::ShowStdOutInLogWindow
-            | VCSBase::VCSBasePlugin::ShowSuccessMessage;
+            VcsBase::VcsBasePlugin::SshPasswordPrompt
+            | VcsBase::VcsBasePlugin::ShowStdOutInLogWindow
+            | VcsBase::VcsBasePlugin::ShowSuccessMessage;
     const Utils::SynchronousProcessResponse resp = vcsSynchronousExec(workingDir, args, flags);
     const bool success = (resp.result == Utils::SynchronousProcessResponse::Finished);
     if (success)
@@ -609,9 +607,9 @@ bool FossilClient::synchronousPush(const QString &workingDir, const QString &dst
     args << vcsCommandString(PushCommand) << remoteLocation << extraOptions;
     // Disable UNIX terminals to suppress SSH prompting
     const unsigned flags =
-            VCSBase::VCSBasePlugin::SshPasswordPrompt
-            | VCSBase::VCSBasePlugin::ShowStdOutInLogWindow
-            | VCSBase::VCSBasePlugin::ShowSuccessMessage;
+            VcsBase::VcsBasePlugin::SshPasswordPrompt
+            | VcsBase::VcsBasePlugin::ShowStdOutInLogWindow
+            | VcsBase::VcsBasePlugin::ShowSuccessMessage;
     const Utils::SynchronousProcessResponse resp = vcsSynchronousExec(workingDir, args, flags);
     return (resp.result == Utils::SynchronousProcessResponse::Finished);
 }
@@ -619,7 +617,7 @@ bool FossilClient::synchronousPush(const QString &workingDir, const QString &dst
 void FossilClient::commit(const QString &repositoryRoot, const QStringList &files,
                           const QString &commitMessageFile, const QStringList &extraOptions)
 {
-    VCSBaseClient::commit(repositoryRoot, files, commitMessageFile,
+    VcsBaseClient::commit(repositoryRoot, files, commitMessageFile,
                           QStringList(extraOptions) << QLatin1String("-M") << commitMessageFile);
 }
 
@@ -633,25 +631,26 @@ void FossilClient::annotate(const QString &workingDir, const QString &file,
 
     Q_UNUSED(lineNumber)
     QString vcsCmdString = vcsCommandString(AnnotateCommand);
-    const QString kind = vcsEditorKind(AnnotateCommand);
-    const QString id = VCSBase::VCSBaseEditorWidget::getSource(workingDir, QStringList(file));
+    const Core::Id kind = vcsEditorKind(AnnotateCommand);
+    const QString id = VcsBase::VcsBaseEditorWidget::getSource(workingDir, QStringList(file));
     const QString title = vcsEditorTitle(vcsCmdString, id);
-    const QString source = VCSBase::VCSBaseEditorWidget::getSource(workingDir, file);
+    const QString source = VcsBase::VcsBaseEditorWidget::getSource(workingDir, file);
 
-    VCSBase::VCSBaseEditorWidget *editor = createVCSEditor(kind, title, source, true,
+    VcsBase::VcsBaseEditorWidget *editor = createVcsEditor(kind, title, source, true,
                                                            vcsCmdString.toLatin1().constData(), id);
 
-    VCSBase::VCSBaseEditorParameterWidget *paramWidget =
-            createAnnotateEditor(workingDir,file, revision, lineNumber, extraOptions);
-    if (paramWidget != 0)
+    VcsBase::VcsBaseEditorParameterWidget *paramWidget = editor->configurationWidget();
+    if (!paramWidget && (paramWidget = createAnnotateEditor(workingDir, file, revision, lineNumber, extraOptions))) {
+        // editor has been just created, createVcsEditor() didn't set a configuration widget yet
         editor->setConfigurationWidget(paramWidget);
+    }
 
-    VCSBase::Command *cmd = createCommand(workingDir, editor);
+    VcsBase::Command *cmd = createCommand(workingDir, editor);
     cmd->setCookie(lineNumber);
 
     // here we introduce a "|BLAME|" meta-option to allow both annotate and blame modes
     QRegExp blameMetaOptionRx = QRegExp(QLatin1String("\\|BLAME\\|"));
-    Q_ASSERT(blameMetaOptionRx.isValid());
+    QTC_ASSERT(blameMetaOptionRx.isValid(), return);
     QStringList paramArgs = paramWidget != 0 ? paramWidget->arguments() : QStringList();
 
     int foundAt = paramArgs.indexOf(blameMetaOptionRx);
@@ -672,18 +671,28 @@ QString FossilClient::findTopLevelForFile(const QFileInfo &file) const
     const QString repositoryCheckFile =
             QLatin1String(Constants::FOSSILREPO);
     return file.isDir() ?
-                VCSBase::VCSBasePlugin::findRepositoryForDirectory(file.absoluteFilePath(),
+                VcsBase::VcsBasePlugin::findRepositoryForDirectory(file.absoluteFilePath(),
                                                                    repositoryCheckFile) :
-                VCSBase::VCSBasePlugin::findRepositoryForDirectory(file.absolutePath(),
+                VcsBase::VcsBasePlugin::findRepositoryForDirectory(file.absolutePath(),
                                                                    repositoryCheckFile);
 }
 
-unsigned int FossilClient::binaryVersion()
+bool FossilClient::managesFile(const QString &workingDirectory, const QString &fileName) const
+{
+    QStringList args(QLatin1String("finfo"));
+    args << fileName;
+    QByteArray stdOut;
+    if (!vcsFullySynchronousExec(workingDirectory, args, &stdOut))
+        return false;
+    return !stdOut.startsWith("no history for file");
+}
+
+unsigned int FossilClient::binaryVersion() const
 {
     static unsigned int cachedBinaryVersion = 0;
     static QString cachedBinaryPath;
 
-    const QString currentBinaryPath = settings()->stringValue(FossilSettings::binaryPathKey);
+    const QString currentBinaryPath = settings()->binaryPath();
 
     if (currentBinaryPath.isEmpty())
         return 0;
@@ -702,7 +711,7 @@ unsigned int FossilClient::binaryVersion()
     return cachedBinaryVersion;
 }
 
-QString FossilClient::binaryVersionString()
+QString FossilClient::binaryVersionString() const
 {
     const unsigned int version = binaryVersion();
 
@@ -712,7 +721,7 @@ QString FossilClient::binaryVersionString()
     return makeVersionString(version);
 }
 
-FossilClient::SupportedFeatures FossilClient::supportedFeatures()
+FossilClient::SupportedFeatures FossilClient::supportedFeatures() const
 {
     // use for legacy client support to test for feature presence
     // e.g. supportedFeatures().testFlag(TimelineWidthFeature)
@@ -743,11 +752,13 @@ void FossilClient::view(const QString &source, const QString &id, const QStringL
          << QLatin1String("-v")
          << extraOptions;
 
-    const QString kind = vcsEditorKind(DiffCommand);
+    const Core::Id kind = vcsEditorKind(DiffCommand);
     const QString title = vcsEditorTitle(vcsCommandString(DiffCommand), id);
 
-    VCSBase::VCSBaseEditorWidget *editor = createVCSEditor(kind, title, source,
+    VcsBase::VcsBaseEditorWidget *editor = createVcsEditor(kind, title, source,
                                                            true, "view", id);
+    editor->setWorkingDirectory(workingDirectory);
+
     enqueueJob(createCommand(workingDirectory, editor), args);
 }
 
@@ -767,8 +778,8 @@ FossilLogHighlighter::FossilLogHighlighter(QTextDocument * parent) :
     m_revisionIdRx(QLatin1String(Constants::CHANGESET_ID)),
     m_dateRx(QLatin1String("([0-9]{4}-[0-9]{2}-[0-9]{2})"))
 {
-    Q_ASSERT(m_revisionIdRx.isValid());
-    Q_ASSERT(m_dateRx.isValid());
+    QTC_CHECK(m_revisionIdRx.isValid());
+    QTC_CHECK(m_dateRx.isValid());
 }
 
 void FossilLogHighlighter::highlightBlock(const QString &text)
@@ -803,17 +814,19 @@ void FossilClient::logRepository(const QString &workingDir, const QStringList &e
     const QStringList files;
 
     const QString vcsCmdString = QLatin1String("timeline");
-    const QString kind = vcsEditorKind(LogCommand);
-    const QString id = VCSBase::VCSBaseEditorWidget::getTitleId(workingDir, files);
+    const Core::Id kind = vcsEditorKind(LogCommand);
+    const QString id = VcsBase::VcsBaseEditorWidget::getTitleId(workingDir, files);
     const QString title = vcsEditorTitle(vcsCmdString, id);
-    const QString source = VCSBase::VCSBaseEditorWidget::getSource(workingDir, files);
+    const QString source = VcsBase::VcsBaseEditorWidget::getSource(workingDir, files);
 
-    VCSBase::VCSBaseEditorWidget *editor = createVCSEditor(kind, title, source, true,
+    VcsBase::VcsBaseEditorWidget *editor = createVcsEditor(kind, title, source, true,
                                                            vcsCmdString.toLatin1().constData(), id);
 
-    VCSBase::VCSBaseEditorParameterWidget *paramWidget = createLogRepositoryEditor(workingDir, files, extraOptions);
-    if (paramWidget != 0)
+    VcsBase::VcsBaseEditorParameterWidget *paramWidget = editor->configurationWidget();
+    if (!paramWidget && (paramWidget = createLogRepositoryEditor(workingDir, files, extraOptions))) {
+        // editor has been just created, createVcsEditor() didn't set a configuration widget yet
         editor->setConfigurationWidget(paramWidget);
+    }
 
     //@TODO: move highlighter and widgets to fossil editor sources.
 
@@ -837,7 +850,7 @@ void FossilClient::revertFile(const QString &workingDir,
     args << extraOptions << file;
 
     // Indicate file list
-    VCSBase::Command *cmd = createCommand(workingDir);
+    VcsBase::Command *cmd = createCommand(workingDir);
     cmd->setCookie(QStringList(workingDir + QLatin1Char('/') + file));
     connect(cmd, SIGNAL(success(QVariant)), this, SIGNAL(changed(QVariant)), Qt::QueuedConnection);
     enqueueJob(cmd, args);
@@ -863,13 +876,13 @@ void FossilClient::revertAll(const QString &workingDir, const QString &revision,
     }
 
     // Indicate repository change
-    VCSBase::Command *cmd = createCommand(workingDir);
+    VcsBase::Command *cmd = createCommand(workingDir);
     cmd->setCookie(QStringList(workingDir));
     connect(cmd, SIGNAL(success(QVariant)), this, SIGNAL(changed(QVariant)), Qt::QueuedConnection);
     enqueueJob(createCommand(workingDir), args);
 }
 
-QString FossilClient::vcsCommandString(VCSCommand cmd) const
+QString FossilClient::vcsCommandString(VcsCommand cmd) const
 {
     // override specific client commands
     // otherwise return baseclient command
@@ -879,21 +892,21 @@ QString FossilClient::vcsCommandString(VCSCommand cmd) const
     case MoveCommand: return QLatin1String("mv");
     case LogCommand: return QLatin1String("finfo");
 
-    default: return VCSBaseClient::vcsCommandString(cmd);
+    default: return VcsBaseClient::vcsCommandString(cmd);
     }
 }
 
-QString FossilClient::vcsEditorKind(VCSCommand cmd) const
+Core::Id FossilClient::vcsEditorKind(VcsCommand cmd) const
 {
-    switch(cmd) {
+    switch (cmd) {
     case AnnotateCommand:
-        return QLatin1String(Constants::ANNOTATELOG);
+        return Constants::ANNOTATELOG;
     case DiffCommand:
-        return QLatin1String(Constants::DIFFLOG);
+        return Constants::DIFFLOG;
     case LogCommand:
-        return QLatin1String(Constants::FILELOG);
+        return Constants::FILELOG;
     default:
-        return QString();
+        return Core::Id();
     }
 }
 
@@ -985,13 +998,13 @@ struct FossilCommandParameters
 };
 
 // Parameter widget controlling whitespace diff mode, associated with a parameter
-class FossilDiffParameterWidget : public VCSBase::VCSBaseEditorParameterWidget
+class FossilDiffParameterWidget : public VcsBase::VcsBaseEditorParameterWidget
 {
     Q_OBJECT
 public:
     FossilDiffParameterWidget(FossilClient *client,
                               const FossilCommandParameters &p, QWidget *parent = 0) :
-        VCSBase::VCSBaseEditorParameterWidget(parent), m_client(client), m_params(p)
+        VcsBase::VcsBaseEditorParameterWidget(parent), m_client(client), m_params(p)
     {
         // NOTE: fossil diff does not support whitespace ignore option, may be next revisions
 //        mapSetting(addToggleButton(QLatin1String("-w"), tr("Ignore whitespace")),
@@ -1001,7 +1014,7 @@ public:
     QStringList arguments() const
     {
         // pass args to Fossil verbatim
-        return VCSBaseEditorParameterWidget::arguments();
+        return VcsBaseEditorParameterWidget::arguments();
     }
 
     void executeCommand()
@@ -1014,7 +1027,7 @@ private:
     const FossilCommandParameters m_params;
 };
 
-VCSBase::VCSBaseEditorParameterWidget *FossilClient::createDiffEditor(
+VcsBase::VcsBaseEditorParameterWidget *FossilClient::createDiffEditor(
     const QString &workingDir, const QStringList &files, const QStringList &extraOptions)
 {
     const FossilCommandParameters parameters(workingDir, files, extraOptions);
@@ -1023,13 +1036,13 @@ VCSBase::VCSBaseEditorParameterWidget *FossilClient::createDiffEditor(
 
 
 // Parameter widget controlling annotate/blame mode
-class FossilAnnotateParameterWidget : public VCSBase::VCSBaseEditorParameterWidget
+class FossilAnnotateParameterWidget : public VcsBase::VcsBaseEditorParameterWidget
 {
     Q_OBJECT
 public:
     FossilAnnotateParameterWidget(FossilClient *client,
                               const FossilCommandParameters &p, QWidget *parent = 0) :
-        VCSBase::VCSBaseEditorParameterWidget(parent), m_client(client), m_params(p)
+        VcsBase::VcsBaseEditorParameterWidget(parent), m_client(client), m_params(p)
     {
         FossilSettings *settings = m_client->settings();
         FossilClient::SupportedFeatures features = m_client->supportedFeatures();
@@ -1043,7 +1056,7 @@ public:
     QStringList arguments() const
     {
         // pass args to Fossil verbatim
-        return VCSBaseEditorParameterWidget::arguments();
+        return VcsBaseEditorParameterWidget::arguments();
     }
 
     void executeCommand()
@@ -1060,7 +1073,7 @@ private:
     const FossilCommandParameters m_params;
 };
 
-VCSBase::VCSBaseEditorParameterWidget *FossilClient::createAnnotateEditor(
+VcsBase::VcsBaseEditorParameterWidget *FossilClient::createAnnotateEditor(
         const QString &workingDir,
         const QString &file,
         const QString &revision,
@@ -1072,13 +1085,14 @@ VCSBase::VCSBaseEditorParameterWidget *FossilClient::createAnnotateEditor(
     return new FossilAnnotateParameterWidget(this, parameters);
 }
 
-class FossilLogParameterWidget : public VCSBase::VCSBaseEditorParameterWidget
+
+class FossilLogParameterWidget : public VcsBase::VcsBaseEditorParameterWidget
 {
     Q_OBJECT
 public:
     FossilLogParameterWidget(FossilClient *client,
                              const FossilCommandParameters &p, QWidget *parent = 0) :
-        VCSBase::VCSBaseEditorParameterWidget(parent), m_client(client), m_params(p)
+        VcsBase::VcsBaseEditorParameterWidget(parent), m_client(client), m_params(p)
     {
     }
 
@@ -1092,24 +1106,22 @@ private:
     const FossilCommandParameters m_params;
 };
 
-VCSBase::VCSBaseEditorParameterWidget *FossilClient::createLogEditor(
+VcsBase::VcsBaseEditorParameterWidget *FossilClient::createLogEditor(
     const QString &workingDir, const QStringList &files, const QStringList &extraOptions)
 {
     const FossilCommandParameters parameters(workingDir, files, extraOptions);
     return new FossilLogParameterWidget(this, parameters);
 }
 
-class FossilLogRepositoryParameterWidget : public VCSBase::VCSBaseEditorParameterWidget
+
+class FossilLogRepositoryParameterWidget : public VcsBase::VcsBaseEditorParameterWidget
 {
     Q_OBJECT
 public:
     FossilLogRepositoryParameterWidget(FossilClient *client,
                              const FossilCommandParameters &p, QWidget *parent = 0) :
-        VCSBase::VCSBaseEditorParameterWidget(parent), m_client(client), m_params(p)
+        VcsBase::VcsBaseEditorParameterWidget(parent), m_client(client), m_params(p)
     {
-        // setup space-separated mapping to result in: "option value"
-        setComboBoxOptionTemplate(QStringList() << QLatin1String("%{option}") << QLatin1String("%{value}"));
-
         // ancestors/descendants filter
         // This is a positional argument not an option.
         // Normally it takes the checkin/branch/tag as an additional parameter
@@ -1118,10 +1130,10 @@ public:
         // then parse it out in arguments.
         // All-choice is a blank argument with no additional parameters
         QList<ComboBoxItem> lineageFilterChoices;
-        lineageFilterChoices << ComboBoxItem(tr("Ancestors"), QLatin1String("|LINEAGE|ancestors|current"))
-                        << ComboBoxItem(tr("Descendants"), QLatin1String("|LINEAGE|descendants|current"))
-                        << ComboBoxItem(tr("Unfiltered"), QLatin1String("|LINEAGE|"));
-        mapSetting(addComboBox(QLatin1String("|META-OPTION"), lineageFilterChoices),
+        lineageFilterChoices << ComboBoxItem(tr("Ancestors"), QLatin1String("ancestors"))
+                        << ComboBoxItem(tr("Descendants"), QLatin1String("descendants"))
+                        << ComboBoxItem(tr("Unfiltered"), QLatin1String(""));
+        mapSetting(addComboBox(QStringList(QLatin1String("|LINEAGE|%1|current")), lineageFilterChoices),
                    m_client->settings()->stringPointer(FossilSettings::timelineLineageFilterKey));
 
         // show files
@@ -1137,23 +1149,30 @@ public:
                         << ComboBoxItem(tr("Tags"), QLatin1String("g"))
                         << ComboBoxItem(tr("Tickets"), QLatin1String("t"))
                         << ComboBoxItem(tr("Wiki Commits"), QLatin1String("w"));
-        mapSetting(addComboBox(QLatin1String("-t"), itemTypeChoices),
+
+        // here we setup the ComboBox to map to the "-t <val>", which will produce
+        // the enquoted option-values (e.g "-t all").
+        // Fossil expects separate arguments for option and value ( i.e. "-t" "all")
+        // so we need to handle the splitting explicitly in arguments().
+        mapSetting(addComboBox(QStringList(QLatin1String("-t %1")), itemTypeChoices),
                    m_client->settings()->stringPointer(FossilSettings::timelineItemTypeKey));
     }
 
     QStringList arguments() const
     {
         const QChar pipeChar(QLatin1Char('|'));
+        const QChar spaceChar(QLatin1Char(' '));
         QStringList args;
 
-        foreach (const QString &arg, VCSBaseEditorParameterWidget::arguments()) {
-            if (arg.startsWith(pipeChar)){
-                // meta-option: "|META-OPTION" "|OPT|val|extra1|..."
+        // split "-t val" => "-t" "val"
+        foreach (const QString &arg, VcsBaseEditorParameterWidget::arguments()) {
+            if (arg.startsWith(QLatin1String("-t"))) {
+                args << arg.split(spaceChar);
+
+            } else if (arg.startsWith(pipeChar)){
+                // meta-option: "|OPT|val|extra1|..."
                 QStringList params = arg.split(pipeChar);
                 QString option = params[1];
-                if (option == QLatin1String("META-OPTION"))
-                    continue; // skip
-
                 for (int i = 2; i < params.size(); ++i) {
                     if (option == QLatin1String("LINEAGE") && params[i].isEmpty()) {
                         // empty lineage filter == Unfiltered
@@ -1180,7 +1199,7 @@ private:
     const FossilCommandParameters m_params;
 };
 
-VCSBase::VCSBaseEditorParameterWidget *FossilClient::createLogRepositoryEditor(
+VcsBase::VcsBaseEditorParameterWidget *FossilClient::createLogRepositoryEditor(
     const QString &workingDir, const QStringList &files, const QStringList &extraOptions)
 {
     const FossilCommandParameters parameters(workingDir, files, extraOptions);

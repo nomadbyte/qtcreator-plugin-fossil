@@ -33,13 +33,13 @@
 #include <utils/pathchooser.h>
 #include <vcsbase/vcsbaseconstants.h>
 
-#include <QtCore/QTextStream>
+#include <QTextStream>
 
 using namespace Fossil::Internal;
 using namespace Fossil;
 
-OptionsPageWidget::OptionsPageWidget(QWidget *parent) :
-    QWidget(parent)
+OptionsPageWidget::OptionsPageWidget(QWidget *parent)
+    : QWidget(parent)
 {
     m_ui.setupUi(this);
     m_ui.commandChooser->setExpectedKind(Utils::PathChooser::ExistingCommand);
@@ -53,14 +53,13 @@ OptionsPageWidget::OptionsPageWidget(QWidget *parent) :
 FossilSettings OptionsPageWidget::settings() const
 {
     FossilSettings s = FossilPlugin::instance()->settings();
-    s.setValue(FossilSettings::binaryPathKey, m_ui.commandChooser->path());
+    s.setValue(FossilSettings::binaryPathKey, m_ui.commandChooser->rawPath());
     s.setValue(FossilSettings::defaultRepoPathKey, m_ui.defaultRepoPathChooser->path());
     s.setValue(FossilSettings::userNameKey, m_ui.defaultUsernameLineEdit->text().trimmed());
     s.setValue(FossilSettings::sslIdentityFileKey, m_ui.sslIdentityFilePathChooser->path());
     s.setValue(FossilSettings::logCountKey, m_ui.logEntriesCount->value());
     s.setValue(FossilSettings::timelineWidthKey, m_ui.logEntriesWidth->value());
     s.setValue(FossilSettings::timeoutKey, m_ui.timeout->value());
-    s.setValue(FossilSettings::promptOnSubmitKey, m_ui.promptOnSubmitCheckBox->isChecked());
     s.setValue(FossilSettings::disableAutosyncKey, m_ui.disableAutosyncCheckBox->isChecked());
     return s;
 }
@@ -74,7 +73,6 @@ void OptionsPageWidget::setSettings(const FossilSettings &s)
     m_ui.logEntriesCount->setValue(s.intValue(FossilSettings::logCountKey));
     m_ui.logEntriesWidth->setValue(s.intValue(FossilSettings::timelineWidthKey));
     m_ui.timeout->setValue(s.intValue(FossilSettings::timeoutKey));
-    m_ui.promptOnSubmitCheckBox->setChecked(s.boolValue(FossilSettings::promptOnSubmitKey));
     m_ui.disableAutosyncCheckBox->setChecked(s.boolValue(FossilSettings::disableAutosyncKey));
 }
 
@@ -93,7 +91,6 @@ QString OptionsPageWidget::searchKeywords() const
             << sep << m_ui.miscGroupBox->title()
             << sep << m_ui.showLogEntriesLabel->text()
             << sep << m_ui.timeoutSecondsLabel->text()
-            << sep << m_ui.promptOnSubmitCheckBox->text()
             << sep << m_ui.disableAutosyncCheckBox->text()
                ;
     rc.remove(QLatin1Char('&'));
@@ -102,16 +99,8 @@ QString OptionsPageWidget::searchKeywords() const
 
 OptionsPage::OptionsPage()
 {
-}
-
-QString OptionsPage::id() const
-{
-    return QLatin1String(Constants::VCS_ID_FOSSIL);
-}
-
-QString OptionsPage::displayName() const
-{
-    return tr("Fossil");
+    setId(Constants::VCS_ID_FOSSIL);
+    setDisplayName(tr("Fossil"));
 }
 
 QWidget *OptionsPage::createPage(QWidget *parent)
@@ -133,7 +122,7 @@ void OptionsPage::apply()
     if (newSettings != plugin->settings()) {
         //assume success and emit signal that settings are changed;
         plugin->setSettings(newSettings);
-        newSettings.writeSettings(Core::ICore::instance()->settings());
+        newSettings.writeSettings(Core::ICore::settings());
         emit settingsChanged();
     }
 }

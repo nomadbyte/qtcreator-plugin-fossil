@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>283</width>
-    <height>166</height>
+    <width>367</width>
+    <height>137</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -69,23 +69,23 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="QCheckBox" name="includePrivateCheckBox">
-        <property name="toolTip">
-         <string>Allow transfer of private branches.</string>
-        </property>
-        <property name="text">
-         <string>Include private branches</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0" colspan="2">
+      <item row="4" column="0">
        <widget class="QCheckBox" name="disableAutosyncCheckBox">
         <property name="toolTip">
          <string>Disable automatic pull/push of local changes to the remote repository.</string>
         </property>
         <property name="text">
          <string>Disable auto-sync</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QCheckBox" name="includePrivateCheckBox">
+        <property name="toolTip">
+         <string>Allow transfer of private branches.</string>
+        </property>
+        <property name="text">
+         <string>Include private branches</string>
         </property>
        </widget>
       </item>

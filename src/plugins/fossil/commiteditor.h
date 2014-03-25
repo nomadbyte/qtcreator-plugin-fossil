@@ -30,7 +30,7 @@
 #include <vcsbase/vcsbaseclient.h>
 #include <vcsbase/vcsbasesubmiteditor.h>
 
-namespace VCSBase {
+namespace VcsBase {
 class SubmitFileModel;
 }
 
@@ -40,23 +40,22 @@ namespace Internal {
 class BranchInfo;
 class FossilCommitWidget;
 
-class CommitEditor : public VCSBase::VCSBaseSubmitEditor
+class CommitEditor : public VcsBase::VcsBaseSubmitEditor
 {
     Q_OBJECT
 
 public:
-    explicit CommitEditor(const VCSBase::VCSBaseSubmitEditorParameters *parameters,
+    explicit CommitEditor(const VcsBase::VcsBaseSubmitEditorParameters *parameters,
                           QWidget *parent);
 
     void setFields(const QString &repositoryRoot, const BranchInfo &branch,
                    const QStringList &tags, const QString &userName,
-                   const QList<VCSBase::VCSBaseClient::StatusItem> &repoStatus);
+                   const QList<VcsBase::VcsBaseClient::StatusItem> &repoStatus);
 
-    const FossilCommitWidget *commitWidget() const;
+    FossilCommitWidget *commitWidget();
 
 private:
-    FossilCommitWidget *commitWidget();
-    VCSBase::SubmitFileModel *m_fileModel;
+    VcsBase::SubmitFileModel *m_fileModel;
 };
 
 }

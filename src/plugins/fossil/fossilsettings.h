@@ -29,13 +29,13 @@
 
 #include <vcsbase/vcsbaseclientsettings.h>
 
-#include <QtCore/QDebug>
+#include <QDebug>
 
 
 namespace Fossil {
 namespace Internal {
 
-class FossilSettings : public VCSBase::VCSBaseClientSettings
+class FossilSettings : public VcsBase::VcsBaseClientSettings
 {
 public:
     static const QLatin1String defaultRepoPathKey;

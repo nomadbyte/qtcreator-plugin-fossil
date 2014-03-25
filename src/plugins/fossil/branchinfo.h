@@ -27,8 +27,8 @@
 #ifndef BRANCHINFO_H
 #define BRANCHINFO_H
 
-#include <QtCore/QString>
-#include <QtCore/QDebug>
+#include <QString>
+#include <QDebug>
 
 namespace Fossil {
 namespace Internal {

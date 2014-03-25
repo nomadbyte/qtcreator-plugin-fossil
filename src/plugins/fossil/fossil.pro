@@ -1,7 +1,6 @@
-TARGET = Fossil
-TEMPLATE = lib
+PROVIDER = Nomadbyte
+
 include(../../qtcreatorplugin.pri)
-include(fossil_dependencies.pri)
 SOURCES += \
     fossilclient.cpp \
     fossilcontrol.cpp \

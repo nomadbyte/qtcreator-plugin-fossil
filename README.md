@@ -52,7 +52,8 @@ Installation
 - Copy these files to location of the installed `Qt Creator` instance
 - On _Linux_:
 
-        sudo cp $QTC_BUILD_DIR/lib/qtcreator/plugins/Nokia/*Fossil*  $QTC_INSTALL_DIR/lib/qtcreator/plugins/Nokia/
+        sudo mkdir $QTC_INSTALL_DIR/lib/qtcreator/plugins/Nomadbyte
+        sudo cp $QTC_BUILD_DIR/lib/qtcreator/plugins/Nomadbyte/*Fossil*  $QTC_INSTALL_DIR/lib/qtcreator/plugins/Nomadbyte/
 
 - Optionally install the updated documentation
 

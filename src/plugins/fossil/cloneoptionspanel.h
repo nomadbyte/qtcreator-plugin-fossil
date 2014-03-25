@@ -27,7 +27,7 @@
 #ifndef CLONEOPTIONSPANEL_H
 #define CLONEOPTIONSPANEL_H
 
-#include <QtGui/QWidget>
+#include <QWidget>
 
 namespace Fossil {
 namespace Internal {

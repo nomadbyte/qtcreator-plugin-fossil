@@ -31,12 +31,14 @@
 #include <texteditor/fontsettings.h>
 #include <texteditor/texteditorconstants.h>
 
-#include <QtGui/QSyntaxHighlighter>
-#include <QtGui/QTextEdit>
+#include <utils/qtcassert.h>
 
-#include <QtCore/QDebug>
-#include <QtCore/QRegExp>
-#include <QtCore/QDir>
+#include <QSyntaxHighlighter>
+#include <QTextEdit>
+
+#include <QDebug>
+#include <QRegExp>
+#include <QDir>
 
 //TODO: Check to see when the Highlighter has been moved to a base class and use that instead
 
@@ -47,7 +49,7 @@ namespace Internal {
 static QTextCharFormat commentFormat()
 {
     const TextEditor::FontSettings settings = TextEditor::TextEditorSettings::instance()->fontSettings();
-    return settings.toTextCharFormat(QLatin1String(TextEditor::Constants::C_COMMENT));
+    return settings.toTextCharFormat(TextEditor::C_COMMENT);
 }
 
 // Highlighter for Fossil submit messages.
@@ -68,7 +70,7 @@ FossilSubmitHighlighter::FossilSubmitHighlighter(QTextEdit * parent) :
     m_commentFormat(commentFormat()),
     m_keywordRx(QLatin1String("\\[([0-9a-f]{5,40})\\]"))
 {
-    Q_ASSERT(m_keywordRx.isValid());
+    QTC_CHECK(m_keywordRx.isValid());
 }
 
 void FossilSubmitHighlighter::highlightBlock(const QString &text)
@@ -93,7 +95,7 @@ void FossilSubmitHighlighter::highlightBlock(const QString &text)
 
 
 FossilCommitWidget::FossilCommitWidget(QWidget *parent) :
-    Utils::SubmitEditorWidget(parent),
+    VcsBase::SubmitEditorWidget(parent),
     m_spaceChar(QLatin1Char(' ')),
     m_commaChar(QLatin1Char(',')),
     m_tagsSeparator(QString(m_commaChar).append(m_spaceChar)),
@@ -162,7 +164,7 @@ bool FossilCommitWidget::canSubmit() const
     if (m_commitPanelUi.invalidBranchLabel->isVisible() || message.isEmpty())
         return false;
 
-    return Utils::SubmitEditorWidget::canSubmit();
+    return VcsBase::SubmitEditorWidget::canSubmit();
 }
 
 void FossilCommitWidget::branchChanged()

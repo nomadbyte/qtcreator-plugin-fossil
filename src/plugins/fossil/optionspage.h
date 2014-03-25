@@ -31,8 +31,8 @@
 
 #include <vcsbase/vcsbaseoptionspage.h>
 
-#include <QtGui/QWidget>
-#include <QtCore/QPointer>
+#include <QWidget>
+#include <QPointer>
 
 namespace Fossil {
 namespace Internal {
@@ -55,14 +55,12 @@ private:
 };
 
 
-class OptionsPage : public VCSBase::VCSBaseOptionsPage
+class OptionsPage : public VcsBase::VcsBaseOptionsPage
 {
     Q_OBJECT
 
 public:
     OptionsPage();
-    QString id() const;
-    QString displayName() const;
 
     QWidget *createPage(QWidget *parent);
     void apply();

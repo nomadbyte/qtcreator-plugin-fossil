@@ -48,9 +48,10 @@ public:
     explicit FossilControl(FossilClient *fossilClient);
 
     QString displayName() const;
-    QString id() const;
+    Core::Id id() const;
 
     bool managesDirectory(const QString &filename, QString *topLevel = 0) const;
+    bool managesFile(const QString &workingDirectory, const QString &fileName) const;
     bool isConfigured() const;
     bool supportsOperation(Operation operation) const;
     bool vcsOpen(const QString &fileName);
@@ -60,14 +61,11 @@ public:
     bool vcsCreateRepository(const QString &directory);
     bool vcsCheckout(const QString &directory, const QByteArray &url);
     QString vcsGetRepositoryURL(const QString &directory);
-    QString vcsCreateSnapshot(const QString &topLevel);
-    QStringList vcsSnapshots(const QString &topLevel);
-    bool vcsRestoreSnapshot(const QString &topLevel, const QString &name);
-    bool vcsRemoveSnapshot(const QString &topLevel, const QString &name);
     bool vcsAnnotate(const QString &file, int line);
+    QString vcsTopic(const QString &directory);
 
 public slots:
-    // To be connected to the VCSTask's success signal to emit the repository/
+    // To be connected to the VcsTask's success signal to emit the repository/
     // files changed signals according to the variant's type:
     // String -> repository, StringList -> files
     void changed(const QVariant &);

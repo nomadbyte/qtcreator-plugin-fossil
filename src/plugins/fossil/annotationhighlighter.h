@@ -28,12 +28,12 @@
 #define ANNOTATIONHIGHLIGHTER_H
 
 #include <vcsbase/baseannotationhighlighter.h>
-#include <QtCore/QRegExp>
+#include <QRegExp>
 
 namespace Fossil {
 namespace Internal {
 
-class FossilAnnotationHighlighter : public VCSBase::BaseAnnotationHighlighter
+class FossilAnnotationHighlighter : public VcsBase::BaseAnnotationHighlighter
 {
 public:
     explicit FossilAnnotationHighlighter(const ChangeNumbers &changeNumbers,

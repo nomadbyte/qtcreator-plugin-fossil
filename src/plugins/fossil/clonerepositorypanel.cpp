@@ -26,13 +26,12 @@
 
 #include "clonerepositorypanel.h"
 #include "ui_clonerepositorypanel.h"
+
 #include "constants.h"
 #include "fossilplugin.h"
 #include "fossilclient.h"
 #include "fossilcontrol.h"
 #include "fossilsettings.h"
-
-#include <QtCore/QtDebug>
 
 namespace Fossil {
 namespace Internal {

@@ -27,7 +27,7 @@
 #ifndef CONFIGUREDIALOG_H
 #define CONFIGUREDIALOG_H
 
-#include <QtGui/QDialog>
+#include <QDialog>
 
 namespace Fossil {
 namespace Internal {

@@ -27,87 +27,81 @@
 #ifndef FOSSILCONSTANTS_H
 #define FOSSILCONSTANTS_H
 
-#include <QtCore/QtGlobal>
+#include <QtGlobal>
 
 namespace Fossil {
 namespace Constants {
 
-const char * const VCS_ID_FOSSIL = "I.Fossil";
+const char VCS_ID_FOSSIL[] = "I.Fossil";
 
-const char * const FOSSIL = "fossil";
-#if defined(Q_OS_WIN32) || defined(Q_OS_CYGWIN)
-const char * const FOSSILREPO = "_FOSSIL_";
+const char FOSSIL[] = "fossil";
+#if defined(Q_OS_WIN) || defined(Q_OS_CYGWIN)
+const char FOSSILREPO[] = "_FOSSIL_";
 #else
-const char * const FOSSILREPO = ".fslckout";
+const char FOSSILREPO[] = ".fslckout";
 #endif
-const char * const FOSSILDEFAULT = "fossil";
+const char FOSSILDEFAULT[] = "fossil";
 
-const char * const FOSSIL_FILE_SUFFIX = ".fossil";
-const char * const FOSSIL_FILE_FILTER = "Fossil Repositories (*.fossil *.fsl);;All Files (*)";
+const char FOSSIL_FILE_SUFFIX[] = ".fossil";
+const char FOSSIL_FILE_FILTER[] = "Fossil Repositories (*.fossil *.fsl);;All Files (*)";
 
 //changeset identifiers
-const char * const CHANGESET_ID = "([0-9a-f]{5,40})"; // match and capture
-const char * const CHANGESET_ID_EXACT = "[0-9a-f]{5,40}"; // match
+const char CHANGESET_ID[] = "([0-9a-f]{5,40})"; // match and capture
+const char CHANGESET_ID_EXACT[] = "[0-9a-f]{5,40}"; // match
 
 //diff chunk identifiers
-const char * const DIFFFILE_ID_EXACT = "[+]{3} (.*)\\s*";  // match and capture
+const char DIFFFILE_ID_EXACT[] = "[+]{3} (.*)\\s*";  // match and capture
 
 //BaseEditorParameters
-const char * const COMMANDLOG_ID = "Fossil Command Log Editor";
-const char * const COMMANDLOG_DISPLAY_NAME = QT_TRANSLATE_NOOP("VCS", "Fossil Command Log Editor");
-const char * const COMMANDLOG = "Fossil Command Log Editor";
-const char * const COMMANDAPP = "application/vnd.nokia.text.scs_fossil_commandlog";
-const char * const COMMANDEXT = "vcsFossilCommand";
+const char FILELOG_ID[] = "Fossil File Log Editor";
+const char FILELOG_DISPLAY_NAME[] = QT_TRANSLATE_NOOP("VCS", "Fossil File Log Editor");
+const char FILELOG[] = "Fossil File Log Editor";
+const char LOGAPP[] = "text/vnd.qtcreator.fossil.log";
+const char LOGEXT[] = "vcsFossilLog";
 
-const char * const FILELOG_ID = "Fossil File Log Editor";
-const char * const FILELOG_DISPLAY_NAME = QT_TRANSLATE_NOOP("VCS", "Fossil File Log Editor");
-const char * const FILELOG = "Fossil File Log Editor";
-const char * const LOGAPP = "application/vnd.nokia.text.scs_fossil_log";
-const char * const LOGEXT = "vcsFossilLog";
+const char ANNOTATELOG_ID[] = "Fossil Annotation Editor";
+const char ANNOTATELOG_DISPLAY_NAME[] = QT_TRANSLATE_NOOP("VCS", "Fossil Annotation Editor");
+const char ANNOTATELOG[] = "Fossil Annotation Editor";
+const char ANNOTATEAPP[] = "text/vnd.qtcreator.fossil.annotation";
+const char ANNOTATEEXT[] = "vcsFossilAnnotate";
 
-const char * const ANNOTATELOG_ID = "Fossil Annotation Editor";
-const char * const ANNOTATELOG_DISPLAY_NAME = QT_TRANSLATE_NOOP("VCS", "Fossil Annotation Editor");
-const char * const ANNOTATELOG = "Fossil Annotation Editor";
-const char * const ANNOTATEAPP = "application/vnd.nokia.text.scs_fossil_annotatelog";
-const char * const ANNOTATEEXT = "vcsFossilAnnotate";
-
-const char * const DIFFLOG_ID = "Fossil Diff Editor";
-const char * const DIFFLOG_DISPLAY_NAME = QT_TRANSLATE_NOOP("VCS", "Fossil Diff Editor");
-const char * const DIFFLOG = "Fossil Diff Editor";
-const char * const DIFFAPP = "text/x-patch";
-const char * const DIFFEXT = "diff";
+const char DIFFLOG_ID[] = "Fossil Diff Editor";
+const char DIFFLOG_DISPLAY_NAME[] = QT_TRANSLATE_NOOP("VCS", "Fossil Diff Editor");
+const char DIFFLOG[] = "Fossil Diff Editor";
+const char DIFFAPP[] = "text/x-patch";
+const char DIFFEXT[] = "diff";
 
 //SubmitEditorParameters
-const char * const COMMIT_ID = "Fossil Commit Log Editor";
-const char * const COMMIT_DISPLAY_NAME = QT_TRANSLATE_NOOP("VCS", "Fossil Commit Log Editor");
-const char * const COMMITMIMETYPE = "application/vnd.nokia.text.scs_fossil_commitlog";
+const char COMMIT_ID[] = "Fossil Commit Log Editor";
+const char COMMIT_DISPLAY_NAME[] = QT_TRANSLATE_NOOP("VCS", "Fossil Commit Log Editor");
+const char COMMITMIMETYPE[] = "text/vnd.qtcreator.fossil.commit";
 
 //menu items
 //File menu actions
-const char * const ADD = "Fossil.AddSingleFile";
-const char * const DELETE = "Fossil.DeleteSingleFile";
-const char * const ANNOTATE = "Fossil.Annotate";
-const char * const DIFF = "Fossil.DiffSingleFile";
-const char * const LOG = "Fossil.LogSingleFile";
-const char * const REVERT = "Fossil.RevertSingleFile";
-const char * const STATUS = "Fossil.Status";
+const char ADD[] = "Fossil.AddSingleFile";
+const char DELETE[] = "Fossil.DeleteSingleFile";
+const char ANNOTATE[] = "Fossil.Annotate";
+const char DIFF[] = "Fossil.DiffSingleFile";
+const char LOG[] = "Fossil.LogSingleFile";
+const char REVERT[] = "Fossil.RevertSingleFile";
+const char STATUS[] = "Fossil.Status";
 
 //directory menu Actions
-const char * const DIFFMULTI = "Fossil.Action.DiffMulti";
-const char * const REVERTMULTI = "Fossil.Action.RevertAll";
-const char * const STATUSMULTI = "Fossil.Action.StatusMulti";
-const char * const LOGMULTI = "Fossil.Action.LogMulti";
+const char DIFFMULTI[] = "Fossil.Action.DiffMulti";
+const char REVERTMULTI[] = "Fossil.Action.RevertAll";
+const char STATUSMULTI[] = "Fossil.Action.StatusMulti";
+const char LOGMULTI[] = "Fossil.Action.LogMulti";
 
 //repository menu actions
-const char * const PULL = "Fossil.Action.Pull";
-const char * const PUSH = "Fossil.Action.Push";
-const char * const UPDATE = "Fossil.Action.Update";
-const char * const COMMIT = "Fossil.Action.Commit";
-const char * const CONFIGURE_REPOSITORY = "Fossil.Action.Settings";
-const char * const CREATE_REPOSITORY = "Fossil.Action.CreateRepository";
+const char PULL[] = "Fossil.Action.Pull";
+const char PUSH[] = "Fossil.Action.Push";
+const char UPDATE[] = "Fossil.Action.Update";
+const char COMMIT[] = "Fossil.Action.Commit";
+const char CONFIGURE_REPOSITORY[] = "Fossil.Action.Settings";
+const char CREATE_REPOSITORY[] = "Fossil.Action.CreateRepository";
 
 //submit editor actions
-const char * const DIFFEDITOR = "Fossil.Action.Editor.Diff";
+const char DIFFEDITOR[] = "Fossil.Action.Editor.Diff";
 
 } // namespace Constants
 } // namespace Fossil

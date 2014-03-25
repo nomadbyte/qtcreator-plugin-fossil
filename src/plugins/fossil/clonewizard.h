@@ -28,30 +28,22 @@
 #define CLONEWIZARD_H
 
 #include <vcsbase/basecheckoutwizard.h>
-
-#include <QtGui/QIcon>
+#include <vcsbase/command.h>
 
 namespace Fossil {
 namespace Internal {
 
-class CloneWizard : public VCSBase::BaseCheckoutWizard
+class CloneWizard : public VcsBase::BaseCheckoutWizard
 {
     Q_OBJECT
 
 public:
-    CloneWizard(QObject *parent = 0);
-
-    QIcon icon() const;
-    QString description() const;
-    QString displayName() const;
+    CloneWizard();
 
 protected:
     QList<QWizardPage *> createParameterPages(const QString &path);
-    QSharedPointer<VCSBase::AbstractCheckoutJob> createJob(const QList<QWizardPage *> &parameterPages,
-                                                           QString *checkoutPath);
-
-private:
-    const QIcon m_icon;
+    VcsBase::Command *createCommand(const QList<QWizardPage *> &parameterPages,
+                                    QString *checkoutPath);
 };
 
 } // namespace Internal

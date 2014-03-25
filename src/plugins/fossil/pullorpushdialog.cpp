@@ -29,6 +29,9 @@
 
 #include "constants.h"
 
+#include <utils/qtcassert.h>
+
+
 using namespace Fossil::Internal;
 
 PullOrPushDialog::PullOrPushDialog(Mode mode, QWidget *parent) :

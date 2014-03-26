@@ -36,6 +36,7 @@ SUBDIRS   = \
     pythoneditor \
     mercurial \
     bazaar \
+    fossil \
     classview \
     tasklist \
     analyzerbase \

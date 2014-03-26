@@ -27,6 +27,7 @@ Project {
         "diffeditor/diffeditor.qbs",
         "fakevim/fakevim.qbs",
         "find/find.qbs",
+        "fossil/fossil.qbs",
         "genericprojectmanager/genericprojectmanager.qbs",
         "git/git.qbs",
         "glsleditor/glsleditor.qbs",

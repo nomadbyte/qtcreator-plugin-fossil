@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Fossil::Internal::CloneRepositoryPanel</class>
+ <widget class="QWidget" name="Fossil::Internal::CloneRepositoryPanel">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>367</width>
+    <height>219</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string notr="true"/>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QGroupBox" name="repositoryGroupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>Local Repository</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QRadioButton" name="cloneRepoButton">
+        <property name="text">
+         <string>Clone into a new fossil file</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="cloneRepoGroup">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <layout class="QFormLayout" name="cloneRepoLayout">
+         <property name="fieldGrowthPolicy">
+          <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+         </property>
+         <property name="leftMargin">
+          <number>20</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="QLabel" name="cloneRepoNameLabel">
+           <property name="toolTip">
+            <string>Base name of a new local fossil file to clone into.</string>
+           </property>
+           <property name="text">
+            <string>Name:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="cloneRepoNameLineEdit">
+           <property name="toolTip">
+            <string>Base name of a new local fossil file to clone into.</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="checkoutRepoButton">
+        <property name="text">
+         <string>Check out from an existing fossil file</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="checkoutRepoGroup">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <layout class="QFormLayout" name="checkoutRepoLayout">
+         <property name="leftMargin">
+          <number>20</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="QLabel" name="checkoutRepoFileLabel">
+           <property name="toolTip">
+            <string>Path of an exisiting local fossil file to check out from.</string>
+           </property>
+           <property name="text">
+            <string>File:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="Utils::PathChooser" name="checkoutRepoFilePathChooser" native="true">
+           <property name="toolTip">
+            <string>Path of an exisiting local fossil file to check out from.</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <layout class="QFormLayout" name="branchLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="branchLabel">
+          <property name="toolTip">
+           <string>Checkout branch.</string>
+          </property>
+          <property name="text">
+           <string>Branch:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="branchLineEdit">
+          <property name="toolTip">
+           <string>Checkout branch.</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>4</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Utils::PathChooser</class>
+   <extends>QWidget</extends>
+   <header location="global">utils/pathchooser.h</header>
+   <container>1</container>
+   <slots>
+    <signal>editingFinished()</signal>
+    <signal>browsingFinished()</signal>
+   </slots>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

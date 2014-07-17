@@ -43,14 +43,15 @@ class FossilSettings;
 class FossilClient : public VcsBase::VcsBaseClient
 {
     Q_OBJECT
-
 public:
     enum SupportedFeature {
         AnnotateBlameFeature = 0x2,
         TimelineWidthFeature = 0x4,
+        DiffIgnoreWhiteSpaceFeature = 0x8,
         AllSupportedFeatures =  // | all defined features
             AnnotateBlameFeature
             | TimelineWidthFeature
+            | DiffIgnoreWhiteSpaceFeature
     };
     Q_DECLARE_FLAGS(SupportedFeatures, SupportedFeature)
 
@@ -74,6 +75,7 @@ public:
     QString synchronousUserDefaultQuery(const QString &workingDirectory);
     bool synchronousSetUserDefault(const QString &workingDirectory, const QString &userName);
     QString synchronousGetRepositoryURL(const QString &workingDirectory);
+    QString synchronousTopic(const QString &workingDirectory);
     bool synchronousCreateRepository(const QString &workingDirectory,
                                      const QStringList &extraOptions = QStringList());
     bool synchronousMove(const QString &workingDir,

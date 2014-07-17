@@ -38,6 +38,7 @@
 
 #include <QSyntaxHighlighter>
 
+#include <QDateTime>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -488,6 +489,38 @@ QString FossilClient::synchronousGetRepositoryURL(const QString &workingDirector
     return output;
 }
 
+struct TopicData
+{
+    QDateTime timeStamp;
+    QString topic;
+};
+
+QString FossilClient::synchronousTopic(const QString &workingDirectory)
+{
+    static QMap<QString, TopicData> topicCache;
+
+    if (workingDirectory.isEmpty())
+        return QString();
+
+    // return current branch name
+
+    const QString topLevel = findTopLevelForFile(workingDirectory);
+    QFileInfo currentStateFile(topLevel + QLatin1String("/")
+                               + QLatin1String(Constants::FOSSILREPO));
+
+    TopicData &data = topicCache[workingDirectory];
+    QDateTime lastModified = currentStateFile.lastModified();
+    if (lastModified == data.timeStamp)
+        return data.topic;
+    data.timeStamp = lastModified;
+
+    BranchInfo branchInfo = synchronousBranchQuery(workingDirectory);
+    if (branchInfo.name().isEmpty())
+        return QString();
+
+    return data.topic = branchInfo.name();
+}
+
 bool FossilClient::synchronousCreateRepository(const QString &workingDirectory, const QStringList &extraOptions)
 {
     VcsBase::VcsBaseOutputWindow *outputWindow = VcsBase::VcsBaseOutputWindow::instance();
@@ -730,6 +763,8 @@ FossilClient::SupportedFeatures FossilClient::supportedFeatures() const
 
     const unsigned int version = binaryVersion();
 
+    if (version < makeVersionNumber(1,29,0))
+        features &= ~DiffIgnoreWhiteSpaceFeature;
     if (version < makeVersionNumber(1,28,0)) {
         features &= ~AnnotateBlameFeature;
         features &= ~TimelineWidthFeature;
@@ -1006,9 +1041,14 @@ public:
                               const FossilCommandParameters &p, QWidget *parent = 0) :
         VcsBase::VcsBaseEditorParameterWidget(parent), m_client(client), m_params(p)
     {
-        // NOTE: fossil diff does not support whitespace ignore option, may be next revisions
-//        mapSetting(addToggleButton(QLatin1String("-w"), tr("Ignore whitespace")),
-//                   m_client->settings()->boolPointer(FossilSettings::diffIgnoreWhiteSpaceKey));
+        FossilClient::SupportedFeatures features = m_client->supportedFeatures();
+
+        if (features.testFlag(FossilClient::DiffIgnoreWhiteSpaceFeature)) {
+            mapSetting(addToggleButton(QLatin1String("-w"), tr("Ignore All Whitespace")),
+                       m_client->settings()->boolPointer(FossilSettings::diffIgnoreAllWhiteSpaceKey));
+            mapSetting(addToggleButton(QLatin1String("--strip-trailing-cr"), tr("Strip Trailing CR")),
+                       m_client->settings()->boolPointer(FossilSettings::diffStripTrailingCRKey));
+        }
     }
 
     QStringList arguments() const

@@ -34,7 +34,8 @@ namespace Internal {
 
 const QLatin1String FossilSettings::defaultRepoPathKey("defaultRepoPath");
 const QLatin1String FossilSettings::sslIdentityFileKey("sslIdentityFile");
-const QLatin1String FossilSettings::diffIgnoreWhiteSpaceKey("diffIgnoreWhiteSpace");
+const QLatin1String FossilSettings::diffIgnoreAllWhiteSpaceKey("diffIgnoreAllWhiteSpace");
+const QLatin1String FossilSettings::diffStripTrailingCRKey("diffStripTrailingCR");
 const QLatin1String FossilSettings::annotateShowCommittersKey("annotateShowCommitters");
 const QLatin1String FossilSettings::timelineWidthKey("timelineWidth");
 const QLatin1String FossilSettings::timelineLineageFilterKey("timelineLineageFilter");
@@ -49,7 +50,8 @@ FossilSettings::FossilSettings()
     declareKey(binaryPathKey, QLatin1String(Constants::FOSSILDEFAULT));
     declareKey(defaultRepoPathKey, QLatin1String(""));
     declareKey(sslIdentityFileKey, QLatin1String(""));
-    declareKey(diffIgnoreWhiteSpaceKey, false);
+    declareKey(diffIgnoreAllWhiteSpaceKey, false);
+    declareKey(diffStripTrailingCRKey, false);
     declareKey(annotateShowCommittersKey, false);
     declareKey(timelineWidthKey, 0);
     declareKey(timelineLineageFilterKey, QLatin1String(""));

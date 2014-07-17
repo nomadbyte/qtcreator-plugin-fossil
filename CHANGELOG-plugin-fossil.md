@@ -1,6 +1,15 @@
 qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
 =================================
 
+## 3.0.1_2 - 2014-07-17
+
+- client min. version `fossil 1.29`
+- Show current branch name indicator appended to the opened project name
+
+- __FIXED__:`Diff` has no ignore white-space option. `fossil` client currently
+  does not support this (see `fossil help diff`).
+
+
 ## 3.0.1_1 - 2014-03-25
 
 - Adapted to updated `Qt Creator 3.0.1` VcsBase framework

@@ -150,9 +150,7 @@ bool FossilControl::vcsAnnotate(const QString &file, int line)
 
 QString FossilControl::vcsTopic(const QString &directory)
 {
-    // @TODO::return current branch name
-    Q_UNUSED(directory);
-    return QString();
+    return m_client->synchronousTopic(directory);
 }
 
 bool FossilControl::vcsCheckout(const QString &directory, const QByteArray &url)

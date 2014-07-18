@@ -40,7 +40,8 @@ class FossilSettings : public VcsBase::VcsBaseClientSettings
 public:
     static const QLatin1String defaultRepoPathKey;
     static const QLatin1String sslIdentityFileKey;
-    static const QLatin1String diffIgnoreWhiteSpaceKey;
+    static const QLatin1String diffIgnoreAllWhiteSpaceKey;
+    static const QLatin1String diffStripTrailingCRKey;
     static const QLatin1String annotateShowCommittersKey;
     static const QLatin1String timelineWidthKey;
     static const QLatin1String timelineLineageFilterKey;

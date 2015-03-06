@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2014, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2015, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -302,7 +302,7 @@ void FossilPlugin::logCurrentFile()
                                           .arg(settings().intValue(FossilSettings::logCountKey));
 
     // annotate only supported for current revision, so disable context menu
-    m_client->log(state.currentFileTopLevel(), QStringList(state.relativeCurrentFile()),
+    m_client->logCurrentFile(state.currentFileTopLevel(), QStringList(state.relativeCurrentFile()),
                   extraOptions, false);
 }
 
@@ -383,7 +383,7 @@ void FossilPlugin::logRepository()
         extraOptions << QLatin1String("-W") << QString(QLatin1String("%1"))
                                                     .arg(settings().intValue(FossilSettings::timelineWidthKey));
 
-    m_client->logRepository(state.topLevel(), extraOptions);
+    m_client->log(state.topLevel(), QStringList(), extraOptions);
 }
 
 void FossilPlugin::revertAll()

@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2014, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2015, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -48,10 +48,12 @@ public:
         AnnotateBlameFeature = 0x2,
         TimelineWidthFeature = 0x4,
         DiffIgnoreWhiteSpaceFeature = 0x8,
+        TimelinePathFeature = 0x10,
         AllSupportedFeatures =  // | all defined features
             AnnotateBlameFeature
             | TimelineWidthFeature
             | DiffIgnoreWhiteSpaceFeature
+            | TimelinePathFeature
     };
     Q_DECLARE_FLAGS(SupportedFeatures, SupportedFeature)
 
@@ -94,7 +96,12 @@ public:
                   const QStringList &extraOptions = QStringList());
     void view(const QString &source, const QString &id,
               const QStringList &extraOptions = QStringList());
-    void logRepository(const QString &workingDir, const QStringList &extraOptions = QStringList());
+    void log(const QString &workingDir, const QStringList &files = QStringList(),
+             const QStringList &extraOptions = QStringList(),
+             bool enableAnnotationContextMenu = false);
+    void logCurrentFile(const QString &workingDir, const QStringList &files = QStringList(),
+                        const QStringList &extraOptions = QStringList(),
+                        bool enableAnnotationContextMenu = false);
     void revertFile(const QString &workingDir, const QString &file,
                     const QString &revision = QString(),
                     const QStringList &extraOptions = QStringList());
@@ -110,6 +117,7 @@ protected:
     QString vcsCommandString(VcsCommand cmd) const;
     Core::Id vcsEditorKind(VcsCommand cmd) const;
     QStringList revisionSpec(const QString &revision) const;
+    StatusItem parseStatusLine(const QString &line) const;
     VcsBase::VcsBaseEditorParameterWidget *createDiffEditor(const QString &workingDir,
                                                             const QStringList &files,
                                                             const QStringList &extraOptions);
@@ -118,13 +126,12 @@ protected:
                                                                 const QString &revision,
                                                                 int lineNumber,
                                                                 const QStringList &extraOptions);
+    VcsBase::VcsBaseEditorParameterWidget *createLogCurrentFileEditor(const QString &workingDir,
+                                                                      const QStringList &files,
+                                                                      const QStringList &extraOptions);
     VcsBase::VcsBaseEditorParameterWidget *createLogEditor(const QString &workingDir,
                                                            const QStringList &files,
                                                            const QStringList &extraOptions);
-    VcsBase::VcsBaseEditorParameterWidget *createLogRepositoryEditor(const QString &workingDir,
-                                                                     const QStringList &files,
-                                                                     const QStringList &extraOptions);
-    StatusItem parseStatusLine(const QString &line) const;
 
 private:
     friend class CloneWizard;

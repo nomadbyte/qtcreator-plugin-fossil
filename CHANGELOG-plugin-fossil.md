@@ -1,6 +1,22 @@
 qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
 =================================
 
+## 2.4.1_4 - 2015-04-20
+
+- client min. version `fossil 1.30`
+- Consistent timeline view both for repository and for current file (thanks to
+  `fossil timeline --path` option added in v1.30); falling back to `finfo`
+  with legacy client versions.
+- Apply custom syntax highlighter to timeline view
+
+- __FIXED__:`Diff` has no ignore white-space option. `fossil` client currently
+  does not support this (see `fossil help diff`).
+- __FIXED__:`Timeline Current File` shows complete timeline with file's changes
+  from all branches, not only the current branch. `fossil` client currently has
+  no facility to subset a file's timeline by branch and starting time
+  (see `fossil help finfo`).
+
+
 ## 2.4.1_3 - 2014-02-19
 
 - client min. version `fossil 1.28`

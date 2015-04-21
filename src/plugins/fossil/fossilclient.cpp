@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2014, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2015, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -721,6 +721,10 @@ FossilClient::SupportedFeatures FossilClient::supportedFeatures()
 
     const unsigned int version = binaryVersion();
 
+    if (version < makeVersionNumber(1,30,0))
+        features &= ~TimelinePathFeature;
+    if (version < makeVersionNumber(1,29,0))
+        features &= ~DiffIgnoreWhiteSpaceFeature;
     if (version < makeVersionNumber(1,28,0)) {
         features &= ~AnnotateBlameFeature;
         features &= ~TimelineWidthFeature;
@@ -798,26 +802,76 @@ void FossilLogHighlighter::highlightBlock(const QString &text)
     }
 }
 
-void FossilClient::logRepository(const QString &workingDir, const QStringList &extraOptions)
+void FossilClient::log(const QString &workingDir, const QStringList &files,
+                       const QStringList &extraOptions,
+                       bool enableAnnotationContextMenu)
 {
-    const QStringList files;
+    // Show timeline for both repository and a file or path (--path <file-or-path>)
+    // When used for log repository, the files list is empty
 
-    const QString vcsCmdString = QLatin1String("timeline");
+    // LEGACY:fallback to log current file with legacy clients
+    SupportedFeatures features = supportedFeatures();
+    if (!files.isEmpty()
+        && !features.testFlag(TimelinePathFeature)) {
+        logCurrentFile(workingDir, files, extraOptions, enableAnnotationContextMenu);
+        return;
+    }
+
+    const QString vcsCmdString = vcsCommandString(LogCommand);
     const QString kind = vcsEditorKind(LogCommand);
     const QString id = VCSBase::VCSBaseEditorWidget::getTitleId(workingDir, files);
     const QString title = vcsEditorTitle(vcsCmdString, id);
     const QString source = VCSBase::VCSBaseEditorWidget::getSource(workingDir, files);
-
     VCSBase::VCSBaseEditorWidget *editor = createVCSEditor(kind, title, source, true,
                                                            vcsCmdString.toLatin1().constData(), id);
+    editor->setFileLogAnnotateEnabled(enableAnnotationContextMenu);
 
-    VCSBase::VCSBaseEditorParameterWidget *paramWidget = createLogRepositoryEditor(workingDir, files, extraOptions);
+    VCSBase::VCSBaseEditorParameterWidget *paramWidget = createLogEditor(workingDir, files, extraOptions);
     if (paramWidget != 0)
         editor->setConfigurationWidget(paramWidget);
 
     //@TODO: move highlighter and widgets to fossil editor sources.
 
-    //new FossilLogHighlighter(editor->document());
+    new FossilLogHighlighter(editor->document());
+
+    QStringList args;
+    const QStringList paramArgs = paramWidget != 0 ? paramWidget->arguments() : QStringList();
+    args << vcsCmdString << extraOptions << paramArgs;
+    if (!files.isEmpty())
+         args << QLatin1String("--path") << files;
+    enqueueJob(createCommand(workingDir, editor), args);
+}
+
+void FossilClient::logCurrentFile(const QString &workingDir, const QStringList &files,
+                                  const QStringList &extraOptions,
+                                  bool enableAnnotationContextMenu)
+{
+    // Show commit history for the given file/file-revision
+    // NOTE: 'fossil finfo' shows full history from all branches.
+
+    // With newer clients, 'fossil timeline' can handle both repository and file
+    SupportedFeatures features = supportedFeatures();
+    if (features.testFlag(TimelinePathFeature)) {
+        log(workingDir, files, extraOptions, enableAnnotationContextMenu);
+        return;
+    }
+
+    const QString vcsCmdString = QLatin1String("finfo");
+    const QString kind = vcsEditorKind(LogCommand);
+    const QString id = VCSBase::VCSBaseEditorWidget::getTitleId(workingDir, files);
+    const QString title = vcsEditorTitle(vcsCmdString, id);
+    const QString source = VCSBase::VCSBaseEditorWidget::getSource(workingDir, files);
+    VCSBase::VCSBaseEditorWidget *editor = createVCSEditor(kind, title, source, true,
+                                                           vcsCmdString.toLatin1().constData(), id);
+    editor->setFileLogAnnotateEnabled(enableAnnotationContextMenu);
+
+    VCSBase::VCSBaseEditorParameterWidget *paramWidget = createLogCurrentFileEditor(workingDir, files, extraOptions);
+    if (paramWidget != 0)
+        editor->setConfigurationWidget(paramWidget);
+
+    //@TODO: move highlighter and widgets to fossil editor sources.
+
+    new FossilLogHighlighter(editor->document());
 
     QStringList args;
     const QStringList paramArgs = paramWidget != 0 ? paramWidget->arguments() : QStringList();
@@ -877,7 +931,7 @@ QString FossilClient::vcsCommandString(VCSCommand cmd) const
     switch (cmd) {
     case RemoveCommand: return QLatin1String("rm");
     case MoveCommand: return QLatin1String("mv");
-    case LogCommand: return QLatin1String("finfo");
+    case LogCommand: return QLatin1String("timeline");
 
     default: return VCSBaseClient::vcsCommandString(cmd);
     }
@@ -993,9 +1047,14 @@ public:
                               const FossilCommandParameters &p, QWidget *parent = 0) :
         VCSBase::VCSBaseEditorParameterWidget(parent), m_client(client), m_params(p)
     {
-        // NOTE: fossil diff does not support whitespace ignore option, may be next revisions
-//        mapSetting(addToggleButton(QLatin1String("-w"), tr("Ignore whitespace")),
-//                   m_client->settings()->boolPointer(FossilSettings::diffIgnoreWhiteSpaceKey));
+        FossilClient::SupportedFeatures features = m_client->supportedFeatures();
+
+        if (features.testFlag(FossilClient::DiffIgnoreWhiteSpaceFeature)) {
+            mapSetting(addToggleButton(QLatin1String("-w"), tr("Ignore All Whitespace")),
+                       m_client->settings()->boolPointer(FossilSettings::diffIgnoreAllWhiteSpaceKey));
+            mapSetting(addToggleButton(QLatin1String("--strip-trailing-cr"), tr("Strip Trailing CR")),
+                       m_client->settings()->boolPointer(FossilSettings::diffStripTrailingCRKey));
+        }
     }
 
     QStringList arguments() const
@@ -1072,11 +1131,11 @@ VCSBase::VCSBaseEditorParameterWidget *FossilClient::createAnnotateEditor(
     return new FossilAnnotateParameterWidget(this, parameters);
 }
 
-class FossilLogParameterWidget : public VCSBase::VCSBaseEditorParameterWidget
+class FossilLogCurrentFileParameterWidget : public VCSBase::VCSBaseEditorParameterWidget
 {
     Q_OBJECT
 public:
-    FossilLogParameterWidget(FossilClient *client,
+    FossilLogCurrentFileParameterWidget(FossilClient *client,
                              const FossilCommandParameters &p, QWidget *parent = 0) :
         VCSBase::VCSBaseEditorParameterWidget(parent), m_client(client), m_params(p)
     {
@@ -1084,7 +1143,7 @@ public:
 
     void executeCommand()
     {
-        m_client->log(m_params.workingDir, m_params.files, m_params.extraOptions);
+        m_client->logCurrentFile(m_params.workingDir, m_params.files, m_params.extraOptions);
     }
 
 private:
@@ -1092,18 +1151,23 @@ private:
     const FossilCommandParameters m_params;
 };
 
-VCSBase::VCSBaseEditorParameterWidget *FossilClient::createLogEditor(
+VCSBase::VCSBaseEditorParameterWidget *FossilClient::createLogCurrentFileEditor(
     const QString &workingDir, const QStringList &files, const QStringList &extraOptions)
 {
+    SupportedFeatures features = supportedFeatures();
+
+    if (features.testFlag(TimelinePathFeature))
+        return createLogEditor(workingDir, files, extraOptions);
+
     const FossilCommandParameters parameters(workingDir, files, extraOptions);
-    return new FossilLogParameterWidget(this, parameters);
+    return new FossilLogCurrentFileParameterWidget(this, parameters);
 }
 
-class FossilLogRepositoryParameterWidget : public VCSBase::VCSBaseEditorParameterWidget
+class FossilLogParameterWidget : public VCSBase::VCSBaseEditorParameterWidget
 {
     Q_OBJECT
 public:
-    FossilLogRepositoryParameterWidget(FossilClient *client,
+    FossilLogParameterWidget(FossilClient *client,
                              const FossilCommandParameters &p, QWidget *parent = 0) :
         VCSBase::VCSBaseEditorParameterWidget(parent), m_client(client), m_params(p)
     {
@@ -1172,7 +1236,7 @@ public:
 
     void executeCommand()
     {
-        m_client->logRepository(m_params.workingDir, m_params.extraOptions);
+        m_client->log(m_params.workingDir, m_params.files, m_params.extraOptions);
     }
 
 private:
@@ -1180,11 +1244,11 @@ private:
     const FossilCommandParameters m_params;
 };
 
-VCSBase::VCSBaseEditorParameterWidget *FossilClient::createLogRepositoryEditor(
+VCSBase::VCSBaseEditorParameterWidget *FossilClient::createLogEditor(
     const QString &workingDir, const QStringList &files, const QStringList &extraOptions)
 {
     const FossilCommandParameters parameters(workingDir, files, extraOptions);
-    return new FossilLogRepositoryParameterWidget(this, parameters);
+    return new FossilLogParameterWidget(this, parameters);
 }
 
 } // namespace Internal

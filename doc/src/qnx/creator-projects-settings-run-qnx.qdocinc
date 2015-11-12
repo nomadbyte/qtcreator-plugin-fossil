@@ -1,0 +1,11 @@
+    \section2 Specifying Run Settings for QNX Devices
+
+    To run and debug an application on a QNX device, you must
+    create connections from the development PC to the device. Click
+    \uicontrol {Manage device configurations} to create a connection. For more
+    information, see \l{Connecting QNX Devices}.
+
+    \image qtcreator-qnx-run-settings.png "Run settings for QNX devices"
+
+    Specifying run settings for QNX Neutrino devices is very similar to
+    \l{Specifying Run Settings for Linux-Based Devices}.

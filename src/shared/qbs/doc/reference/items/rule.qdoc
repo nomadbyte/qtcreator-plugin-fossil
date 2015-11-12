@@ -1,0 +1,185 @@
+/****************************************************************************
+**
+** Copyright (C) 2015 The Qt Company Ltd.
+** Contact: http://www.qt.io/licensing
+**
+** This file is part of the Qt Build Suite.
+**
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms and
+** conditions see http://www.qt.io/terms-conditions. For further information
+** use the contact form at http://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 2.1 or version 3 as published by the Free
+** Software Foundation and appearing in the file LICENSE.LGPLv21 and
+** LICENSE.LGPLv3 included in the packaging of this file.  Please review the
+** following information to ensure the GNU Lesser General Public License
+** requirements will be met: https://www.gnu.org/licenses/lgpl.html and
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, The Qt Company gives you certain additional
+** rights.  These rights are described in The Qt Company LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+****************************************************************************/
+/*!
+    \contentspage list-of-items.html
+    \previouspage qtapplication-item.html
+    \page rule-item.html
+    \nextpage staticlibrary-item.html
+    \ingroup list-of-items
+
+    \title Rule Item
+    \brief Creates transformers for input tags.
+
+    A \e {multiplex rule} creates one \e transformer that takes all
+    input artifacts with the matching input file tag and creates
+    one or more artifacts (e.g. C++ linker).
+    A \e {simplex rule} creates one transformer per matching input file
+    (e.g. C++ compiler).
+    As a real-world example of a simplex rule, here is a simplified version
+    of \QBS' rule for transforming C++ sources into object files using gcc:
+    \code
+    Rule {
+        id: compiler
+        inputs: ['cpp']
+        auxiliaryInputs: ['hpp']
+
+        Artifact {
+            fileTags: ['obj']
+            filePath: '.obj/' + qbs.getHash(input.baseDir) + '/' + input.fileName + '.o'
+        }
+
+        prepare: {
+            var args = [];
+            if (product.moduleProperty('cpp', 'debugInformation'))
+                args.push('-g');
+            var warnings = product.moduleProperty('cpp', 'warningLevel')
+            if (warnings === 'none')
+                args.push('-w');
+            if (warnings === 'all') {
+                args.push('-Wall');
+                args.push('-Wextra');
+            }
+            if (product.moduleProperty('cpp', 'treatWarningsAsErrors'))
+                args.push('-Werror');
+            var includePaths = product.moduleProperties('cpp', 'includePaths');
+            for (i in includePaths)
+                args.push('-I' + includePaths[i]);
+            var defines = product.moduleProperties('cpp', 'defines');
+            for (i in defines)
+                args.push('-D' + defines[i]);
+            args.push('-c');
+            args.push(input.filePath);
+            args.push('-o');
+            args.push(output.filePath);
+            var compilerPath = ModUtils.moduleProperty(product, 'compilerPath');
+            var cmd = new Command(compilerPath, args);
+            cmd.description = 'compiling ' + input.fileName;
+            cmd.highlight = 'compiler';
+            return cmd;
+        }
+    }
+    \endcode
+
+    \section1 Rule Properties
+
+    \table
+    \header
+        \li Property
+        \li Type
+        \li Default
+        \li Description
+    \row
+        \li multiplex
+        \li bool
+        \li false
+        \li Determines whether this is a multiplex rule.
+    \row
+        \li inputs
+        \li string list
+        \li undefined
+        \li File tags the input artifacts must match.
+           All output artifacts will depend on all artifacts in the product with
+           the given input file tags. Also these artifacts are available in the
+           inputs variable of the prepare script.
+    \row
+        \li auxiliaryInputs
+        \li string list
+        \li undefined
+        \li A list of file tags. This rule will be dependent on every other rule and
+            transformer that produces artifacts that are compatible with \a{auxiliaryInputs}.
+            Unlike \a{inputs}, the property \a{auxiliaryInputs} has no effect on the content of the
+            \a{inputs} variable in the \a{prepare} script.
+    \row
+        \li excludedAuxiliaryInputs
+        \li string list
+        \li undefined
+        \li A list of file tags. Connections to rules that produce these file tags are prevented.
+            This property has no effect on the content of the \a{inputs} variable in the \a{prepare}
+            script.
+    \row
+        \li inputsFromDependencies
+        \li string list
+        \li undefined
+        \li File tags the artifacts of product dependencies must match.
+           For example, the product \a foo might appear as follows in the current product:
+           \code
+            Depends {
+                name: "foo"
+            }
+           \endcode
+           All artifacts of \a foo that match the given
+           file tags will appear in the \a inputs variable of the prepare
+           script. Also, each output artifact of this rule will be dependent on
+           those artifacts.
+    \row
+        \li outputArtifacts
+        \li array of objects
+        \li undefined
+        \li An array of output artifacts, specified as JavaScript objects.
+            Example:
+            \code
+            outputArtifacts: [{filePath: "myfile.txt", fileTags: ["foo", "bar"]}]
+            \endcode
+            For a description of the possible properties, see the documentation of the Artifact
+            item.
+            Output artifacts can be specified either by \c{Rule.outputArtifacts} or by \c{Artifact}
+            items. Use \c{Rule.outputArtifacts} if the set of outputs is not fixed but dependent on
+            the input's content.
+            The user may set the property \c{explicitlyDependsOn} on artifact objects, which is
+            similar to \c{Rule.explicitlyDependsOn}.
+    \row
+        \li outputFileTags
+        \li string list
+        \li undefined
+        \li If output artifacts are specified by \c{Rule.outputArtifacts}, then
+            \c{Rule.outputFileTags} must be a list of file tags the rule potentially produces.
+    \row
+        \li condition
+        \li bool
+        \li true
+        \li If true, the rule is enabled, otherwise it does nothing.
+    \row
+        \li explicitlyDependsOn
+        \li string list
+        \li undefined
+        \li Each artifact that matches the file tags in \a explicitlyDependsOn
+           is added to the dependencies of each output node.
+    \row
+        \li prepare
+        \li script
+        \li undefined
+        \li Script that prepares the commands to transform the inputs to outputs.
+            The code in this script is treated as a function with the signature
+            \c{function(project, product, inputs, outputs, input, output)}.
+            The argument \c{input} is \c{undefined} if there's more than one input artifact for this
+            rule. Similarly, \c{output} is only defined if there's exactly one output artifact.
+    \endtable
+
+*/

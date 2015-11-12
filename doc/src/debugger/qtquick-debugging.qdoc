@@ -1,0 +1,240 @@
+/****************************************************************************
+**
+** Copyright (C) 2015 The Qt Company Ltd.
+** Contact: http://www.qt.io/licensing
+**
+** This file is part of Qt Creator
+**
+**
+** GNU Free Documentation License
+**
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of this
+** file.
+**
+**
+****************************************************************************/
+
+// **********************************************************************
+// NOTE: the sections are not ordered by their logical order to avoid
+// reshuffling the file each time the index order changes (i.e., often).
+// Run the fixnavi.pl script to adjust the links to the index order.
+// **********************************************************************
+
+/*!
+    \contentspage {Qt Creator Manual}
+    \previouspage creator-debugging-helpers.html
+    \page creator-debugging-qml.html
+    \nextpage creator-debugging-example.html
+
+    \title Debugging Qt Quick Projects
+
+    \note You need Qt 4.8 or later to debug Qt Quick projects.
+
+    For an example of how to debug Qt Quick Projects, see
+    \l{Debugging a Qt Quick Example Application}.
+
+    \section1 Setting Up QML Debugging
+
+    The process of setting up debugging for Qt Quick projects depends on the
+    \l{Creating Qt Quick Projects}{type of the project}: Qt Quick UI or Qt Quick
+    Application, and the Qt version used.
+
+    To debug Qt Quick UI projects, select the \uicontrol {Enable QML} check box in the
+    \uicontrol {Debugger Settings} in \uicontrol Projects mode \uicontrol {Run Settings}.
+
+    To debug Qt Quick Applications:
+
+        \list 1
+
+        \li Debugging is enabled by default for Qt 4.8, or later. For Qt 4.7,
+            select \uicontrol Projects, and then select the
+            \uicontrol {Enable QML debugging and profiling} check box in the \uicontrol qmake
+            section in \uicontrol {Build Steps}.
+
+            You might have to compile the library first, by selecting the
+            \uicontrol Compile link.
+
+            \image qml-link-debugging-library.png "Build Steps"
+
+            \note Debugging requires opening a socket at a well-known port,
+            which presents a security risk. Anyone on the Internet could connect
+            to the application that you are debugging and execute any JavaScript
+            functions. Therefore, you must make sure that the port is properly
+            protected by a firewall.
+
+        \li In the \uicontrol {Run Settings}, \uicontrol {Debugger Settings} section, select
+            the \uicontrol {Enable QML} check box to enable
+            QML debugging.
+
+        \li Select \uicontrol {Build > Rebuild Project} to clean and rebuild the
+            project.
+
+        \li To debug applications on devices, check that Qt 4.7.4, or later,
+            libraries are installed on the device and
+            \l{Running on Multiple Platforms}{select the corresponding kit for the device}
+            before you start debugging.
+
+    \endlist
+
+    \section1 Mixed C++/QML Debugging
+
+    To debug both the C++ and QML parts of your application at the same time,
+    select the \uicontrol {Enable C++} and \uicontrol {Enable QML} checkboxes for both
+    languages in the \uicontrol {Debugger Settings} section in the project
+    \uicontrol{Run Settings}.
+
+    \image qtquick-debugging-settings.png
+
+    \section1 Starting QML Debugging
+
+    To start the application, choose \uicontrol {Debug > Start Debugging >
+    Start Debugging} or press \key F5. Once the application starts running, it
+    behaves and performs as usual. You can then perform the following tasks:
+
+    \list
+
+        \li Debug JavaScript functions
+
+        \li Execute JavaScript expressions to get information about the state of
+            the application
+
+        \li Change QML code and immediately see the changes at runtime
+
+        \li Inspect QML code and change it temporarily at runtime
+
+    \endlist
+
+    To debug already running applications:
+
+    \list 1
+
+        \li Build the application by using the appropriate configuration
+            parameters (if you build the application with \QC, it automatically
+            uses the correct configuration):
+
+            \list
+
+                \li Qt Quick 1: \c {CONFIG+=declarative_debug}
+
+                \li Qt Quick 2: \c {CONFIG+=qml_debug}
+
+            \endlist
+
+        \li Start the application with the following arguments:
+
+            \c {qmljsdebugger=port:<port>[,host:<ip address>][,block]}
+
+            Where \c port (mandatory) specifies the debugging port,
+            \c {ip address} (optional) specifies the IP address of the host
+            where the application is running, and \c block (optional) prevents
+            the application from running until the debug client connects to the
+            server. This enables debugging from the start.
+
+        \li Select \uicontrol {Debug > Start Debugging > Attach to QML Port}.
+
+            Choose the kit configured for the device where the application to
+            be debugged is running. The port number to use is displayed in the
+            standard output when the application starts.
+
+    \endlist
+
+    \section1 Debugging JavaScript Functions
+
+    You can use the \QC \uicontrol Debug mode to inspect the state of your
+    application while debugging. You can interact with the debugger by:
+
+    \list
+
+        \li \l{Setting Breakpoints}{Setting breakpoints}
+
+        \li \l{Viewing Call Stack Trace}{Viewing call stack trace}
+
+        \li \l{Locals and Expressions}{Viewing locals and expressions}
+
+    \endlist
+
+    \section1 Executing JavaScript Expressions
+
+    When the application is interrupted by a breakpoint, you can use the
+    \uicontrol {QML/JS Console} to execute JavaScript expressions in the current
+    context. To open it, choose \uicontrol Window > \uicontrol {Output Panes}
+    > \uicontrol {QML/JS Console}.
+
+    \image qml-script-console.png "QML/JS Console"
+
+    For more information about using the console, see \l{QML/JS Console}.
+
+    \section1 Applying QML Changes at Runtime
+
+    When you change property values in the \uicontrol {QML/JS Console} or in the
+    \uicontrol {Locals and Expressions} view, they are immediately updated in the running
+    application, but not in the source code.
+
+    \section1 Inspecting Items
+
+    While the application is running, you can use the
+    \uicontrol {Locals and Expressions} view to explore the QML item structure.
+
+    \image qml-observer-view.png "QML item tree"
+
+    To keep the application visible while you interact with the debugger, click
+    \inlineimage qml-inspector-app-on-top.png
+    (\uicontrol {Show Application on Top}).
+
+    You can view a QML item in \uicontrol {Locals and Expressions} in the following
+    ways:
+
+    \list
+
+        \li Expand the item in the object tree.
+
+        \li Select the item in the code editor.
+
+        \li Click
+            \inlineimage qml-inspector-select-button.png
+            (\uicontrol Select) to activate selection mode and then click an item
+            in the running application.
+
+    \endlist
+
+    To change property values temporarily, without editing the source,
+    double-click them and enter the new values. You can view the results in the
+    running application.
+
+    \section1 Inspecting User Interfaces
+
+    When you debug complex applications, you can jump to the position in code
+    where an item is defined or you can zoom into the user interface.
+
+    When the \uicontrol Select tool is enabled, you can click items in the running
+    application to jump to their definitions in the code. The properties of the
+    selected item are displayed in the \uicontrol {Locals and Expressions} view.
+
+    You can also view the item hierarchy in the running application:
+
+    \list
+
+        \li When debugging Qt Quick 1 applications, right-click an item in the
+            running application to view the item hierarchy as a context menu.
+
+            \image qml-observer-context-menu.png "QML item hierarchy"
+
+        \li When debugging Qt Quick 2 applications, double-click an item in the
+            running application to cycle through the item stack at the cursor
+            position.
+
+    \endlist
+
+    To switch to the zoom mode, click the \uicontrol Zoom button. Click in the
+    running application to zoom in. Right-click to open a context menu that
+    contains zoom controls.
+
+    To switch out of the selection or zoom mode, deselect the \uicontrol Select or
+    \uicontrol Zoom button.
+
+    To move the application running in \QQV to the front, select the
+    \uicontrol {Show Application on Top} button.
+
+*/

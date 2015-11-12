@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/texteditor">
+        <file>images/finddocuments.png</file>
+        <file>images/finddirectory.png</file>
+        <file>images/refactormarker.png</file>
+        <file>images/snippet.png</file>
+        <file>images/f1.png</file>
+    </qresource>
+</RCC>

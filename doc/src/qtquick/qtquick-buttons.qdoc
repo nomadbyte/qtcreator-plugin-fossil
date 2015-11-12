@@ -1,0 +1,258 @@
+/****************************************************************************
+**
+** Copyright (C) 2015 The Qt Company Ltd.
+** Contact: http://www.qt.io/licensing
+**
+** This file is part of Qt Creator
+**
+**
+** GNU Free Documentation License
+**
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of this
+** file.
+**
+**
+****************************************************************************/
+
+// **********************************************************************
+// NOTE: the sections are not ordered by their logical order to avoid
+// reshuffling the file each time the index order changes (i.e., often).
+// Run the fixnavi.pl script to adjust the links to the index order.
+// **********************************************************************
+
+/*!
+    \contentspage {Qt Creator Manual}
+    \previouspage quick-components.html
+    \page quick-buttons.html
+    \nextpage quick-scalable-image.html
+
+    \title Creating Buttons
+
+    To create a button component:
+
+    \list 1
+
+        \li Select \uicontrol {File > New File or Project > Qt > QML File > Choose}
+            to create a QML file called Button.qml (for example).
+
+            \note Components are listed in the \uicontrol Library only if the
+            filename begins with a capital letter.
+
+        \li Click \uicontrol {Design} to edit the file in the visual editor.
+
+        \li In the \uicontrol Navigator, click \uicontrol Rectangle to set properties
+            for it.
+
+        \li In the \uicontrol Properties pane, modify the appearance of the button.
+
+        \list a
+
+            \li In the \uicontrol Size field, set the width (\uicontrol W) and height
+                (\uicontrol H) of the button.
+
+            \li In the \uicontrol Color field, select the button color.
+
+            \li In the \uicontrol Radius field, use the slider to set the radius of
+                the rectangle and produce rounded corners for the button.
+
+        \endlist
+
+        \li Drag and drop a \uicontrol {Text} item on top of the \uicontrol Rectangle. This
+            creates a nested item where \uicontrol Rectangle is the parent item
+            of \uicontrol Text. Items are positioned relative to their parents.
+
+        \li In the \uicontrol Properties pane, edit the properties of the \uicontrol Text
+            item.
+
+        \list a
+
+            \li In the \uicontrol Text field, type \b Button.
+
+                You can select the text color in the \uicontrol {Text color} field and the
+                font, size, and style in the
+                \uicontrol Font section.
+
+            \li In the \uicontrol Alignment field, select the center buttons to align
+                the text to the center of the button.
+
+            \li Click \uicontrol {Layout}, and then click the
+                \inlineimage qmldesigner-anchor-fill-screen.png
+                (\uicontrol {Fill to Parent}) button to anchor the text to the whole
+                button area.
+
+        \endlist
+
+        \li Press \key {Ctrl+S} to save the button.
+
+            \image qmldesigner-button.png "Button component"
+
+    \endlist
+
+    To create a graphical button that scales beautifully without using vector
+    graphics, use the \l{BorderImage} type. For more information, see
+    \l{Creating Scalable Buttons and Borders}.
+
+    */
+
+
+/*!
+
+    \contentspage {Qt Creator Manual}
+    \previouspage quick-buttons.html
+    \page quick-scalable-image.html
+    \nextpage quick-screens.html
+
+    \title Creating Scalable Buttons and Borders
+
+    You can use the
+    \l{BorderImage} type to display an image, such as a PNG file, as a border
+    and a background.
+
+    Use two Border Image items and suitable graphics to make it look like the
+    button is pushed down when it is clicked. One of the Border Image items
+    is visible by default. You can specify that it is hidden and the other one
+    becomes visible when the mouse is clicked.
+
+    Add a Mouse Area that covers the whole area and emits the clicked signal
+    (\c {parent.clicked()}) when it detects a mouse click.
+
+    You can add text to the button and set it up as a property. The text can
+    then be initialized from the outside, making the button a reusable UI
+    component. The font size is also available in case the default size is too
+    big. You can scale down the button text and use smooth text rendering for
+    some extra quality.
+
+    \image qmldesigner-borderimage.png "Graphical button"
+
+    To create a graphical button:
+
+    \list 1
+
+        \li Select \uicontrol {File > New File or Project > Qt > QML File > Choose}
+            to create a QML file called Button.qml (for example).
+
+        \li Double-click the file to open it in the code editor.
+
+        \li Replace the \uicontrol Rectangle with an \uicontrol Item, as illustrated by the
+            following code snippet:
+
+            \qml
+            Item {
+
+            }
+            \endqml
+
+        \li Specify properties and set expressions for the \uicontrol Item, as
+            illustrated by the following code snippet:
+
+            \qml
+            Item {
+                property string text: ""
+                property int fontSize: 10
+
+                signal clicked
+
+                width: 60
+                height: 40
+            }
+            \endqml
+
+            You will point to the properties and expression later.
+
+        \li Click \uicontrol {Design} to edit the file in the visual editor.
+
+        \li Drag and drop two \uicontrol {Border Image} items from the \uicontrol Library
+            to the canvas.
+
+        \li Drag and drop a \uicontrol Text item to the canvas.
+
+        \li Drag and drop a \uicontrol {Mouse Area} to the canvas.
+
+        \li In the \uicontrol Navigator, select \uicontrol border_image1 to specify
+            settings for it in the \uicontrol Properties pane:
+
+        \list a
+
+            \li Select \uicontrol {Set Binding} in the menu next to the
+                \uicontrol Visibility check box.
+
+            \li Enter the following expression to specify that the image is
+                visible when the mouse is not pressed down:
+                \c {!mouse_area1.pressed}.
+
+            \li In the \uicontrol Source field, select the image file for the button,
+                for example button_up.png.
+
+            \li  Click \uicontrol {Layout}, and then click the
+                \inlineimage qmldesigner-anchor-fill-screen.png
+                (\uicontrol {Fill to Parent}) button to anchor the border image to the
+                \uicontrol Item.
+
+        \endlist
+
+        \li Select \uicontrol border_image2 to specify similar settings for it:
+
+        \list a
+
+            \li Set the following epression for \uicontrol Visibility, to specify that
+                the image is visible when the mouse is pressed down:
+                \c {mouse_area1.pressed}.
+
+            \li In the \uicontrol Source field, select the image file for the button
+                when it is clicked, for example button_down.png.
+
+            \li Click \uicontrol {Layout}, and then click the
+                \uicontrol {Fill to Parent}
+                button to anchor the border image to the \uicontrol Item.
+
+        \endlist
+
+        \li Select \uicontrol text1 to specify font size and color, and text
+            scaling and rendering:
+
+        \list a
+
+            \li In the \uicontrol Color field, use the color picker to select
+                the font color, or enter a value in the field.
+
+            \li In the \uicontrol Text field, select \uicontrol {Set Binding} and
+                enter a pointer to the \c {text} property that you specified
+                earlier: \c {parent.txt}.
+
+            \li In the \uicontrol Size field, select \uicontrol {Pixels} to specify the font
+                size in pixels. By default, the size is specified in points.
+
+            \li In the \uicontrol Size field, select \uicontrol {Set Expression} and enter a
+                pointer to the \c {fontSize} property that you specified
+                earlier.
+
+            \li Click \uicontrol {Layout}, and then click the
+                \inlineimage qmldesigner-center-in.png "Anchor buttons"
+                (\uicontrol {Set Vertical Anchor} and \uicontrol {Set Horizontal Anchor})
+                buttons to inherit the vertical and horizontal centering from
+                the parent.
+
+            \li Click \uicontrol Advanced to specify scaling for the text in the
+                \uicontrol Scale field.
+
+            \li Select \uicontrol {Set Binding} and enter the following expression:
+                \c {if (!mousearea1.pressed) { 1 } else { 0.95 }}.
+
+                \note You can enter long and complicated expressions also in the
+                code editor.
+
+        \endlist
+
+        \li In the code editor, add to the \c MouseArea a pointer to the
+            \c clicked expression that you added earlier:
+            \c {onClicked: parent.clicked()}.
+
+    \endlist
+
+    \note To test the button, add it to a Qt Quick Application or Qt
+    Quick UI project and run the application.
+
+*/
+

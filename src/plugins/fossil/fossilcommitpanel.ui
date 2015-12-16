@@ -114,7 +114,7 @@
          <string/>
         </property>
         <property name="pixmap">
-         <pixmap resource="../projectexplorer/projectexplorer.qrc">:/projectexplorer/images/compile_error.png</pixmap>
+         <pixmap>:/projectexplorer/images/compile_error.png</pixmap>
         </property>
        </widget>
       </item>
@@ -172,8 +172,6 @@ Private check-ins are not pushed to remote repository by default.</string>
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../projectexplorer/projectexplorer.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

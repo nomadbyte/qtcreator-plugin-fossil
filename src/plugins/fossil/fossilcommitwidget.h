@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2015, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2016, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -50,7 +50,7 @@ class FossilCommitWidget : public VcsBase::SubmitEditorWidget
     Q_OBJECT
 
 public:
-    explicit FossilCommitWidget(QWidget *parent = 0);
+    FossilCommitWidget();
 
     void setFields(const QString &repoPath,
                    const BranchInfo &newBranch, const QStringList &tags, const QString &userName);

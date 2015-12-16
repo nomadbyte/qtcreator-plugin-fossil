@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2015, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2016, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -29,41 +29,21 @@
 
 #include "fossilsettings.h"
 
-#include <vcsbase/vcsbaseclientsettings.h>
 #include <vcsbase/vcsbaseclient.h>
 #include <vcsbase/vcsbaseplugin.h>
 #include <coreplugin/icontext.h>
 
-#include <QFileInfo>
-#include <QHash>
-#include <qglobal.h>
-
 QT_BEGIN_NAMESPACE
 class QAction;
-class QTemporaryFile;
 QT_END_NAMESPACE
 
 namespace Core {
-class ActionManager;
 class ActionContainer;
-class ICore;
+class CommandLocator;
 class Id;
-class IRevisionControl;
-class IEditorFactory;
-class IEditor;
 } // namespace Core
 
-namespace Utils {
-class ParameterAction;
-} // namespace Utils
-
-namespace VcsBase {
-class VcsBaseSubmitEditor;
-}
-
-namespace Locator {
-class CommandLocator;
-}
+namespace Utils { class ParameterAction; }
 
 namespace Fossil {
 namespace Internal {
@@ -71,7 +51,7 @@ namespace Internal {
 class OptionsPage;
 class FossilClient;
 class FossilControl;
-class FossilEditor;
+class FossilEditorWidget;
 
 class FossilPlugin : public VcsBase::VcsBasePlugin
 {
@@ -86,12 +66,10 @@ public:
     static FossilPlugin *instance();
     FossilClient *client() const;
 
-    const FossilSettings &settings() const;
-    void setSettings(const FossilSettings &settings);
-
 private slots:
     // File menu action slots
     void addCurrentFile();
+    void deleteCurrentFile();
     void annotateCurrentFile();
     void diffCurrentFile();
     void logCurrentFile();
@@ -116,12 +94,12 @@ private slots:
     void createRepository();
 
 protected:
-    void updateActions(VcsBase::VcsBasePlugin::ActionState);
-    bool submitEditorAboutToClose();
+    void updateActions(VcsBase::VcsBasePlugin::ActionState) override;
+    bool submitEditorAboutToClose() override;
 
 private:
     // Methods
-    void createMenu();
+    void createMenu(const Core::Context &context);
     void createSubmitEditorActions();
     void createFileActions(const Core::Context &context);
     void createDirectoryActions(const Core::Context &context);
@@ -129,11 +107,10 @@ private:
 
     // Variables
     static FossilPlugin *m_instance;
-    FossilSettings m_settings;
     OptionsPage *m_optionsPage;
     FossilClient *m_client;
 
-    Locator::CommandLocator *m_commandLocator;
+    Core::CommandLocator *m_commandLocator;
     Core::ActionContainer *m_fossilContainer;
 
     QList<QAction *> m_repositoryActionList;
@@ -148,6 +125,8 @@ private:
     Utils::ParameterAction *m_revertFile;
     Utils::ParameterAction *m_statusFile;
 
+    QAction *m_createRepositoryAction;
+
     // Submit editor actions
     QAction *m_editorCommit;
     QAction *m_editorDiff;
@@ -157,6 +136,7 @@ private:
 
     QString m_submitRepository;
     bool m_submitActionTriggered;
+
 
 #ifdef WITH_TESTS
 private slots:

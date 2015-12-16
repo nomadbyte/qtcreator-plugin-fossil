@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2015, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2016, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -30,9 +30,7 @@
 #include <vcsbase/vcsbaseclient.h>
 #include <vcsbase/vcsbasesubmiteditor.h>
 
-namespace VcsBase {
-class SubmitFileModel;
-}
+namespace VcsBase { class SubmitFileModel; }
 
 namespace Fossil {
 namespace Internal {
@@ -45,8 +43,7 @@ class CommitEditor : public VcsBase::VcsBaseSubmitEditor
     Q_OBJECT
 
 public:
-    explicit CommitEditor(const VcsBase::VcsBaseSubmitEditorParameters *parameters,
-                          QWidget *parent);
+    explicit CommitEditor(const VcsBase::VcsBaseSubmitEditorParameters *parameters);
 
     void setFields(const QString &repositoryRoot, const BranchInfo &branch,
                    const QStringList &tags, const QString &userName,

@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2015, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2016, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -33,7 +33,7 @@
 #include <coreplugin/editormanager/editormanager.h>
 #include <utils/qtcassert.h>
 #include <utils/synchronousprocess.h>
-#include <vcsbase/diffhighlighter.h>
+#include <vcsbase/diffandloghighlighter.h>
 
 #include <QRegExp>
 #include <QString>
@@ -46,8 +46,7 @@
 using namespace Fossil::Internal;
 using namespace Fossil;
 
-FossilEditor::FossilEditor(const VcsBase::VcsBaseEditorParameters *type, QWidget *parent)
-    : VcsBase::VcsBaseEditorWidget(type, parent),
+FossilEditorWidget::FossilEditorWidget() :
       m_exactChangesetId(QLatin1String(Constants::CHANGESET_ID_EXACT)),
       m_exactDiffFileId(QLatin1String(Constants::DIFFFILE_ID_EXACT)),
       m_firstChangesetId(QString(QLatin1String("\n%1 ")).arg(QLatin1String(Constants::CHANGESET_ID))),
@@ -58,11 +57,13 @@ FossilEditor::FossilEditor(const VcsBase::VcsBaseEditorParameters *type, QWidget
     QTC_ASSERT(m_firstChangesetId.isValid(), return);
     QTC_ASSERT(m_nextChangesetId.isValid(), return);
 
-    setAnnotateRevisionTextFormat(tr("Annotate %1"));
-    setAnnotatePreviousRevisionTextFormat(tr("Annotate Parent Revision %1"));
+    setAnnotateRevisionTextFormat(tr("&Annotate %1"));
+    setAnnotatePreviousRevisionTextFormat(tr("Annotate &Parent Revision %1"));
 
     setDiffFilePattern(m_exactDiffFileId);
-    setLogEntryPattern(QRegExp(QLatin1String(Constants::CHANGESET_ID)));
+    QRegExp logChangePattern(QLatin1String("^.*\\[([0-9a-f]{5,40})\\]"));
+    QTC_ASSERT(logChangePattern.isValid(), return);
+    setLogEntryPattern(logChangePattern);
 
     //VcsBase::DiffHighlighter *dh = createDiffHighlighter(); // own implementation
     //baseTextDocument()->setSyntaxHighlighter(dh);
@@ -82,7 +83,7 @@ FossilEditor::FossilEditor(const VcsBase::VcsBaseEditorParameters *type, QWidget
 //}
 
 
-QSet<QString> FossilEditor::annotationChanges() const
+QSet<QString> FossilEditorWidget::annotationChanges() const
 {
     QSet<QString> changes;
     const QString txt = toPlainText();
@@ -103,7 +104,7 @@ QSet<QString> FossilEditor::annotationChanges() const
     return changes;
 }
 
-QString FossilEditor::changeUnderCursor(const QTextCursor &cursorIn) const
+QString FossilEditorWidget::changeUnderCursor(const QTextCursor &cursorIn) const
 {
     QTextCursor cursor = cursorIn;
     cursor.select(QTextCursor::WordUnderCursor);
@@ -116,7 +117,7 @@ QString FossilEditor::changeUnderCursor(const QTextCursor &cursorIn) const
 }
 
 
-VcsBase::BaseAnnotationHighlighter *FossilEditor::createAnnotationHighlighter(const QSet<QString> &changes) const
+VcsBase::BaseAnnotationHighlighter *FossilEditorWidget::createAnnotationHighlighter(const QSet<QString> &changes) const
 {
     return new FossilAnnotationHighlighter(changes);
 }

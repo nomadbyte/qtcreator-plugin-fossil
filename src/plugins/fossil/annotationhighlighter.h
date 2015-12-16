@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2015, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2016, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -40,7 +40,7 @@ public:
                                          QTextDocument *document = 0);
 
 private:
-    QString changeNumber(const QString &block) const;
+    QString changeNumber(const QString &block) const override;
     QRegExp m_changeset;
 };
 

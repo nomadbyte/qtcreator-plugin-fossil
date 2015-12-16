@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/fossil" >
-        <file>images/fossil.png</file>
-    </qresource>
-</RCC>

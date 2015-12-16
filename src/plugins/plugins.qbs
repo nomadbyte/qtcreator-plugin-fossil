@@ -9,8 +9,10 @@ Project {
         "autotoolsprojectmanager/autotoolsprojectmanager.qbs",
         "baremetal/baremetal.qbs",
         "bazaar/bazaar.qbs",
+        "beautifier/beautifier.qbs",
         "bineditor/bineditor.qbs",
         "bookmarks/bookmarks.qbs",
+        "clangcodemodel/clangcodemodel.qbs",
         "classview/classview.qbs",
         "clearcase/clearcase.qbs",
         "cmakeprojectmanager/cmakeprojectmanager.qbs",
@@ -26,8 +28,8 @@ Project {
         "designer/designer.qbs",
         "diffeditor/diffeditor.qbs",
         "fakevim/fakevim.qbs",
-        "find/find.qbs",
         "fossil/fossil.qbs",
+        "emacskeys/emacskeys.qbs",
         "genericprojectmanager/genericprojectmanager.qbs",
         "git/git.qbs",
         "glsleditor/glsleditor.qbs",
@@ -35,12 +37,12 @@ Project {
         "help/help.qbs",
         "imageviewer/imageviewer.qbs",
         "ios/ios.qbs",
-        "locator/locator.qbs",
         "macros/macros.qbs",
         "mercurial/mercurial.qbs",
         "perforce/perforce.qbs",
         "projectexplorer/projectexplorer.qbs",
         "qbsprojectmanager/qbsprojectmanager.qbs",
+        "qmakeandroidsupport",
         "pythoneditor/pythoneditor.qbs",
 //        "qmldesigner/qmldesigner.qbs",
         "qmljseditor/qmljseditor.qbs",
@@ -59,6 +61,7 @@ Project {
         "updateinfo/updateinfo.qbs",
         "valgrind/valgrind.qbs",
         "vcsbase/vcsbase.qbs",
-        "welcome/welcome.qbs"
+        "welcome/welcome.qbs",
+        "winrt/winrt.qbs"
     ].concat(project.additionalPlugins)
 }

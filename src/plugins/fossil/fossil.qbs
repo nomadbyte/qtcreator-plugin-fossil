@@ -1,42 +1,27 @@
-import qbs.base 1.0
-
-import QtcPlugin
+import qbs 1.0
 
 QtcPlugin {
     name: "Fossil"
-    provider: "Nomadbyte"
 
     Depends { name: "Qt.widgets" }
+    Depends { name: "Utils" }
+
     Depends { name: "Core" }
     Depends { name: "TextEditor" }
     Depends { name: "ProjectExplorer" }
-    Depends { name: "Find" }
     Depends { name: "VcsBase" }
-    Depends { name: "Locator" }
-
 
     files: [
         "annotationhighlighter.cpp",
         "annotationhighlighter.h",
         "branchinfo.cpp",
         "branchinfo.h",
-        "cloneoptionspanel.cpp",
-        "cloneoptionspanel.h",
-        "cloneoptionspanel.ui",
-        "clonerepositorypanel.cpp",
-        "clonerepositorypanel.h",
-        "clonerepositorypanel.ui",
-        "clonewizard.cpp",
-        "clonewizard.h",
-        "clonewizardpage.cpp",
-        "clonewizardpage.h",
         "commiteditor.cpp",
         "commiteditor.h",
         "configuredialog.cpp",
         "configuredialog.h",
         "configuredialog.ui",
         "constants.h",
-        "fossil.qrc",
         "fossilclient.cpp",
         "fossilclient.h",
         "fossilcommitpanel.ui",
@@ -59,7 +44,8 @@ QtcPlugin {
         "revertdialog.ui",
         "revisioninfo.cpp",
         "revisioninfo.h",
-        "images/fossil.png",
+        "wizard/fossiljsextension.cpp",
+        "wizard/fossiljsextension.h",
     ]
 }
 

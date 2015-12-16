@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2015, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2016, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -47,29 +47,30 @@ class FossilControl: public Core::IVersionControl
 public:
     explicit FossilControl(FossilClient *fossilClient);
 
-    QString displayName() const;
-    Core::Id id() const;
+    QString displayName() const override;
+    Core::Id id() const override;
 
-    bool managesDirectory(const QString &filename, QString *topLevel = 0) const;
-    bool managesFile(const QString &workingDirectory, const QString &fileName) const;
-    bool isConfigured() const;
-    bool supportsOperation(Operation operation) const;
-    bool vcsOpen(const QString &fileName);
-    bool vcsAdd(const QString &filename);
-    bool vcsDelete(const QString &filename);
-    bool vcsMove(const QString &from, const QString &to);
-    bool vcsCreateRepository(const QString &directory);
-    bool vcsCheckout(const QString &directory, const QByteArray &url);
-    QString vcsGetRepositoryURL(const QString &directory);
-    bool vcsAnnotate(const QString &file, int line);
-    QString vcsTopic(const QString &directory);
+    bool managesDirectory(const QString &filename, QString *topLevel = 0) const override;
+    bool managesFile(const QString &workingDirectory, const QString &fileName) const override;
+    bool isConfigured() const override;
+    bool supportsOperation(Operation operation) const override;
+    bool vcsOpen(const QString &fileName) override;
+    bool vcsAdd(const QString &filename) override;
+    bool vcsDelete(const QString &filename) override;
+    bool vcsMove(const QString &from, const QString &to) override;
+    bool vcsCreateRepository(const QString &directory) override;
+    bool vcsAnnotate(const QString &file, int line) override;
+    QString vcsTopic(const QString &directory) override;
+    Core::ShellCommand *createInitialCheckoutCommand(const QString &sourceUrl,
+                                                     const Utils::FileName &baseDirectory,
+                                                     const QString &localName,
+                                                     const QStringList &extraArgs) override;
 
 public slots:
     // To be connected to the VcsTask's success signal to emit the repository/
     // files changed signals according to the variant's type:
     // String -> repository, StringList -> files
     void changed(const QVariant &);
-    void emitConfigurationChanged();
 
 private:
     FossilClient *m_client;

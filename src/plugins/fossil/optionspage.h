@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2015, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2016, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -34,45 +34,34 @@
 #include <QWidget>
 #include <QPointer>
 
+namespace VcsBase { class VcsBaseClientSettings; } // namespace VcsBase
+
 namespace Fossil {
 namespace Internal {
 
 class FossilSettings;
 
-class OptionsPageWidget : public QWidget
+class OptionsPageWidget : public VcsBase::VcsClientOptionsPageWidget
 {
     Q_OBJECT
 
 public:
     explicit OptionsPageWidget(QWidget *parent = 0);
 
-    FossilSettings settings() const;
-    void setSettings(const FossilSettings &s);
-    QString searchKeywords() const;
+    VcsBase::VcsBaseClientSettings settings() const;
+    void setSettings(const VcsBase::VcsBaseClientSettings &s);
 
 private:
     Ui::OptionsPage m_ui;
 };
 
 
-class OptionsPage : public VcsBase::VcsBaseOptionsPage
+class OptionsPage : public VcsBase::VcsClientOptionsPage
 {
     Q_OBJECT
 
 public:
-    OptionsPage();
-
-    QWidget *createPage(QWidget *parent);
-    void apply();
-    void finish() { }
-    bool matches(const QString &s) const;
-
-signals:
-    void settingsChanged();
-
-private:
-    QString m_searchKeywords;
-    QPointer<OptionsPageWidget> m_optionsPageWidget;
+    OptionsPage(Core::IVersionControl *control);
 };
 
 } // namespace Internal

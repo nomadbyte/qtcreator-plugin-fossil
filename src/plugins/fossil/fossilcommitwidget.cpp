@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2015, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2016, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -31,6 +31,7 @@
 #include <texteditor/fontsettings.h>
 #include <texteditor/texteditorconstants.h>
 
+#include <utils/completingtextedit.h>
 #include <utils/qtcassert.h>
 
 #include <QSyntaxHighlighter>
@@ -57,15 +58,15 @@ static QTextCharFormat commentFormat()
 class FossilSubmitHighlighter : QSyntaxHighlighter
 {
 public:
-    explicit FossilSubmitHighlighter(QTextEdit *parent);
-    void highlightBlock(const QString &text);
+    explicit FossilSubmitHighlighter(Utils::CompletingTextEdit *parent);
+    void highlightBlock(const QString &text) override;
 
 private:
     const QTextCharFormat m_commentFormat;
     const QRegExp m_keywordRx;
 };
 
-FossilSubmitHighlighter::FossilSubmitHighlighter(QTextEdit * parent) :
+FossilSubmitHighlighter::FossilSubmitHighlighter(Utils::CompletingTextEdit *parent) :
     QSyntaxHighlighter(parent),
     m_commentFormat(commentFormat()),
     m_keywordRx(QLatin1String("\\[([0-9a-f]{5,40})\\]"))
@@ -94,8 +95,7 @@ void FossilSubmitHighlighter::highlightBlock(const QString &text)
 }
 
 
-FossilCommitWidget::FossilCommitWidget(QWidget *parent) :
-    VcsBase::SubmitEditorWidget(parent),
+FossilCommitWidget::FossilCommitWidget() :
     m_spaceChar(QLatin1Char(' ')),
     m_commaChar(QLatin1Char(',')),
     m_tagsSeparator(QString(m_commaChar).append(m_spaceChar)),

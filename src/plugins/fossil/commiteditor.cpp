@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2015, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2016, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -26,6 +26,7 @@
 
 #include "branchinfo.h"
 #include "commiteditor.h"
+#include "constants.h"
 #include "fossilcommitwidget.h"
 
 #include <coreplugin/idocument.h>
@@ -36,11 +37,11 @@
 
 using namespace Fossil::Internal;
 
-CommitEditor::CommitEditor(const VcsBase::VcsBaseSubmitEditorParameters *parameters, QWidget *parent)
-        : VcsBase::VcsBaseSubmitEditor(parameters, new FossilCommitWidget(parent)),
-          m_fileModel(0)
+CommitEditor::CommitEditor(const VcsBase::VcsBaseSubmitEditorParameters *parameters)
+    : VcsBase::VcsBaseSubmitEditor(parameters, new FossilCommitWidget),
+      m_fileModel(0)
 {
-    document()->setDisplayName(tr("Commit Editor"));
+    document()->setPreferredDisplayName(tr("Commit Editor"));
 }
 
 FossilCommitWidget *CommitEditor::commitWidget()
@@ -59,8 +60,28 @@ void CommitEditor::setFields(const QString &repositoryRoot, const BranchInfo &br
     fossilWidget->setFields(repositoryRoot, branch, tags, userName);
 
     m_fileModel = new VcsBase::SubmitFileModel(this);
+    m_fileModel->setRepositoryRoot(repositoryRoot);
+    m_fileModel->setFileStatusQualifier([](const QString &status, const QVariant &)
+                                           -> VcsBase::SubmitFileModel::FileStatusHint
+    {
+        if (status == QLatin1String(Constants::FSTATUS_ADDED)
+            || status == QLatin1String(Constants::FSTATUS_ADDED_BY_MERGE)
+            || status == QLatin1String(Constants::FSTATUS_ADDED_BY_INTEGRATE)) {
+            return VcsBase::SubmitFileModel::FileAdded;
+        } else if (status == QLatin1String(Constants::FSTATUS_EDITED)
+            || status == QLatin1String(Constants::FSTATUS_UPDATED_BY_MERGE)
+            || status == QLatin1String(Constants::FSTATUS_UPDATED_BY_INTEGRATE)) {
+            return VcsBase::SubmitFileModel::FileModified;
+        } else if (status == QLatin1String(Constants::FSTATUS_DELETED)) {
+            return VcsBase::SubmitFileModel::FileDeleted;
+        } else if (status == QLatin1String(Constants::FSTATUS_RENAMED)) {
+            return VcsBase::SubmitFileModel::FileRenamed;
+        }
+        return VcsBase::SubmitFileModel::FileStatusUnknown;
+    } );
+
     foreach (const VcsBase::VcsBaseClient::StatusItem &item, repoStatus)
-        if (item.flags != QLatin1String("Unknown"))
+        if (item.flags != QLatin1String(Constants::FSTATUS_UNKNOWN))
             m_fileModel->addFile(item.file, item.flags);
-    setFileModel(m_fileModel,repositoryRoot);
+    setFileModel(m_fileModel);
 }

@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2015, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2016, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -41,6 +41,7 @@ const char FOSSILREPO[] = "_FOSSIL_";
 const char FOSSILREPO[] = ".fslckout";
 #endif
 const char FOSSILDEFAULT[] = "fossil";
+const char FOSSIL_CONTEXT[] = "Fossil Context";
 
 const char FOSSIL_FILE_SUFFIX[] = ".fossil";
 const char FOSSIL_FILE_FILTER[] = "Fossil Repositories (*.fossil *.fsl);;All Files (*)";
@@ -55,21 +56,15 @@ const char DIFFFILE_ID_EXACT[] = "[+]{3} (.*)\\s*";  // match and capture
 //BaseEditorParameters
 const char FILELOG_ID[] = "Fossil File Log Editor";
 const char FILELOG_DISPLAY_NAME[] = QT_TRANSLATE_NOOP("VCS", "Fossil File Log Editor");
-const char FILELOG[] = "Fossil File Log Editor";
 const char LOGAPP[] = "text/vnd.qtcreator.fossil.log";
-const char LOGEXT[] = "vcsFossilLog";
 
 const char ANNOTATELOG_ID[] = "Fossil Annotation Editor";
 const char ANNOTATELOG_DISPLAY_NAME[] = QT_TRANSLATE_NOOP("VCS", "Fossil Annotation Editor");
-const char ANNOTATELOG[] = "Fossil Annotation Editor";
 const char ANNOTATEAPP[] = "text/vnd.qtcreator.fossil.annotation";
-const char ANNOTATEEXT[] = "vcsFossilAnnotate";
 
 const char DIFFLOG_ID[] = "Fossil Diff Editor";
 const char DIFFLOG_DISPLAY_NAME[] = QT_TRANSLATE_NOOP("VCS", "Fossil Diff Editor");
-const char DIFFLOG[] = "Fossil Diff Editor";
 const char DIFFAPP[] = "text/x-patch";
-const char DIFFEXT[] = "diff";
 
 //SubmitEditorParameters
 const char COMMIT_ID[] = "Fossil Commit Log Editor";
@@ -102,6 +97,17 @@ const char CREATE_REPOSITORY[] = "Fossil.Action.CreateRepository";
 
 //submit editor actions
 const char DIFFEDITOR[] = "Fossil.Action.Editor.Diff";
+
+// File status hint
+const char FSTATUS_ADDED[] = "Added";
+const char FSTATUS_ADDED_BY_MERGE[] = "Added by Merge";
+const char FSTATUS_ADDED_BY_INTEGRATE[] = "Added by Integrate";
+const char FSTATUS_DELETED[] = "Deleted";
+const char FSTATUS_EDITED[] = "Edited";
+const char FSTATUS_UPDATED_BY_MERGE[] = "Updated by Merge";
+const char FSTATUS_UPDATED_BY_INTEGRATE[] = "Updated by Integrate";
+const char FSTATUS_RENAMED[] = "Renamed";
+const char FSTATUS_UNKNOWN[] = "Unknown";
 
 } // namespace Constants
 } // namespace Fossil

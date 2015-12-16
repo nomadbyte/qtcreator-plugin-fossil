@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2015, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2016, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -34,20 +34,20 @@
 namespace Fossil {
 namespace Internal {
 
-class FossilEditor : public VcsBase::VcsBaseEditorWidget
+class FossilEditorWidget : public VcsBase::VcsBaseEditorWidget
 {
     Q_OBJECT
 
 public:
-    explicit FossilEditor(const VcsBase::VcsBaseEditorParameters *type, QWidget *parent);
+    FossilEditorWidget();
 
 //private slots:
 //    void slotChangeContents();
 
 private:
-    QSet<QString> annotationChanges() const;
-    QString changeUnderCursor(const QTextCursor &cursor) const;
-    VcsBase::BaseAnnotationHighlighter *createAnnotationHighlighter(const QSet<QString> &changes) const;
+    QSet<QString> annotationChanges() const override;
+    QString changeUnderCursor(const QTextCursor &cursor) const override;
+    VcsBase::BaseAnnotationHighlighter *createAnnotationHighlighter(const QSet<QString> &changes) const override;
 
     const QRegExp m_exactChangesetId;
     const QRegExp m_exactDiffFileId;

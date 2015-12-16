@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2015, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2016, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -26,6 +26,7 @@
 
 #include "optionspage.h"
 #include "constants.h"
+#include "fossilclient.h"
 #include "fossilsettings.h"
 #include "fossilplugin.h"
 
@@ -38,21 +39,22 @@
 using namespace Fossil::Internal;
 using namespace Fossil;
 
-OptionsPageWidget::OptionsPageWidget(QWidget *parent)
-    : QWidget(parent)
+OptionsPageWidget::OptionsPageWidget(QWidget *parent) :
+    VcsClientOptionsPageWidget(parent)
 {
     m_ui.setupUi(this);
     m_ui.commandChooser->setExpectedKind(Utils::PathChooser::ExistingCommand);
     m_ui.commandChooser->setPromptDialogTitle(tr("Fossil Command"));
+    m_ui.commandChooser->setHistoryCompleter(QLatin1String("Fossil.Command.History"));
     m_ui.defaultRepoPathChooser->setExpectedKind(Utils::PathChooser::ExistingDirectory);
     m_ui.defaultRepoPathChooser->setPromptDialogTitle(tr("Fossil Repositories"));
     m_ui.sslIdentityFilePathChooser->setExpectedKind(Utils::PathChooser::File);
     m_ui.sslIdentityFilePathChooser->setPromptDialogTitle(tr("SSL/TLS Identity Key"));
 }
 
-FossilSettings OptionsPageWidget::settings() const
+VcsBase::VcsBaseClientSettings OptionsPageWidget::settings() const
 {
-    FossilSettings s = FossilPlugin::instance()->settings();
+    VcsBase::VcsBaseClientSettings s = FossilPlugin::instance()->client()->settings();
     s.setValue(FossilSettings::binaryPathKey, m_ui.commandChooser->rawPath());
     s.setValue(FossilSettings::defaultRepoPathKey, m_ui.defaultRepoPathChooser->path());
     s.setValue(FossilSettings::userNameKey, m_ui.defaultUsernameLineEdit->text().trimmed());
@@ -64,7 +66,7 @@ FossilSettings OptionsPageWidget::settings() const
     return s;
 }
 
-void OptionsPageWidget::setSettings(const FossilSettings &s)
+void OptionsPageWidget::setSettings(const VcsBase::VcsBaseClientSettings &s)
 {
     m_ui.commandChooser->setPath(s.stringValue(FossilSettings::binaryPathKey));
     m_ui.defaultRepoPathChooser->setPath(s.stringValue(FossilSettings::defaultRepoPathKey));
@@ -76,58 +78,10 @@ void OptionsPageWidget::setSettings(const FossilSettings &s)
     m_ui.disableAutosyncCheckBox->setChecked(s.boolValue(FossilSettings::disableAutosyncKey));
 }
 
-QString OptionsPageWidget::searchKeywords() const
-{
-    QString rc;
-    QLatin1Char sep(' ');
-    QTextStream(&rc)
-            << sep << m_ui.configGroupBox->title()
-            << sep << m_ui.commandLabel->text()
-            << sep << m_ui.repoGroupBox->title()
-            << sep << m_ui.defaultRepoPathLabel->text()
-            << sep << m_ui.userGroupBox->title()
-            << sep << m_ui.defaultUsernameLabel->text()
-            << sep << m_ui.sslIdentityFileLabel->text()
-            << sep << m_ui.miscGroupBox->title()
-            << sep << m_ui.showLogEntriesLabel->text()
-            << sep << m_ui.timeoutSecondsLabel->text()
-            << sep << m_ui.disableAutosyncCheckBox->text()
-               ;
-    rc.remove(QLatin1Char('&'));
-    return rc;
-}
-
-OptionsPage::OptionsPage()
+OptionsPage::OptionsPage(Core::IVersionControl *control) :
+    VcsClientOptionsPage(control, FossilPlugin::instance()->client())
 {
     setId(Constants::VCS_ID_FOSSIL);
     setDisplayName(tr("Fossil"));
-}
-
-QWidget *OptionsPage::createPage(QWidget *parent)
-{
-    if (!m_optionsPageWidget)
-        m_optionsPageWidget = new OptionsPageWidget(parent);
-    m_optionsPageWidget->setSettings(FossilPlugin::instance()->settings());
-    if (m_searchKeywords.isEmpty())
-        m_searchKeywords = m_optionsPageWidget->searchKeywords();
-    return m_optionsPageWidget;
-}
-
-void OptionsPage::apply()
-{
-    if (!m_optionsPageWidget)
-        return;
-    FossilPlugin *plugin = FossilPlugin::instance();
-    const FossilSettings newSettings = m_optionsPageWidget->settings();
-    if (newSettings != plugin->settings()) {
-        //assume success and emit signal that settings are changed;
-        plugin->setSettings(newSettings);
-        newSettings.writeSettings(Core::ICore::settings());
-        emit settingsChanged();
-    }
-}
-
-bool OptionsPage::matches(const QString &s) const
-{
-    return m_searchKeywords.contains(s, Qt::CaseInsensitive);
+    setWidgetFactory([]() { return new OptionsPageWidget; });
 }

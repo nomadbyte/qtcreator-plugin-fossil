@@ -1,5 +1,3 @@
-PROVIDER = Nomadbyte
-
 include(../../qtcreatorplugin.pri)
 SOURCES += \
     fossilclient.cpp \
@@ -13,12 +11,9 @@ SOURCES += \
     annotationhighlighter.cpp \
     pullorpushdialog.cpp \
     branchinfo.cpp \
-    clonewizardpage.cpp \
-    clonewizard.cpp \
-    cloneoptionspanel.cpp \
-    clonerepositorypanel.cpp \
     configuredialog.cpp \
-    revisioninfo.cpp
+    revisioninfo.cpp \
+    wizard/fossiljsextension.cpp
 HEADERS += \
     fossilclient.h \
     constants.h \
@@ -32,18 +27,12 @@ HEADERS += \
     annotationhighlighter.h \
     pullorpushdialog.h \
     branchinfo.h \
-    clonewizard.h \
-    clonewizardpage.h \
-    cloneoptionspanel.h \
-    clonerepositorypanel.h \
     configuredialog.h \
-    revisioninfo.h
+    revisioninfo.h \
+    wizard/fossiljsextension.h
 FORMS += \
     optionspage.ui \
     revertdialog.ui \
     fossilcommitpanel.ui \
     pullorpushdialog.ui \
-    cloneoptionspanel.ui \
-    clonerepositorypanel.ui \
     configuredialog.ui
-RESOURCES += fossil.qrc

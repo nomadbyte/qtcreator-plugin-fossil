@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2015, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2016, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -24,42 +24,42 @@
 **  THE SOFTWARE.
 **************************************************************************/
 
-#ifndef CLONEWIZARDPAGE_H
-#define CLONEWIZARDPAGE_H
+#ifndef FOSSILJSEXTENSION_H
+#define FOSSILJSEXTENSION_H
 
-#include <vcsbase/basecheckoutwizardpage.h>
+#include <vcsbase/wizard/vcsjsextension.h>
+
+#include <QStringList>
+#include <QMap>
+#include <QObject>
 
 namespace Fossil {
 namespace Internal {
-class CloneRepositoryPanel;
-class CloneOptionsPanel;
 
-class CloneWizardPage : public VcsBase::BaseCheckoutWizardPage
+class FossilJsExtensionPrivate;
+
+class FossilJsExtension : public QObject
 {
     Q_OBJECT
+
 public:
-    CloneWizardPage(QWidget *parent = 0);
-    const CloneRepositoryPanel *cloneRepositoryPanel() const;
-    const CloneOptionsPanel *cloneOptionsPanel() const;
+    static void parseArgOptions(const QStringList &args, QMap<QString, QString> &options);
 
-Q_SIGNALS:
-    void checkoutDirectoryNameGenerated(const QString&, const QString& ) const;
+    FossilJsExtension();
+    ~FossilJsExtension();
 
-protected:
-    QString directoryFromRepository(const QString &repository) const;
-    bool checkIsValid() const;
-
-private slots:
-    void slotCloneRepositoryNameEdited(const QString &name);
-    void slotCheckoutRepositoryEdited(const QString &path);
-    void slotCheckoutBranchEdited();
+    Q_INVOKABLE bool isConfigured() const;
+    Q_INVOKABLE QString displayName() const;
+    Q_INVOKABLE QString defaultAdminUser() const;
+    Q_INVOKABLE QString defaultSslIdentityFile() const;
+    Q_INVOKABLE QString defaultLocalRepoPath() const;
+    Q_INVOKABLE bool defaultDisableAutosync() const;
 
 private:
-    CloneRepositoryPanel *m_repositoryPanel;
-    CloneOptionsPanel *m_optionsPanel;
+    FossilJsExtensionPrivate *d;
 };
 
 } // namespace Internal
 } // namespace Fossil
 
-#endif // CLONEWIZARDPAGE_H
+#endif // FOSSILJSEXTENSION_H

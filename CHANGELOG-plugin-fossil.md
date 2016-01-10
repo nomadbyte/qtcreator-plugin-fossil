@@ -1,6 +1,12 @@
 qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
 =================================
 
+## 3.0.1_4 - 2016-01-10
+
+- client min. version `fossil 1.33`
+- Additional `fossil status` cases (`Set Exec`, `Set Symlink`)
+
+
 ## 3.0.1_3 - 2015-03-06
 
 - client min. version `fossil 1.30`

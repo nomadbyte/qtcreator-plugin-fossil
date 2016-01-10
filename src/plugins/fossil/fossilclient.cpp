@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2015, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2016, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -1050,6 +1050,14 @@ FossilClient::StatusItem FossilClient::parseStatusLine(const QString &line) cons
         flags = QLatin1String("Updated by Integrate");
     else if (label == QLatin1String("CONFLICT"))
         flags = QLatin1String("Conflict");
+    else if (label == QLatin1String("EXECUTABLE"))
+        flags = QLatin1String("Set Exec");
+    else if (label == QLatin1String("SYMLINK"))
+        flags = QLatin1String("Set Symlink");
+    else if (label == QLatin1String("UNEXEC"))
+        flags = QLatin1String("Unset Exec");
+    else if (label == QLatin1String("UNLINK"))
+        flags = QLatin1String("Unset Symlink");
     else if (label == QLatin1String("NOT_A_FILE"))
         flags = QLatin1String("Unknown");
 
@@ -1243,7 +1251,7 @@ public:
         QList<ComboBoxItem> itemTypeChoices;
         itemTypeChoices << ComboBoxItem(tr("All Items"), QLatin1String("all"))
                         << ComboBoxItem(tr("File Commits"), QLatin1String("ci"))
-                        << ComboBoxItem(tr("Events"), QLatin1String("e"))
+                        << ComboBoxItem(tr("Technical Notes"), QLatin1String("e"))
                         << ComboBoxItem(tr("Tags"), QLatin1String("g"))
                         << ComboBoxItem(tr("Tickets"), QLatin1String("t"))
                         << ComboBoxItem(tr("Wiki Commits"), QLatin1String("w"));

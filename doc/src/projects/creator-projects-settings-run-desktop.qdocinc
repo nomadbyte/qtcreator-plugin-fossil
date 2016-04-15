@@ -1,0 +1,20 @@
+    \section2 Specifying Run Settings for Desktop Device Types
+
+    You can specify command line arguments to be passed to the executable
+    and the working directory to use. The working directory defaults to
+    the directory of the build result.
+
+    For console applications, check the \uicontrol{Run in Terminal} check box.
+    If you need to run with special environment variables set up, you
+    also do it in the run configuration settings.
+
+    \image qtcreator-pprunsettings.png
+
+    The \uicontrol {Use debug version of frameworks (DYLD_IMAGE_SUFFIX=_debug)} option
+    (only available on OS X) enables you to debug (for example, step into)
+    linked frameworks, such as the Qt framework itself. You do not need this
+    option for debugging your application code.
+
+    You can also create custom executable run configurations where you
+    can set the executable to be run. For more information, see
+    \l{Specifying a Custom Executable to Run}.

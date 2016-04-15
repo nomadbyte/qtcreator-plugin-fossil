@@ -1,0 +1,134 @@
+/****************************************************************************
+**
+** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2015 Petroules Corporation.
+** Contact: http://www.qt.io/licensing
+**
+** This file is part of the Qt Build Suite.
+**
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms and
+** conditions see http://www.qt.io/terms-conditions. For further information
+** use the contact form at http://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 2.1 or version 3 as published by the Free
+** Software Foundation and appearing in the file LICENSE.LGPLv21 and
+** LICENSE.LGPLv3 included in the packaging of this file.  Please review the
+** following information to ensure the GNU Lesser General Public License
+** requirements will be met: https://www.gnu.org/licenses/lgpl.html and
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, The Qt Company gives you certain additional
+** rights.  These rights are described in The Qt Company LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+****************************************************************************/
+
+/*!
+    \contentspage index.html
+    \page jsextensions-general.html
+    \ingroup list-of-builtin-services
+
+    \title General Services
+    \brief Provides various operations.
+
+    These are operations that do not fit into any of the other categories.
+    They are automatically available in any \QBS project file or JavaScript file.
+
+    \section1 Available Operations
+
+    \section2 qbs.currentEnv
+    \code
+    qbs.currentEnv(): { [key: string]: string; }
+    \endcode
+    Returns the environment of \QBS in the current context as an object whose properties are
+    the environment variables.
+
+    \section2 qbs.getEnv
+    \code
+    qbs.getEnv(key: string): string
+    \endcode
+    Tries to find a variable with the given name in the build environment and returns its value. If
+    no such variable could be found, \c undefined is returned.
+
+    \section2 qbs.getHash
+    \code
+    qbs.getHash(key: string): string
+    \endcode
+    Calculates a 16-byte hash of the input and returns it.
+    Rules in modules should use this function to find unique locations for output
+    artifacts in the build directory without duplicating the whole directory structure of
+    the respective input file (to deal with the case of two files with the same name in different
+    subdirectories of the same product).
+
+    \section2 qbs.rfc1034Identifier
+    \code
+    qbs.rfc1034Identifier(str: string): string
+    \endcode
+    Returns an RFC 1034 compliant identifier based on the given string by replacing each character
+    that is not Latin alphanumeric or \c{.} with \c{-}.
+
+    \section2 loadFile
+    \code
+    loadFile(filePath: string): any
+    \endcode
+    Loads a JavaScript file and returns an object that contains the evaluated context of this file.
+    This function is only available in JavaScript files.
+    For example:
+    \code
+    var MyFunctions = loadFile("myfunctions.js");
+    MyFunctions.doSomething();
+    \endcode
+
+    \section2 loadExtension
+    \code
+    loadExtension(extensionName: string): any
+    \endcode
+    Loads a \QBS extension and returns an object that contains all functions of that extension.
+    This function is only available in JavaScript files.
+    For example:
+    \code
+    var FileInfo = loadExtension("qbs.FileInfo");
+    var fileName = FileInfo.fileName(filePath);
+    \endcode
+
+
+    \section1 Extensions to JavaScript Built-in Objects
+
+    \section2 Array.contains
+    \code
+    Array.contains(e: any): boolean
+    \endcode
+    Returns \c{true} if the array contains the element \c{e}. Returns \c{false} otherwise.
+
+    \section2 Array.uniqueConcat
+    \code
+    Array.uniqueConcat(other: any[]): any[]
+    \endcode
+    Returns a copy of this array joined with the array \c{other}.
+    Duplicates that would originate from the concatenation are removed.
+    The order of elements is preserved.
+
+    \section2 String.contains
+    \code
+    String.contains(s: string): boolean
+    \endcode
+    Returns \c{true} if the string contains the substring \c{s}. Returns \c{false} otherwise.
+
+    \section2 startsWith
+    \code
+    String.startsWith(s: string): boolean
+    \endcode
+    Returns \c{true} if the string starts with the substring \c{s}. Returns \c{false} otherwise.
+
+    \section2 endsWith
+    \code
+    String.endsWith(s: string): boolean
+    \endcode
+    Returns \c{true} if the string ends with the substring \c{s}. Returns \c{false} otherwise.
+*/

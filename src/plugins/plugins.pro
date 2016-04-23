@@ -34,6 +34,7 @@ SUBDIRS   = \
     glsleditor \
     pythoneditor \
     mercurial \
+    fossil \
     bazaar \
     classview \
     tasklist \

@@ -93,8 +93,6 @@ public:
     void annotate(const QString &workingDir, const QString &file,
                   const QString &revision = QString(), int lineNumber = -1,
                   const QStringList &extraOptions = QStringList()) override;
-    void view(const QString &source, const QString &id,
-              const QStringList &extraOptions = QStringList()) override;
     void log(const QString &workingDir, const QStringList &files = QStringList(),
              const QStringList &extraOptions = QStringList(),
              bool enableAnnotationContextMenu = false) override;
@@ -111,6 +109,10 @@ public:
     unsigned int binaryVersion() const;
     QString binaryVersionString() const;
     SupportedFeatures supportedFeatures() const;
+
+public slots:
+    void view(const QString &source, const QString &id,
+              const QStringList &extraOptions = QStringList()) override;
 
 protected:
     QString vcsCommandString(VcsCommandTag cmd) const override;

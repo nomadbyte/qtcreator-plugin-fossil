@@ -1,0 +1,30 @@
+    \section1 Running on QNX Devices
+
+    \list 1
+
+        \li Connect the device to the development PC or to the Wi-Fi network.
+
+        \li Configure the device and specify a connection to it. For more
+            information, see \l{Connecting QNX Devices}.
+
+        \li Make sure that your kit has your QNX device set.
+
+        \li Click the \uicontrol Run button.
+
+    \endlist
+
+    \QC uses the compiler specified in the QNX tool chain to build the
+    application.
+
+    \note Debugging is currently only fully supported on Linux and OS X.
+    It is not possible to insert breakpoints during runtime on Windows.
+
+    \section2 Troubleshooting Errors
+
+    For the command-line output to show up in the \uicontrol{Application Output},
+    \QC needs to be able to establish an SSH connection to the device.
+    This is only possible if QNX Momentics is not running, and the SSH key
+    configured for the device is a 4096-bit key.
+
+    If these conditions are not met, you will get an error message saying debug
+    output cannot be shown.

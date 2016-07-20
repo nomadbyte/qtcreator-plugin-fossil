@@ -1,0 +1,78 @@
+/****************************************************************************
+**
+** Copyright (C) 2015 The Qt Company Ltd.
+** Contact: http://www.qt.io/licensing
+**
+** This file is part of the Qt Build Suite.
+**
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms and
+** conditions see http://www.qt.io/terms-conditions. For further information
+** use the contact form at http://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 2.1 or version 3 as published by the Free
+** Software Foundation and appearing in the file LICENSE.LGPLv21 and
+** LICENSE.LGPLv3 included in the packaging of this file.  Please review the
+** following information to ensure the GNU Lesser General Public License
+** requirements will be met: https://www.gnu.org/licenses/lgpl.html and
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, The Qt Company gives you certain additional
+** rights.  These rights are described in The Qt Company LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+****************************************************************************/
+/*!
+    \contentspage index.html
+    \previouspage shell.html
+    \page reference.html
+
+    \title Reference
+
+    \list
+        \li \l{List of Language Items}
+        \li \l{List of Built-in Services}
+        \li \l{List of Command-line Tools}
+        \li \l{List of Modules}
+        \li \l{Command and JavaScriptCommand}
+    \endlist
+*/
+
+/*!
+    \contentspage reference.html
+    \group list-of-builtin-services
+    \title List of Built-in Services
+    \QBS provides the following built-in JavaScript extensions to simplify operations that
+    are expected to be needed often in project files.
+
+    To gain access to the operations provided by a particular Service - for example,
+    the File service - use the following statement at the top of your \QBS project file:
+    \code
+    import qbs.File
+    \endcode
+
+    If you instead need to access the service from a JavaScript file, import it using the following
+    statement at the top of your JavaScript file:
+    \code
+    var File = loadExtension("qbs.File");
+    \endcode
+*/
+
+/*!
+    \contentspage reference.html
+    \group list-of-modules
+    \title List of Modules
+    These are the modules shipped with \QBS.
+*/
+
+/*!
+    \contentspage reference.html
+    \group list-of-items
+    \title List of Language Items
+    \QBS provides the following built-in QML items to define projects.
+*/

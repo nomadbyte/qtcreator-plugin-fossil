@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/qmlprofiler">
+        <file>bindingloops.vert</file>
+        <file>bindingloops.frag</file>
+    </qresource>
+</RCC>

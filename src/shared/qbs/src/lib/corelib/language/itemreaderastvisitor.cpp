@@ -1,0 +1,324 @@
+/****************************************************************************
+**
+** Copyright (C) 2015 The Qt Company Ltd.
+** Contact: http://www.qt.io/licensing
+**
+** This file is part of the Qt Build Suite.
+**
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms and
+** conditions see http://www.qt.io/terms-conditions. For further information
+** use the contact form at http://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 2.1 or version 3 as published by the Free
+** Software Foundation and appearing in the file LICENSE.LGPLv21 and
+** LICENSE.LGPLv3 included in the packaging of this file.  Please review the
+** following information to ensure the GNU Lesser General Public License
+** requirements will be met: https://www.gnu.org/licenses/lgpl.html and
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, The Qt Company gives you certain additional
+** rights.  These rights are described in The Qt Company LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+****************************************************************************/
+
+#include "itemreaderastvisitor.h"
+
+#include "astimportshandler.h"
+#include "astpropertiesitemhandler.h"
+#include "asttools.h"
+#include "builtindeclarations.h"
+#include "filecontext.h"
+#include "identifiersearch.h"
+#include "item.h"
+#include "itemreadervisitorstate.h"
+#include "value.h"
+
+#include <jsextensions/jsextensions.h>
+#include <parser/qmljsast_p.h>
+#include <tools/codelocation.h>
+#include <tools/error.h>
+#include <tools/fileinfo.h>
+#include <tools/qbsassert.h>
+#include <tools/qttools.h>
+#include <logging/translator.h>
+
+using namespace QbsQmlJS;
+
+namespace qbs {
+namespace Internal {
+
+ItemReaderASTVisitor::ItemReaderASTVisitor(ItemReaderVisitorState &visitorState,
+        const FileContextPtr &file, ItemPool *itemPool, Logger logger)
+    : m_visitorState(visitorState)
+    , m_file(file)
+    , m_itemPool(itemPool)
+    , m_logger(logger)
+{
+}
+
+bool ItemReaderASTVisitor::visit(AST::UiImportList *uiImportList)
+{
+    ASTImportsHandler importsHandler(m_visitorState, m_logger, m_file);
+    importsHandler.handleImports(uiImportList);
+    m_typeNameToFile = importsHandler.typeNameFileMap();
+    return false;
+}
+
+bool ItemReaderASTVisitor::visit(AST::UiObjectDefinition *ast)
+{
+    const QString typeName = ast->qualifiedTypeNameId->name.toString();
+    Item *item = Item::create(m_itemPool);
+    item->setFile(m_file);
+    item->setTypeName(typeName);
+    item->setLocation(toCodeLocation(ast->qualifiedTypeNameId->identifierToken));
+
+    if (m_item)
+        Item::addChild(m_item, item); // Add this item to the children of the parent item.
+    else
+        m_item = item; // This is the root item.
+
+    const Item *inheritorItem = nullptr;
+
+    // Inheritance resolving, part 1: Find out our actual type name (needed for setting
+    // up children and alternatives).
+    const QStringList fullTypeName = toStringList(ast->qualifiedTypeNameId);
+    const QString baseTypeFileName = m_typeNameToFile.value(fullTypeName);
+    if (!baseTypeFileName.isEmpty()) {
+        inheritorItem = m_visitorState.readFile(baseTypeFileName, m_file->searchPaths(),
+                                                m_itemPool);
+        QBS_CHECK(inheritorItem->type() <= ItemType::LastActualItem);
+        item->setType(inheritorItem->type());
+    } else {
+        item->setType(BuiltinDeclarations::instance().typeForName(typeName, item->location()));
+        if (item->type() == ItemType::Properties && item->parent()
+                && item->parent()->type() == ItemType::SubProject) {
+            item->setType(ItemType::PropertiesInSubProject);
+        }
+    }
+
+    if (ast->initializer) {
+        qSwap(m_item, item);
+        ast->initializer->accept(this);
+        qSwap(m_item, item);
+    }
+
+    ASTPropertiesItemHandler(item).handlePropertiesItems();
+
+    // Inheritance resolving, part 2 (depends on alternatives having been set up).
+    if (inheritorItem) {
+        inheritItem(item, inheritorItem);
+        if (inheritorItem->file()->idScope()) {
+            // Make ids from the derived file visible in the base file.
+            // ### Do we want to turn off this feature? It's QMLish but kind of strange.
+            item->file()->ensureIdScope(m_itemPool);
+            inheritorItem->file()->idScope()->setPrototype(item->file()->idScope());
+        }
+    } else {
+        // Only the item at the top of the inheritance chain is a built-in item.
+        // We cannot do this in "part 1", because then the visitor would complain about duplicate
+        // bindings.
+        item->setupForBuiltinType(m_logger);
+    }
+
+    return false;
+}
+
+void ItemReaderASTVisitor::checkDuplicateBinding(Item *item, const QStringList &bindingName,
+                                                 const AST::SourceLocation &sourceLocation)
+{
+    if (Q_UNLIKELY(item->properties().contains(bindingName.last()))) {
+        QString msg = Tr::tr("Duplicate binding for '%1'");
+        throw ErrorInfo(msg.arg(bindingName.join(QLatin1Char('.'))),
+                    toCodeLocation(sourceLocation));
+    }
+}
+
+bool ItemReaderASTVisitor::visit(AST::UiPublicMember *ast)
+{
+    PropertyDeclaration p;
+    if (Q_UNLIKELY(ast->name.isEmpty()))
+        throw ErrorInfo(Tr::tr("public member without name"));
+    if (Q_UNLIKELY(ast->memberType.isEmpty()))
+        throw ErrorInfo(Tr::tr("public member without type"));
+    if (Q_UNLIKELY(ast->type == AST::UiPublicMember::Signal))
+        throw ErrorInfo(Tr::tr("public member with signal type not supported"));
+    p.setName(ast->name.toString());
+    p.setType(PropertyDeclaration::propertyTypeFromString(ast->memberType.toString()));
+    if (p.type() == PropertyDeclaration::UnknownType) {
+        throw ErrorInfo(Tr::tr("Unknown type '%1' in property declaration.")
+                        .arg(ast->memberType.toString()), toCodeLocation(ast->typeToken));
+    }
+    if (ast->typeModifier.compare(QLatin1String("list"))) {
+        p.setFlags(p.flags() | PropertyDeclaration::ListProperty);
+    } else if (Q_UNLIKELY(!ast->typeModifier.isEmpty())) {
+        throw ErrorInfo(Tr::tr("public member with type modifier '%1' not supported").arg(
+                        ast->typeModifier.toString()));
+    }
+
+    m_item->m_propertyDeclarations.insert(p.name(), p);
+
+    const JSSourceValuePtr value = JSSourceValue::create();
+    value->setFile(m_file);
+    if (ast->statement) {
+        handleBindingRhs(ast->statement, value);
+        const QStringList bindingName(p.name());
+        checkDuplicateBinding(m_item, bindingName, ast->colonToken);
+    }
+
+    m_item->setProperty(p.name(), value);
+    return false;
+}
+
+bool ItemReaderASTVisitor::visit(AST::UiScriptBinding *ast)
+{
+    QBS_CHECK(ast->qualifiedId);
+    QBS_CHECK(!ast->qualifiedId->name.isEmpty());
+
+    const QStringList bindingName = toStringList(ast->qualifiedId);
+
+    if (bindingName.length() == 1 && bindingName.first() == QLatin1String("id")) {
+        const auto * const expStmt = AST::cast<AST::ExpressionStatement *>(ast->statement);
+        if (Q_UNLIKELY(!expStmt))
+            throw ErrorInfo(Tr::tr("id: must be followed by identifier"));
+        const auto * const idExp = AST::cast<AST::IdentifierExpression *>(expStmt->expression);
+        if (Q_UNLIKELY(!idExp || idExp->name.isEmpty()))
+            throw ErrorInfo(Tr::tr("id: must be followed by identifier"));
+        m_item->m_id = idExp->name.toString();
+        m_file->ensureIdScope(m_itemPool);
+        m_file->idScope()->setProperty(m_item->id(), ItemValue::create(m_item));
+        return false;
+    }
+
+    const JSSourceValuePtr value = JSSourceValue::create();
+    handleBindingRhs(ast->statement, value);
+
+    Item * const targetItem = targetItemForBinding(bindingName, value);
+    checkDuplicateBinding(targetItem, bindingName, ast->qualifiedId->identifierToken);
+    targetItem->setProperty(bindingName.last(), value);
+    return false;
+}
+
+bool ItemReaderASTVisitor::visit(AST::FunctionDeclaration *ast)
+{
+    FunctionDeclaration f;
+    if (Q_UNLIKELY(ast->name.isNull()))
+        throw ErrorInfo(Tr::tr("function decl without name"));
+    f.setName(ast->name.toString());
+
+    // remove the name
+    QString funcNoName = textOf(m_file->content(), ast);
+    funcNoName.replace(QRegExp(QLatin1String("^(\\s*function\\s*)\\w*")), QLatin1String("(\\1"));
+    funcNoName.append(QLatin1Char(')'));
+    f.setSourceCode(funcNoName);
+
+    f.setLocation(toCodeLocation(ast->firstSourceLocation()));
+    m_item->m_functions += f;
+    return false;
+}
+
+bool ItemReaderASTVisitor::handleBindingRhs(AST::Statement *statement,
+                                            const JSSourceValuePtr &value)
+{
+    QBS_CHECK(statement);
+    QBS_CHECK(value);
+
+    if (AST::cast<AST::Block *>(statement))
+        value->m_flags |= JSSourceValue::HasFunctionForm;
+
+    value->setFile(m_file);
+    value->setSourceCode(textRefOf(m_file->content(), statement));
+    value->setLocation(statement->firstSourceLocation().startLine,
+                       statement->firstSourceLocation().startColumn);
+
+    bool usesBase, usesOuter, usesOriginal;
+    IdentifierSearch idsearch;
+    idsearch.add(QLatin1String("base"), &usesBase);
+    idsearch.add(QLatin1String("outer"), &usesOuter);
+    idsearch.add(QLatin1String("original"), &usesOriginal);
+    idsearch.start(statement);
+    if (usesBase)
+        value->m_flags |= JSSourceValue::SourceUsesBase;
+    if (usesOuter)
+        value->m_flags |= JSSourceValue::SourceUsesOuter;
+    if (usesOriginal)
+        value->m_flags |= JSSourceValue::SourceUsesOriginal;
+    return false;
+}
+
+CodeLocation ItemReaderASTVisitor::toCodeLocation(const AST::SourceLocation &location) const
+{
+    return CodeLocation(m_file->filePath(), location.startLine, location.startColumn);
+}
+
+Item *ItemReaderASTVisitor::targetItemForBinding(const QStringList &bindingName,
+                                                 const JSSourceValueConstPtr &value)
+{
+    Item *targetItem = m_item;
+    const int c = bindingName.count() - 1;
+    for (int i = 0; i < c; ++i) {
+        ValuePtr v = targetItem->properties().value(bindingName.at(i));
+        if (!v) {
+            Item *newItem = Item::create(m_itemPool);
+            v = ItemValue::create(newItem);
+            targetItem->setProperty(bindingName.at(i), v);
+        }
+        if (Q_UNLIKELY(v->type() != Value::ItemValueType)) {
+            QString msg = Tr::tr("Binding to non-item property.");
+            throw ErrorInfo(msg, value->location());
+        }
+        targetItem = v.staticCast<ItemValue>()->item();
+    }
+    return targetItem;
+}
+
+void ItemReaderASTVisitor::inheritItem(Item *dst, const Item *src)
+{
+    int insertPos = 0;
+    for (int i = 0; i < src->m_children.count(); ++i) {
+        Item *child = src->m_children.at(i);
+        dst->m_children.insert(insertPos++, child);
+        child->m_parent = dst;
+    }
+
+    for (auto it = src->properties().constBegin(); it != src->properties().constEnd(); ++it) {
+        ValuePtr &v = dst->m_properties[it.key()];
+        if (!v) {
+            v = it.value();
+            continue;
+        }
+        if (v->type() != it.value()->type())
+            continue;
+        switch (v->type()) {
+        case Value::JSSourceValueType: {
+            JSSourceValuePtr sv = v.staticCast<JSSourceValue>();
+            QBS_CHECK(!sv->baseValue());
+            const JSSourceValuePtr baseValue = it.value().staticCast<JSSourceValue>();
+            sv->setBaseValue(baseValue);
+            for (auto it = sv->m_alternatives.begin(); it != sv->m_alternatives.end(); ++it)
+                it->value->setBaseValue(baseValue);
+            break;
+        }
+        case Value::ItemValueType:
+            inheritItem(v.staticCast<ItemValue>()->item(),
+                        it.value().staticCast<const ItemValue>()->item());
+            break;
+        default:
+            QBS_CHECK(!"unexpected value type");
+        }
+    }
+
+    for (auto it = src->propertyDeclarations().constBegin();
+         it != src->propertyDeclarations().constEnd(); ++it) {
+        dst->setPropertyDeclaration(it.key(), it.value());
+    }
+}
+
+} // namespace Internal
+} // namespace qbs

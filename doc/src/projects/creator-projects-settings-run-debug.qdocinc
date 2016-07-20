@@ -1,0 +1,13 @@
+    \section2 Specifying Debugger Settings
+
+    \image qtquick-debugging-settings.png "Debugger Settings"
+
+    To select the languages to debug, select the \uicontrol {Enable C++} and
+    \uicontrol {Enable QML} check boxes.
+
+    \note Opening a socket at a well-known port presents a security risk. Anyone
+    on the Internet could connect to the application that you are debugging and
+    execute any JavaScript functions. Therefore, you must make sure that the
+    port is properly protected by a firewall.
+
+    For more information about debugging, see \l{Debugging}.

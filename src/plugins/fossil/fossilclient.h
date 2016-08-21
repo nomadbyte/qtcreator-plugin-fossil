@@ -24,8 +24,7 @@
 **  THE SOFTWARE.
 **************************************************************************/
 
-#ifndef FOSSILCLIENT_H
-#define FOSSILCLIENT_H
+#pragma once
 
 #include "fossilsettings.h"
 #include "branchinfo.h"
@@ -131,5 +130,3 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(FossilClient::SupportedFeatures)
 
 } // namespace Internal
 } // namespace Fossil
-
-#endif // FOSSILCLIENT_H

@@ -1120,7 +1120,7 @@ void FossilClient::revertFile(const QString &workingDir,
     // Indicate file list
     VcsBase::VcsCommand *cmd = createCommand(workingDir);
     cmd->setCookie(QStringList(workingDir + QLatin1Char('/') + file));
-    connect(cmd, SIGNAL(success(QVariant)), this, SIGNAL(changed(QVariant)), Qt::QueuedConnection);
+    connect(cmd, &VcsBase::VcsCommand::success, this, &VcsBase::VcsBaseClient::changed, Qt::QueuedConnection);
     enqueueJob(cmd, args);
 }
 
@@ -1146,7 +1146,7 @@ void FossilClient::revertAll(const QString &workingDir, const QString &revision,
     // Indicate repository change
     VcsBase::VcsCommand *cmd = createCommand(workingDir);
     cmd->setCookie(QStringList(workingDir));
-    connect(cmd, SIGNAL(success(QVariant)), this, SIGNAL(changed(QVariant)), Qt::QueuedConnection);
+    connect(cmd, &VcsBase::VcsCommand::success, this, &VcsBase::VcsBaseClient::changed, Qt::QueuedConnection);
     enqueueJob(createCommand(workingDir), args);
 }
 

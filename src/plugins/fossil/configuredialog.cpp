@@ -60,8 +60,7 @@ public:
     RepositorySettings m_settings;
 };
 
-ConfigureDialog::ConfigureDialog(QWidget *parent):
-    QDialog(parent),
+ConfigureDialog::ConfigureDialog(QWidget *parent) : QDialog(parent),
     d(new ConfigureDialogPrivate)
 {
     d->m_ui.setupUi(this);

@@ -24,8 +24,7 @@
 **  THE SOFTWARE.
 **************************************************************************/
 
-#ifndef BRANCHINFO_H
-#define BRANCHINFO_H
+#pragma once
 
 #include <QString>
 #include <QDebug>
@@ -72,6 +71,3 @@ inline QDebug operator<< (QDebug dbg, const BranchInfo& rh) { return rh.printDeb
 
 } // namespace Internal
 } // namespace Fossil
-
-
-#endif // BRANCHINFO_H

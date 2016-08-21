@@ -45,12 +45,9 @@ class FossilJsExtensionPrivate {
 
 public:
     FossilJsExtensionPrivate() :
-        m_vscId(Constants::VCS_ID_FOSSIL)
-    {
-    }
+        m_vscId(Constants::VCS_ID_FOSSIL) { }
 
-    FossilClient *client() const
-    {
+    FossilClient *client() const {
         return FossilPlugin::instance()->client();
     }
 
@@ -74,8 +71,7 @@ void FossilJsExtension::parseArgOptions(const QStringList &args, QMap<QString, Q
 
 FossilJsExtension::FossilJsExtension() :
     d(new FossilJsExtensionPrivate)
-{
-}
+{ }
 
 FossilJsExtension::~FossilJsExtension()
 {

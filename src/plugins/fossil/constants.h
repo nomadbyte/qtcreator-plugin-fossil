@@ -24,8 +24,7 @@
 **  THE SOFTWARE.
 **************************************************************************/
 
-#ifndef FOSSILCONSTANTS_H
-#define FOSSILCONSTANTS_H
+#pragma once
 
 #include <QtGlobal>
 
@@ -111,5 +110,3 @@ const char FSTATUS_UNKNOWN[] = "Unknown";
 
 } // namespace Constants
 } // namespace Fossil
-
-#endif // FOSSILCONSTANTS_H

@@ -24,8 +24,7 @@
 **  THE SOFTWARE.
 **************************************************************************/
 
-#ifndef REVISIONINFO_H
-#define REVISIONINFO_H
+#pragma once
 
 #include "branchinfo.h"
 
@@ -56,5 +55,3 @@ inline QDebug operator<< (QDebug dbg, const RevisionInfo& rh) {
 
 } // namespace Internal
 } // namespace Fossil
-
-#endif // REVISIONINFO_H

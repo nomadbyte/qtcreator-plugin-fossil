@@ -24,8 +24,7 @@
 **  THE SOFTWARE.
 **************************************************************************/
 
-#ifndef CONFIGUREDIALOG_H
-#define CONFIGUREDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -40,19 +39,17 @@ class ConfigureDialog : public QDialog
     Q_OBJECT
 public:
     explicit ConfigureDialog(QWidget *parent = 0);
-    ~ConfigureDialog();
+    ~ConfigureDialog() override;
 
     const RepositorySettings settings() const;
     void setSettings(const RepositorySettings &settings);
 
 protected:
-    void changeEvent(QEvent *e);
+    void changeEvent(QEvent *e) override;
 
 private:
-    ConfigureDialogPrivate *d;
+    ConfigureDialogPrivate *d = nullptr;
 };
 
 } // namespace Internal
 } // namespace Fossil
-
-#endif // CONFIGUREDIALOG_H

@@ -35,8 +35,7 @@ BranchInfo::BranchInfo(const QString &name, bool isCurrent, BranchFlags flags) :
     m_name(name),
     m_isCurrent(isCurrent),
     m_flags(flags)
-{
-}
+{ }
 
 const QString &BranchInfo::name() const
 {

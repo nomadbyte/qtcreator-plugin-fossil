@@ -24,8 +24,7 @@
 **  THE SOFTWARE.
 **************************************************************************/
 
-#ifndef FOSSILJSEXTENSION_H
-#define FOSSILJSEXTENSION_H
+#pragma once
 
 #include <vcsbase/wizard/vcsjsextension.h>
 
@@ -56,10 +55,8 @@ public:
     Q_INVOKABLE bool defaultDisableAutosync() const;
 
 private:
-    FossilJsExtensionPrivate *d;
+    FossilJsExtensionPrivate *d = nullptr;
 };
 
 } // namespace Internal
 } // namespace Fossil
-
-#endif // FOSSILJSEXTENSION_H

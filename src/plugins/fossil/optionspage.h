@@ -24,15 +24,11 @@
 **  THE SOFTWARE.
 **************************************************************************/
 
-#ifndef OPTIONSPAGE_H
-#define OPTIONSPAGE_H
+#pragma once
 
 #include "ui_optionspage.h"
 
 #include <vcsbase/vcsbaseoptionspage.h>
-
-#include <QWidget>
-#include <QPointer>
 
 namespace VcsBase { class VcsBaseClientSettings; } // namespace VcsBase
 
@@ -66,5 +62,3 @@ public:
 
 } // namespace Internal
 } // namespace Fossil
-
-#endif // OPTIONSPAGE_H

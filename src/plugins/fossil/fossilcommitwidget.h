@@ -24,8 +24,7 @@
 **  THE SOFTWARE.
 **************************************************************************/
 
-#ifndef FOSSILCOMMITWIDGET_H
-#define FOSSILCOMMITWIDGET_H
+#pragma once
 
 #include "ui_fossilcommitpanel.h"
 
@@ -80,5 +79,3 @@ private:
 
 } // namespace Internal
 } // namespace Fossil
-
-#endif // FOSSILCOMMITWIDGET_H

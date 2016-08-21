@@ -24,8 +24,7 @@
 **  THE SOFTWARE.
 **************************************************************************/
 
-#ifndef FOSSILPLUGIN_H
-#define FOSSILPLUGIN_H
+#pragma once
 
 #include "fossilsettings.h"
 
@@ -66,7 +65,11 @@ public:
     static FossilPlugin *instance();
     FossilClient *client() const;
 
-private slots:
+protected:
+    void updateActions(VcsBase::VcsBasePlugin::ActionState) override;
+    bool submitEditorAboutToClose() override;
+
+private:
     // File menu action slots
     void addCurrentFile();
     void deleteCurrentFile();
@@ -93,11 +96,6 @@ private slots:
     void diffFromEditorSelected(const QStringList &files);
     void createRepository();
 
-protected:
-    void updateActions(VcsBase::VcsBasePlugin::ActionState) override;
-    bool submitEditorAboutToClose() override;
-
-private:
     // Methods
     void createMenu(const Core::Context &context);
     void createSubmitEditorActions();
@@ -107,35 +105,34 @@ private:
 
     // Variables
     static FossilPlugin *m_instance;
-    OptionsPage *m_optionsPage;
-    FossilClient *m_client;
+    FossilClient *m_client = nullptr;
 
-    Core::CommandLocator *m_commandLocator;
-    Core::ActionContainer *m_fossilContainer;
+    Core::CommandLocator *m_commandLocator = nullptr;
+    Core::ActionContainer *m_fossilContainer = nullptr;
 
     QList<QAction *> m_repositoryActionList;
 
     // Menu Items (file actions)
-    Utils::ParameterAction *m_addAction;
-    Utils::ParameterAction *m_deleteAction;
-    Utils::ParameterAction *m_annotateFile;
-    Utils::ParameterAction *m_diffFile;
-    Utils::ParameterAction *m_logFile;
-    Utils::ParameterAction *m_renameFile;
-    Utils::ParameterAction *m_revertFile;
-    Utils::ParameterAction *m_statusFile;
+    Utils::ParameterAction *m_addAction = nullptr;
+    Utils::ParameterAction *m_deleteAction = nullptr;
+    Utils::ParameterAction *m_annotateFile = nullptr;
+    Utils::ParameterAction *m_diffFile = nullptr;
+    Utils::ParameterAction *m_logFile = nullptr;
+    Utils::ParameterAction *m_renameFile = nullptr;
+    Utils::ParameterAction *m_revertFile = nullptr;
+    Utils::ParameterAction *m_statusFile = nullptr;
 
-    QAction *m_createRepositoryAction;
+    QAction *m_createRepositoryAction = nullptr;
 
     // Submit editor actions
-    QAction *m_editorCommit;
-    QAction *m_editorDiff;
-    QAction *m_editorUndo;
-    QAction *m_editorRedo;
-    QAction *m_menuAction;
+    QAction *m_editorCommit = nullptr;
+    QAction *m_editorDiff = nullptr;
+    QAction *m_editorUndo = nullptr;
+    QAction *m_editorRedo = nullptr;
+    QAction *m_menuAction = nullptr;
 
     QString m_submitRepository;
-    bool m_submitActionTriggered;
+    bool m_submitActionTriggered = false;
 
 
 #ifdef WITH_TESTS
@@ -148,5 +145,3 @@ private slots:
 
 } // namespace Internal
 } // namespace Fossil
-
-#endif // FOSSILPLUGIN_H

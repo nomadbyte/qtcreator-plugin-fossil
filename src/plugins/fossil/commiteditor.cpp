@@ -37,9 +37,8 @@
 
 using namespace Fossil::Internal;
 
-CommitEditor::CommitEditor(const VcsBase::VcsBaseSubmitEditorParameters *parameters)
-    : VcsBase::VcsBaseSubmitEditor(parameters, new FossilCommitWidget),
-      m_fileModel(0)
+CommitEditor::CommitEditor(const VcsBase::VcsBaseSubmitEditorParameters *parameters) :
+    VcsBase::VcsBaseSubmitEditor(parameters, new FossilCommitWidget)
 {
     document()->setPreferredDisplayName(tr("Commit Editor"));
 }

@@ -31,11 +31,10 @@ using namespace Fossil::Internal;
 using namespace Fossil;
 
 FossilAnnotationHighlighter::FossilAnnotationHighlighter(const ChangeNumbers &changeNumbers,
-                                                         QTextDocument *document)
-    : VcsBase::BaseAnnotationHighlighter(changeNumbers, document),
-      m_changeset(QLatin1String(Constants::CHANGESET_ID))
-{
-}
+                                                         QTextDocument *document) :
+    VcsBase::BaseAnnotationHighlighter(changeNumbers, document),
+    m_changeset(QLatin1String(Constants::CHANGESET_ID))
+{ }
 
 QString FossilAnnotationHighlighter::changeNumber(const QString &block) const
 {

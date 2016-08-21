@@ -44,10 +44,9 @@
 
 using namespace Fossil::Internal;
 
-FossilControl::FossilControl(FossilClient *client)
-    : m_client(client)
-{
-}
+FossilControl::FossilControl(FossilClient *client) :
+    m_client(client)
+{ }
 
 QString FossilControl::displayName() const
 {

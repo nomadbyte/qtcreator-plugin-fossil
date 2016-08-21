@@ -66,8 +66,7 @@ private:
     const QRegExp m_keywordRx;
 };
 
-FossilSubmitHighlighter::FossilSubmitHighlighter(Utils::CompletingTextEdit *parent) :
-    QSyntaxHighlighter(parent),
+FossilSubmitHighlighter::FossilSubmitHighlighter(Utils::CompletingTextEdit *parent) : QSyntaxHighlighter(parent),
     m_commentFormat(commentFormat()),
     m_keywordRx(QLatin1String("\\[([0-9a-f]{5,40})\\]"))
 {
@@ -106,8 +105,8 @@ FossilCommitWidget::FossilCommitWidget() :
     new FossilSubmitHighlighter(descriptionEdit());
     m_branchValidator = new QRegExpValidator(QRegExp(QLatin1String("[^\\n]*")), this);
 
-    connect(m_commitPanelUi.branchLineEdit, SIGNAL(textChanged(QString)),
-            this, SLOT(branchChanged()));
+    connect(m_commitPanelUi.branchLineEdit, &QLineEdit::textChanged,
+            this, &FossilCommitWidget::branchChanged);
 }
 
 void FossilCommitWidget::setFields(const QString &repoPath, const BranchInfo &branch,

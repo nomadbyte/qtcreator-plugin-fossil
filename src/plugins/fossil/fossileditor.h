@@ -24,8 +24,7 @@
 **  THE SOFTWARE.
 **************************************************************************/
 
-#ifndef FOSSILEDITOR_H
-#define FOSSILEDITOR_H
+#pragma once
 
 #include <vcsbase/vcsbaseeditor.h>
 
@@ -41,9 +40,6 @@ class FossilEditorWidget : public VcsBase::VcsBaseEditorWidget
 public:
     FossilEditorWidget();
 
-//private slots:
-//    void slotChangeContents();
-
 private:
     QSet<QString> annotationChanges() const override;
     QString changeUnderCursor(const QTextCursor &cursor) const override;
@@ -57,5 +53,3 @@ private:
 
 } // namespace Internal
 } // namespace Fossil
-
-#endif // FOSSILEDITOR_H

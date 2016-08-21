@@ -24,8 +24,7 @@
 **  THE SOFTWARE.
 **************************************************************************/
 
-#ifndef COMMITEDITOR_H
-#define COMMITEDITOR_H
+#pragma once
 
 #include <vcsbase/vcsbaseclient.h>
 #include <vcsbase/vcsbasesubmiteditor.h>
@@ -52,9 +51,8 @@ public:
     FossilCommitWidget *commitWidget();
 
 private:
-    VcsBase::SubmitFileModel *m_fileModel;
+    VcsBase::SubmitFileModel *m_fileModel = nullptr;
 };
 
 }
 }
-#endif // COMMITEDITOR_H

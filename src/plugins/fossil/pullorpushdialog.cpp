@@ -34,8 +34,7 @@
 
 using namespace Fossil::Internal;
 
-PullOrPushDialog::PullOrPushDialog(Mode mode, QWidget *parent) :
-    QDialog(parent),
+PullOrPushDialog::PullOrPushDialog(Mode mode, QWidget *parent) : QDialog(parent),
     m_mode(mode),
     m_ui(new Ui::PullOrPushDialog)
 {
@@ -55,7 +54,7 @@ PullOrPushDialog::PullOrPushDialog(Mode mode, QWidget *parent) :
     // select URL text in line edit when clicking the radio button
     m_ui->localButton->setFocusProxy(m_ui->localPathChooser);
     m_ui->urlButton->setFocusProxy(m_ui->urlLineEdit);
-    connect(m_ui->urlButton, SIGNAL(clicked(bool)), m_ui->urlLineEdit, SLOT(selectAll()));
+    connect(m_ui->urlButton, &QRadioButton::clicked, m_ui->urlLineEdit, &QLineEdit::selectAll);
 
     this->adjustSize();
 }

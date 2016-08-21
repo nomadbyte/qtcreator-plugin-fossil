@@ -4,8 +4,8 @@ Project {
     name: "Plugins"
 
     references: [
-        "analyzerbase/analyzerbase.qbs",
         "android/android.qbs",
+        "autotest/autotest.qbs",
         "autotoolsprojectmanager/autotoolsprojectmanager.qbs",
         "baremetal/baremetal.qbs",
         "bazaar/bazaar.qbs",
@@ -13,6 +13,7 @@ Project {
         "bineditor/bineditor.qbs",
         "bookmarks/bookmarks.qbs",
         "clangcodemodel/clangcodemodel.qbs",
+        "clangstaticanalyzer/clangstaticanalyzer.qbs",
         "classview/classview.qbs",
         "clearcase/clearcase.qbs",
         "cmakeprojectmanager/cmakeprojectmanager.qbs",
@@ -49,6 +50,7 @@ Project {
         "qmljseditor/qmljseditor.qbs",
         "qmljstools/qmljstools.qbs",
         "qmlprofiler/qmlprofiler.qbs",
+        "qmlprofilerextension/qmlprofilerextension.qbs",
         "qmlprojectmanager/qmlprojectmanager.qbs",
         "qnx/qnx.qbs",
         "qmakeprojectmanager/qmakeprojectmanager.qbs",

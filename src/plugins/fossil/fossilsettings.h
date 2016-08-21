@@ -24,8 +24,7 @@
 **  THE SOFTWARE.
 **************************************************************************/
 
-#ifndef FOSSILSETTINGS_H
-#define FOSSILSETTINGS_H
+#pragma once
 
 #include <vcsbase/vcsbaseclientsettings.h>
 
@@ -81,5 +80,3 @@ inline QDebug operator<< (QDebug dbg, const RepositorySettings& rh) {
 
 } // namespace Internal
 } // namespace Fossil
-
-#endif // FOSSILSETTINGS_H

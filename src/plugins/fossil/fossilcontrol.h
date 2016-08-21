@@ -24,8 +24,7 @@
 **  THE SOFTWARE.
 **************************************************************************/
 
-#ifndef FOSSILCONTROL_H
-#define FOSSILCONTROL_H
+#pragma once
 
 #include <coreplugin/iversioncontrol.h>
 
@@ -66,17 +65,14 @@ public:
                                                      const QString &localName,
                                                      const QStringList &extraArgs) override;
 
-public slots:
     // To be connected to the VcsTask's success signal to emit the repository/
     // files changed signals according to the variant's type:
     // String -> repository, StringList -> files
     void changed(const QVariant &);
 
 private:
-    FossilClient *m_client;
+    FossilClient *const m_client;
 };
 
 } // namespace Internal
 } // namespace Fossil
-
-#endif // FOSSILCONTROL_H

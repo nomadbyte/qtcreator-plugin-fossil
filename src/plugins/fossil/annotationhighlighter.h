@@ -24,8 +24,7 @@
 **  THE SOFTWARE.
 **************************************************************************/
 
-#ifndef ANNOTATIONHIGHLIGHTER_H
-#define ANNOTATIONHIGHLIGHTER_H
+#pragma once
 
 #include <vcsbase/baseannotationhighlighter.h>
 #include <QRegExp>
@@ -37,7 +36,7 @@ class FossilAnnotationHighlighter : public VcsBase::BaseAnnotationHighlighter
 {
 public:
     explicit FossilAnnotationHighlighter(const ChangeNumbers &changeNumbers,
-                                         QTextDocument *document = 0);
+                                         QTextDocument *document = nullptr);
 
 private:
     QString changeNumber(const QString &block) const override;
@@ -46,4 +45,3 @@ private:
 
 } // namespace Internal
 } // namespace Fossil
-#endif // ANNOTATIONHIGHLIGHTER_H

@@ -24,8 +24,7 @@
 **  THE SOFTWARE.
 **************************************************************************/
 
-#ifndef PULLORPUSHDIALOG_H
-#define PULLORPUSHDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -45,7 +44,7 @@ public:
     };
 
     explicit PullOrPushDialog(Mode mode, QWidget *parent = 0);
-    ~PullOrPushDialog();
+    ~PullOrPushDialog() override;
 
     // Common parameters and options
     QString remoteLocation() const;
@@ -57,7 +56,7 @@ public:
     // Push-specific options
 
 protected:
-    void changeEvent(QEvent *e);
+    void changeEvent(QEvent *e) override;
 
 private:
     Mode m_mode;
@@ -66,5 +65,3 @@ private:
 
 } // namespace Internal
 } // namespace Fossil
-
-#endif // PULLORPUSHDIALOG_H

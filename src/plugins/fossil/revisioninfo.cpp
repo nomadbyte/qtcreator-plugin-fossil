@@ -32,8 +32,7 @@ namespace Internal {
 RevisionInfo::RevisionInfo(const QString &revisionId, const QString &parent) :
     id(revisionId),
     parentId(parent)
-{
-}
+{ }
 
 } // namespace Internal
 } // namespace Fossil

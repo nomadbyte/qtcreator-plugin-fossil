@@ -47,10 +47,10 @@ using namespace Fossil::Internal;
 using namespace Fossil;
 
 FossilEditorWidget::FossilEditorWidget() :
-      m_exactChangesetId(QLatin1String(Constants::CHANGESET_ID_EXACT)),
-      m_exactDiffFileId(QLatin1String(Constants::DIFFFILE_ID_EXACT)),
-      m_firstChangesetId(QString(QLatin1String("\n%1 ")).arg(QLatin1String(Constants::CHANGESET_ID))),
-      m_nextChangesetId(QString(QLatin1String("\n%1 ")).arg(QLatin1String(Constants::CHANGESET_ID)))
+    m_exactChangesetId(QLatin1String(Constants::CHANGESET_ID_EXACT)),
+    m_exactDiffFileId(QLatin1String(Constants::DIFFFILE_ID_EXACT)),
+    m_firstChangesetId(QString(QLatin1String("\n%1 ")).arg(QLatin1String(Constants::CHANGESET_ID))),
+    m_nextChangesetId(QString(QLatin1String("\n%1 ")).arg(QLatin1String(Constants::CHANGESET_ID)))
 {
     QTC_ASSERT(m_exactChangesetId.isValid(), return);
     QTC_ASSERT(m_exactDiffFileId.isValid(), return);
@@ -64,24 +64,7 @@ FossilEditorWidget::FossilEditorWidget() :
     QRegExp logChangePattern(QLatin1String("^.*\\[([0-9a-f]{5,40})\\]"));
     QTC_ASSERT(logChangePattern.isValid(), return);
     setLogEntryPattern(logChangePattern);
-
-    //VcsBase::DiffHighlighter *dh = createDiffHighlighter(); // own implementation
-    //baseTextDocument()->setSyntaxHighlighter(dh);
-
-    //connect(this, SIGNAL(textChanged()), this, SLOT(slotChangeContents()));
 }
-
-//void FossilEditor::slotChangeContents()
-//{
-//    QPlainTextEdit te(toPlainText().replace(QLatin1Char('\n'), QLatin1String("\r\n")));
-//    QByteArray qba(toPlainText().toStdString().c_str());
-//    disconnect(this, SIGNAL(textChanged()), this, SLOT(slotChangeContents()));
-//    //setPlainText(toPlainText());
-//    connect(this, SIGNAL(textChanged()), this, SLOT(slotChangeContents()));
-//    qDebug() << "slotChangeContents():: document:" << Utils::SynchronousProcess::normalizeNewlines(toPlainText());
-//    //qDebug() << "slotChangeContents():: document:" << qba.toHex();
-//}
-
 
 QSet<QString> FossilEditorWidget::annotationChanges() const
 {

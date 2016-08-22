@@ -56,6 +56,10 @@
             \li \l{http://www.cvshome.org}
             \li
         \row
+            \li Fossil
+            \li \l{http://www.fossil-scm.org}
+            \li Fossil version 1.26 and later
+        \row
             \li Git
             \li \l{http://git-scm.com/}
             \li Git version 1.8.0, or later
@@ -163,7 +167,7 @@
     \section1 Creating VCS Repositories for New Projects
 
     \QC allows you to create repositories for version control systems that
-    support local repository creation, such as Git, Mercurial, or Bazaar.
+    support local repository creation, such as Git, Mercurial, Fossil, or Bazaar.
     When creating a new project by selecting \uicontrol File > \uicontrol{New File or
     Project}, you can choose a version control system on the final wizard page.
 
@@ -428,6 +432,34 @@
     In addition to the standard version control system functions, you can
     select \uicontrol Tools > \uicontrol CVS > \uicontrol Edit to open a file for editing.
     To discard the changes that you made in a file, select \uicontrol Unedit.
+
+    \section2 Using Additional Fossil Functions
+
+    Fossil is a free and open-source distributed version control system, designed
+    and developed by creator of SQLite. Reliable, simple, and versatile -- a
+    stand-alone executable contains SCM engine, web-interface, bug-tracking, wiki,
+    and built-in web-server. Fossil is available for Linux, Windows and Mac.
+
+    The \uicontrol Fossil submenu contains the following additional items:
+
+    \table
+        \header
+            \li Menu Item
+            \li Description
+        \row
+            \li \uicontrol Pull
+            \li Pull changes from the remote repository.
+        \row
+            \li \uicontrol Push
+            \li Push committed changes to the remote repository.
+        \row
+            \li \uicontrol Update
+            \li Change the version of the current checkout. Any uncommitted
+                changes are retained and applied to the new checkout.
+        \row
+            \li \uicontrol Settings
+            \li Configure settings of the local repository.
+    \endtable
 
     \section2 Using Additional Git Functions
 

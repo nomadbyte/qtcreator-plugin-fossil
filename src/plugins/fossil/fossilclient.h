@@ -89,9 +89,9 @@ public:
                          const QStringList &extraOptions = QStringList()) override;
     void commit(const QString &repositoryRoot, const QStringList &files,
                 const QString &commitMessageFile, const QStringList &extraOptions = QStringList()) override;
-    void annotate(const QString &workingDir, const QString &file,
-                  const QString &revision = QString(), int lineNumber = -1,
-                  const QStringList &extraOptions = QStringList()) override;
+    VcsBase::VcsBaseEditorWidget *annotate(
+            const QString &workingDir, const QString &file, const QString &revision = QString(),
+            int lineNumber = -1, const QStringList &extraOptions = QStringList()) override;
     void log(const QString &workingDir, const QStringList &files = QStringList(),
              const QStringList &extraOptions = QStringList(),
              bool enableAnnotationContextMenu = false) override;

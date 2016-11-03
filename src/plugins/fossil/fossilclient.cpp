@@ -35,7 +35,6 @@
 #include <vcsbase/vcsoutputwindow.h>
 #include <vcsbase/vcscommand.h>
 
-#include <utils/synchronousprocess.h>
 #include <utils/qtcassert.h>
 
 #include <QSyntaxHighlighter>
@@ -280,13 +279,12 @@ unsigned int FossilClient::synchronousBinaryVersion() const
     QStringList args;
     args << QLatin1String("version");
 
-    QByteArray outputData;
-    if (!vcsFullySynchronousExec(QString(), args, &outputData))
+    const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(QString(), args);
+    if (response.result != Utils::SynchronousProcessResponse::Finished)
         return 0;
 
-    QString output = QString::fromLocal8Bit(outputData);
+    QString output = response.stdOut();
     output.remove(QLatin1Char('\r'));
-
     if (output.endsWith(QLatin1Char('\n')))
         output.truncate(output.size()-1);
 
@@ -334,13 +332,12 @@ BranchInfo FossilClient::synchronousBranchQuery(const QString &workingDirectory,
         if (getClosedBranches)
              args << QLatin1String("--closed");
 
-        QByteArray outputData;
-        if (!vcsFullySynchronousExec(workingDirectory, args, &outputData))
+        const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, args);
+        if (response.result != Utils::SynchronousProcessResponse::Finished)
             return nullBranch;
 
-        QString output = QString::fromLocal8Bit(outputData);
+        QString output = response.stdOut();
         output.remove(QLatin1Char('\r'));
-
         if (output.endsWith(QLatin1Char('\n')))
             output.truncate(output.size()-1);
 
@@ -400,12 +397,12 @@ RevisionInfo FossilClient::synchronousRevisionQuery(const QString &workingDirect
     if (!id.isEmpty())
         args << id;
 
-    QByteArray outputData;
-    if (!vcsFullySynchronousExec(workingDirectory, args, &outputData))
+    const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, args);
+    if (response.result != Utils::SynchronousProcessResponse::Finished)
         return RevisionInfo(QString(),QString());
-    QString output = QString::fromLocal8Bit(outputData);
-    output.remove(QLatin1Char('\r'));
 
+    QString output = response.stdOut();
+    output.remove(QLatin1Char('\r'));
     if (output.endsWith(QLatin1Char('\n')))
         output.truncate(output.size()-1);
 
@@ -456,13 +453,12 @@ QStringList FossilClient::synchronousTagQuery(const QString &workingDirectory, c
     if (!id.isEmpty())
         args << id;
 
-    QByteArray outputData;
-    if (!vcsFullySynchronousExec(workingDirectory, args, &outputData))
+    const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, args);
+    if (response.result != Utils::SynchronousProcessResponse::Finished)
         return QStringList();
 
-    QString output = QString::fromLocal8Bit(outputData);
+    QString output = response.stdOut();
     output.remove(QLatin1Char('\r'));
-
     if (output.endsWith(QLatin1Char('\n')))
         output.truncate(output.size()-1);
 
@@ -485,12 +481,12 @@ RepositorySettings FossilClient::synchronousSettingsQuery(const QString &working
     QStringList args;
     args << QLatin1String("settings");
 
-    QByteArray outputData;
-    if (!vcsFullySynchronousExec(workingDirectory, args, &outputData))
+    const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, args);
+    if (response.result != Utils::SynchronousProcessResponse::Finished)
         return RepositorySettings();
-    QString output = QString::fromLocal8Bit(outputData);
-    output.remove(QLatin1Char('\r'));
 
+    QString output = response.stdOut();
+    output.remove(QLatin1Char('\r'));
     if (output.endsWith(QLatin1Char('\n')))
         output.truncate(output.size()-1);
 
@@ -553,8 +549,8 @@ bool FossilClient::synchronousSetSetting(const QString &workingDirectory,
 
     args << extraOptions;
 
-    QByteArray outputData;
-    return vcsFullySynchronousExec(workingDirectory, args, &outputData);
+    const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, args);
+    return (response.result == Utils::SynchronousProcessResponse::Finished);
 }
 
 
@@ -609,12 +605,12 @@ QString FossilClient::synchronousUserDefaultQuery(const QString &workingDirector
     QStringList args;
     args << QLatin1String("user") << QLatin1String("default");
 
-    QByteArray outputData;
-    if (!vcsFullySynchronousExec(workingDirectory, args, &outputData))
+    const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, args);
+    if (response.result != Utils::SynchronousProcessResponse::Finished)
         return QString();
-    QString output = QString::fromLocal8Bit(outputData);
-    output.remove(QLatin1Char('\r'));
 
+    QString output = response.stdOut();
+    output.remove(QLatin1Char('\r'));
     if (output.endsWith(QLatin1Char('\n')))
         output.truncate(output.size()-1);
 
@@ -630,8 +626,8 @@ bool FossilClient::synchronousSetUserDefault(const QString &workingDirectory, co
     QStringList args;
     args << QLatin1String("user") << QLatin1String("default") << userName
          << QLatin1String("--user") << userName;
-    QByteArray outputData;
-    return vcsFullySynchronousExec(workingDirectory, args, &outputData);
+    const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, args);
+    return (response.result == Utils::SynchronousProcessResponse::Finished);
 }
 
 QString FossilClient::synchronousGetRepositoryURL(const QString &workingDirectory)
@@ -642,12 +638,12 @@ QString FossilClient::synchronousGetRepositoryURL(const QString &workingDirector
     QStringList args;
     args << QLatin1String("remote-url");
 
-    QByteArray outputData;
-    if (!vcsFullySynchronousExec(workingDirectory, args, &outputData))
+    const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, args);
+    if (response.result != Utils::SynchronousProcessResponse::Finished)
         return QString();
-    QString output = QString::fromLocal8Bit(outputData);
-    output.remove(QLatin1Char('\r'));
 
+    QString output = response.stdOut();
+    output.remove(QLatin1Char('\r'));
     if (output.endsWith(QLatin1Char('\n')))
         output.truncate(output.size()-1);
 
@@ -715,23 +711,26 @@ bool FossilClient::synchronousCreateRepository(const QString &workingDirectory, 
     if (!adminUser.isEmpty())
         args << QLatin1String("--admin-user") << adminUser;
     args << extraOptions << repoFileNative;
-    QByteArray outputData;
-    if (!vcsFullySynchronousExec(workingDirectory, args, &outputData))
+    Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, args);
+    if (response.result != Utils::SynchronousProcessResponse::Finished)
         return false;
-    QString output = QString::fromLocal8Bit(outputData);
+
+    QString output = response.stdOut();
     output.remove(QLatin1Char('\r'));
     outputWindow->append(output);
 
     // check out the created repository file into the working directory
 
     args.clear();
-    outputData.clear();
+    response.clear();
     output.clear();
 
     args << QLatin1String("open") << repoFileNative;
-    if (!vcsFullySynchronousExec(workingDirectory, args, &outputData))
+    response = vcsFullySynchronousExec(workingDirectory, args);
+    if (response.result != Utils::SynchronousProcessResponse::Finished)
         return false;
-    output = QString::fromLocal8Bit(outputData);
+
+    output = response.stdOut();
     output.remove(QLatin1Char('\r'));
     outputWindow->append(output);
 
@@ -739,15 +738,16 @@ bool FossilClient::synchronousCreateRepository(const QString &workingDirectory, 
 
     if (!adminUser.isEmpty()) {
         args.clear();
-        outputData.clear();
+        response.clear();
         output.clear();
 
         args << QLatin1String("user") << QLatin1String("default") << adminUser
              << QLatin1String("--user") << adminUser;
-        QByteArray outputData;
-        if (!vcsFullySynchronousExec(workingDirectory, args, &outputData))
+        response = vcsFullySynchronousExec(workingDirectory, args);
+        if (response.result != Utils::SynchronousProcessResponse::Finished)
             return false;
-        QString output = QString::fromLocal8Bit(outputData);
+
+        output = response.stdOut();
         output.remove(QLatin1Char('\r'));
         outputWindow->append(output);
     }
@@ -770,8 +770,8 @@ bool FossilClient::synchronousMove(const QString &workingDir,
 
     QStringList args;
     args << vcsCommandString(MoveCommand) << extraOptions << from << to;
-    QByteArray stdOut;
-    return vcsFullySynchronousExec(workingDir, args, &stdOut);
+    const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDir, args);
+    return (response.result == Utils::SynchronousProcessResponse::Finished);
 }
 
 bool FossilClient::synchronousPull(const QString &workingDir, const QString &srcLocation, const QStringList &extraOptions)
@@ -824,10 +824,9 @@ void FossilClient::commit(const QString &repositoryRoot, const QStringList &file
                           QStringList(extraOptions) << QLatin1String("-M") << commitMessageFile);
 }
 
-void FossilClient::annotate(const QString &workingDir, const QString &file,
-                            const QString &revision,
-                            int lineNumber,
-                            const QStringList &extraOptions)
+VcsBase::VcsBaseEditorWidget *FossilClient::annotate(
+        const QString &workingDir, const QString &file, const QString &revision,
+        int lineNumber, const QStringList &extraOptions)
 {
     // 'fossil annotate' command has a variant 'fossil blame'
     // blame command attributes committing username to source lines
@@ -847,7 +846,7 @@ void FossilClient::annotate(const QString &workingDir, const QString &file,
     if (!paramWidget && (paramWidget = createAnnotateEditor())) {
         // editor has been just created, createVcsEditor() didn't set a configuration widget yet
         connect(paramWidget, &VcsBase::VcsBaseEditorParameterWidget::commandExecutionRequested,
-                [=]() { this->annotate(workingDir, file, revision, lineNumber, extraOptions); } );
+                [=]() { return this->annotate(workingDir, file, revision, lineNumber, extraOptions); } );
         editor->setConfigurationWidget(paramWidget);
     }
 
@@ -856,7 +855,7 @@ void FossilClient::annotate(const QString &workingDir, const QString &file,
 
     // here we introduce a "|BLAME|" meta-option to allow both annotate and blame modes
     QRegExp blameMetaOptionRx = QRegExp(QLatin1String("\\|BLAME\\|"));
-    QTC_ASSERT(blameMetaOptionRx.isValid(), return);
+    QTC_ASSERT(blameMetaOptionRx.isValid(), return editor);
     QStringList paramArgs = paramWidget != 0 ? paramWidget->arguments() : QStringList();
 
     int foundAt = paramArgs.indexOf(blameMetaOptionRx);
@@ -870,6 +869,7 @@ void FossilClient::annotate(const QString &workingDir, const QString &file,
          << extraOptions << paramArgs << QLatin1String("--log") << file;
 
     enqueueJob(cmd, args);
+    return editor;
 }
 
 QString FossilClient::findTopLevelForFile(const QFileInfo &file) const
@@ -887,10 +887,10 @@ bool FossilClient::managesFile(const QString &workingDirectory, const QString &f
 {
     QStringList args(QLatin1String("finfo"));
     args << fileName;
-    QByteArray stdOut;
-    if (!vcsFullySynchronousExec(workingDirectory, args, &stdOut))
+    const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, args);
+    if (response.result != Utils::SynchronousProcessResponse::Finished)
         return false;
-    return !stdOut.startsWith("no history for file");
+    return !response.stdOut().startsWith("no history for file");
 }
 
 unsigned int FossilClient::binaryVersion() const

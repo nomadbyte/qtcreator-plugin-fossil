@@ -273,8 +273,12 @@ void FossilPlugin::logCurrentFile()
 {
     const VcsBase::VcsBasePluginState state = currentState();
     QTC_ASSERT(state.hasFile(), return);
+    FossilClient::SupportedFeatures features = m_client->supportedFeatures();
     QStringList extraOptions;
     extraOptions << QLatin1String("-n") << QString::number(m_client->settings().intValue(FossilSettings::logCountKey));
+
+    if (features.testFlag(FossilClient::TimelineWidthFeature))
+        extraOptions << QLatin1String("-W") << QString::number(m_client->settings().intValue(FossilSettings::timelineWidthKey));
 
     // annotate only supported for current revision, so disable context menu
     bool enableAnnotationContextMenu = false;

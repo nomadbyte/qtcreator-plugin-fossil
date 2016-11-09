@@ -1,6 +1,12 @@
 qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
 =================================
 
+## 2.4.1_6 - 2016-11-09
+
+- client min. version `fossil 1.33`
+- __FIXED__:`Timeline Current File` ignores width `-W` option.
+
+
 ## 2.4.1_5 - 2016-01-10
 
 - client min. version `fossil 1.33`

@@ -108,30 +108,10 @@
       <string>Miscellaneous</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="6">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>213</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="showLogEntriesLabel">
         <property name="text">
          <string>Log count:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QLabel" name="timeoutSecondsLabel">
-        <property name="text">
-         <string>Timeout:</string>
         </property>
        </widget>
       </item>
@@ -168,16 +148,10 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0" colspan="5">
-       <widget class="QCheckBox" name="disableAutosyncCheckBox">
-        <property name="toolTip">
-         <string>Disable automatic pull/push of local changes to the remote repository.</string>
-        </property>
+      <item row="0" column="4">
+       <widget class="QLabel" name="timeoutSecondsLabel">
         <property name="text">
-         <string>Disable auto-sync</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
+         <string>Timeout:</string>
         </property>
        </widget>
       </item>
@@ -188,6 +162,32 @@
         </property>
         <property name="value">
          <number>30</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="6">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>213</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="2" column="0" colspan="5">
+       <widget class="QCheckBox" name="disableAutosyncCheckBox">
+        <property name="toolTip">
+         <string>Disable automatic pull/push of local changes to the remote repository.</string>
+        </property>
+        <property name="text">
+         <string>Disable auto-sync</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
         </property>
        </widget>
       </item>

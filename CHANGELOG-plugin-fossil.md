@@ -1,6 +1,13 @@
 qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
 =================================
 
+## 3.0.1_5 - 2016-11-09
+
+- client min. version `fossil 1.33`
+- __FIXED__:`Timeline Current File` ignores width `-W` option.
+- __FIXED__:`Options` incorrect tab-order.
+
+
 ## 3.0.1_4 - 2016-01-10
 
 - client min. version `fossil 1.33`

@@ -106,7 +106,7 @@
                 {
                     "name": "LocalRepo",
                     "trDisplayName": "Local Repository:",
-                    "trToolTip": "Path of an exisiting local fossil file to check out from.",
+                    "trToolTip": "Path of an existing local fossil file to check out from.",
                     "type": "PathChooser",
                     "enabled": "%{isLocalRepo}",
                     "mandatory": false,

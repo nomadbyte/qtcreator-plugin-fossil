@@ -174,7 +174,7 @@ Core::ShellCommand *FossilControl::createInitialCheckoutCommand(const QString &s
     //
     //  2) LocalCheckout:
     //  -- open/checkout an existing local fossil
-    //  Clone URL is an absoulte local path and is the same as the local fossil.
+    //  Clone URL is an absolute local path and is the same as the local fossil.
 
     QString checkoutPath = FossilClient::buildPath(baseDirectory.toString(), localName, QString());
     QString fossilFile = options.value(QLatin1String("fossil-file"));

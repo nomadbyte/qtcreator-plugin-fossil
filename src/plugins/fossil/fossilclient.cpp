@@ -678,12 +678,12 @@ QString FossilClient::synchronousTopic(const QString &workingDirectory)
     QDateTime lastModified = currentStateFile.lastModified();
     if (lastModified == data.timeStamp)
         return data.topic;
-    data.timeStamp = lastModified;
 
     BranchInfo branchInfo = synchronousBranchQuery(workingDirectory);
     if (branchInfo.name().isEmpty())
         return QString();
 
+    data.timeStamp = lastModified;
     return data.topic = branchInfo.name();
 }
 

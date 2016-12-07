@@ -221,14 +221,14 @@ void FossilPlugin::createFileActions(const Core::Context &context)
 
     m_fossilContainer->addSeparator(context);
 
-    m_addAction = new Utils::ParameterAction(tr("Add"), tr("Add \"%1\""), Utils::ParameterAction::EnabledWithParameter, this);
+    m_addAction = new Utils::ParameterAction(tr("Add Current File"), tr("Add \"%1\""), Utils::ParameterAction::EnabledWithParameter, this);
     command = Core::ActionManager::registerAction(m_addAction, Constants::ADD, context);
     command->setAttribute(Core::Command::CA_UpdateText);
     connect(m_addAction, &QAction::triggered, this, &FossilPlugin::addCurrentFile);
     m_fossilContainer->addAction(command);
     m_commandLocator->appendCommand(command);
 
-    m_deleteAction = new Utils::ParameterAction(tr("Delete..."), tr("Delete \"%1\"..."), Utils::ParameterAction::EnabledWithParameter, this);
+    m_deleteAction = new Utils::ParameterAction(tr("Delete Current File..."), tr("Delete \"%1\"..."), Utils::ParameterAction::EnabledWithParameter, this);
     command = Core::ActionManager::registerAction(m_deleteAction, Constants::DELETE, context);
     command->setAttribute(Core::Command::CA_UpdateText);
     connect(m_deleteAction, &QAction::triggered, this, &FossilPlugin::deleteCurrentFile);

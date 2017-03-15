@@ -53,7 +53,7 @@ public:
 
 struct RepositorySettings
 {
-    enum AutosyncMode {AutosyncOff=0, AutosyncOn=1, AutosyncPullOnly};
+    enum AutosyncMode {AutosyncOff = 0, AutosyncOn = 1, AutosyncPullOnly};
 
     QString user;
     AutosyncMode autosync;

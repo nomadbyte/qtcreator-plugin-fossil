@@ -38,7 +38,7 @@ namespace Internal {
 class RevisionInfo
 {
 public:
-    RevisionInfo(const QString &revisionId, const QString &parent);
+    explicit RevisionInfo(const QString &revisionId = QString(), const QString &parent = QString());
 
     const QString id;
     const QString parentId;

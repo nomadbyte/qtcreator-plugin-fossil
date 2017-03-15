@@ -56,10 +56,11 @@ class FossilDiffParameterWidget : public VcsBase::VcsBaseEditorParameterWidget
 {
     Q_OBJECT
 public:
-    FossilDiffParameterWidget(FossilClient* client, QWidget *parent = 0) :
+    FossilDiffParameterWidget(FossilClient *client, QWidget *parent = 0) :
         VcsBase::VcsBaseEditorParameterWidget(parent),
         m_client(client)
     {
+        QTC_ASSERT(m_client, return);
         VcsBase::VcsBaseClientSettings &settings = m_client->settings();
         FossilClient::SupportedFeatures features = m_client->supportedFeatures();
 
@@ -78,7 +79,7 @@ public:
     }
 
 private:
-    FossilClient* m_client;
+    FossilClient *m_client;
 };
 
 // Parameter widget controlling annotate/blame mode
@@ -86,10 +87,11 @@ class FossilAnnotateParameterWidget : public VcsBase::VcsBaseEditorParameterWidg
 {
     Q_OBJECT
 public:
-    FossilAnnotateParameterWidget(FossilClient* client, QWidget *parent = 0) :
+    FossilAnnotateParameterWidget(FossilClient *client, QWidget *parent = 0) :
         VcsBase::VcsBaseEditorParameterWidget(parent),
         m_client(client)
     {
+        QTC_ASSERT(m_client, return);
         VcsBase::VcsBaseClientSettings &settings = m_client->settings();
         FossilClient::SupportedFeatures features = m_client->supportedFeatures();
 
@@ -106,31 +108,33 @@ public:
     }
 
 private:
-    FossilClient* m_client;
+    FossilClient *m_client;
 };
 
 class FossilLogCurrentFileParameterWidget : public VcsBase::VcsBaseEditorParameterWidget
 {
     Q_OBJECT
 public:
-    FossilLogCurrentFileParameterWidget(FossilClient* client, QWidget *parent = 0) :
+    FossilLogCurrentFileParameterWidget(FossilClient *client, QWidget *parent = 0) :
         VcsBase::VcsBaseEditorParameterWidget(parent),
         m_client(client)
     {
+        QTC_ASSERT(m_client, return);
     }
 
 private:
-    FossilClient* m_client;
+    FossilClient *m_client;
 };
 
 class FossilLogParameterWidget : public VcsBase::VcsBaseEditorParameterWidget
 {
     Q_OBJECT
 public:
-    FossilLogParameterWidget(FossilClient* client, QWidget *parent = 0) :
+    FossilLogParameterWidget(FossilClient *client, QWidget *parent = 0) :
         VcsBase::VcsBaseEditorParameterWidget(parent),
         m_client(client)
     {
+        QTC_ASSERT(m_client, return);
         addLineageComboBox();
         addVerboseToggleButton();
         addItemTypeComboBox();
@@ -225,7 +229,7 @@ unsigned FossilClient::makeVersionNumber(int major, int minor, int patch)
 {
     const unsigned version = (QString().setNum(major).toUInt(0,16) << 16) +
                              (QString().setNum(minor).toUInt(0,16) << 8) +
-                             (QString().setNum(patch).toUInt(0,6));
+                             (QString().setNum(patch).toUInt(0,16));
 
     return version;
 }
@@ -390,7 +394,7 @@ RevisionInfo FossilClient::synchronousRevisionQuery(const QString &workingDirect
     // Query details of the given revision/check-out id,
     // if none specified, provide information about current revision
     if (workingDirectory.isEmpty())
-        return RevisionInfo(QString(),QString());
+        return RevisionInfo();
 
     QStringList args;
     args << QLatin1String("info");
@@ -399,7 +403,7 @@ RevisionInfo FossilClient::synchronousRevisionQuery(const QString &workingDirect
 
     const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, args);
     if (response.result != Utils::SynchronousProcessResponse::Finished)
-        return RevisionInfo(QString(),QString());
+        return RevisionInfo();
 
     QString output = response.stdOut();
     output.remove(QLatin1Char('\r'));
@@ -414,8 +418,8 @@ RevisionInfo FossilClient::synchronousRevisionQuery(const QString &workingDirect
     const QRegExp parentIdRx(QLatin1String("parent:\\s*([0-9a-f]{5,40})"));
     if (id.isEmpty())
         revisionIdRx = currentRevisionIdRx;
-    QTC_ASSERT(revisionIdRx.isValid(), return RevisionInfo(QString(),QString()));
-    QTC_ASSERT(parentIdRx.isValid(), return RevisionInfo(QString(),QString()));
+    QTC_ASSERT(revisionIdRx.isValid(), return RevisionInfo());
+    QTC_ASSERT(parentIdRx.isValid(), return RevisionInfo());
 
     //NOTE: parent does not exist for the root (initial empty check-in)
     //      yet in this context we set parentId to its own revisionId
@@ -432,7 +436,7 @@ RevisionInfo FossilClient::synchronousRevisionQuery(const QString &workingDirect
 
     // make sure id at least partially matches the retrieved revisionId
     QTC_ASSERT(revisionId.left(id.size()).compare(id,Qt::CaseInsensitive) == 0,
-               return RevisionInfo(QString(),QString()));
+               return RevisionInfo());
 
     return RevisionInfo(revisionId, parentId);
 }
@@ -503,24 +507,24 @@ RepositorySettings FossilClient::synchronousSettingsQuery(const QString &working
         const QChar spaceChar(QLatin1Char(' '));
         QStringList fields = line.split(spaceChar, QString::SkipEmptyParts);
 
-        QString property = fields[0];
+        QString property = fields.at(0).toLower();
         QString value;
         if (fields.size() >= 3)
-            value = fields[2];
+            value = fields.at(2);
+        QString lcValue = value.toLower();
 
         if (property == QLatin1String("autosync")) {
-            if (value == QLatin1String("on")
-                || value == QLatin1String("1"))
+            if (lcValue == QLatin1String("on")
+                || lcValue == QLatin1String("1"))
                 repoSettings.autosync = RepositorySettings::AutosyncOn;
-            else if (value == QLatin1String("off")
-                     || value == QLatin1String("0"))
+            else if (lcValue == QLatin1String("off")
+                     || lcValue == QLatin1String("0"))
                      repoSettings.autosync = RepositorySettings::AutosyncOff;
-            else if (value == QLatin1String("pullonly")
-                     || value == QLatin1String("2"))
+            else if (lcValue == QLatin1String("pullonly")
+                     || lcValue == QLatin1String("2"))
                      repoSettings.autosync = RepositorySettings::AutosyncPullOnly;
         }
-
-        if (property == QLatin1String("ssl-identity")) {
+        else if (property == QLatin1String("ssl-identity")) {
             repoSettings.sslIdentityFile = value;
         }
     }
@@ -557,8 +561,6 @@ bool FossilClient::synchronousSetSetting(const QString &workingDirectory,
 bool FossilClient::synchronousConfigureRepository(const QString &workingDirectory, const RepositorySettings &newSettings,
                                                   const RepositorySettings &currentSettings)
 {
-    bool result = false;
-
     if (workingDirectory.isEmpty())
         return false;
 
@@ -567,13 +569,15 @@ bool FossilClient::synchronousConfigureRepository(const QString &workingDirector
 
     if (!newSettings.user.isEmpty()
         && (applyAll
-            || newSettings.user != currentSettings.user)) {
-        result &= synchronousSetUserDefault(workingDirectory, newSettings.user);
+            || newSettings.user != currentSettings.user)
+            && !synchronousSetUserDefault(workingDirectory, newSettings.user)) {
+        return false;
     }
 
-    if (applyAll
-        || newSettings.sslIdentityFile != currentSettings.sslIdentityFile) {
-        result &= synchronousSetSetting(workingDirectory,QLatin1String("ssl-identity"), newSettings.sslIdentityFile);
+    if ((applyAll
+         || newSettings.sslIdentityFile != currentSettings.sslIdentityFile)
+        && !synchronousSetSetting(workingDirectory,QLatin1String("ssl-identity"), newSettings.sslIdentityFile)) {
+        return false;
     }
 
     if (applyAll
@@ -591,10 +595,11 @@ bool FossilClient::synchronousConfigureRepository(const QString &workingDirector
             break;
         }
 
-        result &= synchronousSetSetting(workingDirectory,QLatin1String("autosync"), value);
+        if (!synchronousSetSetting(workingDirectory,QLatin1String("autosync"), value))
+            return false;
     }
 
-    return result;
+    return true;
 }
 
 QString FossilClient::synchronousUserDefaultQuery(const QString &workingDirectory)
@@ -649,7 +654,7 @@ QString FossilClient::synchronousGetRepositoryURL(const QString &workingDirector
 
     // Fossil returns "off" when no remote-url is set.
 
-    if (output.isEmpty() || output == QLatin1String("off"))
+    if (output.isEmpty() || output.toLower() == QLatin1String("off"))
         return QString();
 
     return output;
@@ -890,7 +895,7 @@ bool FossilClient::managesFile(const QString &workingDirectory, const QString &f
     const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, args);
     if (response.result != Utils::SynchronousProcessResponse::Finished)
         return false;
-    return !response.stdOut().startsWith("no history for file");
+    return !response.stdOut().toLower().startsWith("no history for file");
 }
 
 unsigned int FossilClient::binaryVersion() const
@@ -936,13 +941,14 @@ FossilClient::SupportedFeatures FossilClient::supportedFeatures() const
 
     const unsigned int version = binaryVersion();
 
-    if (version < makeVersionNumber(1,30,0))
+    if (version < 0x13000) {
         features &= ~TimelinePathFeature;
-    if (version < makeVersionNumber(1,29,0))
-        features &= ~DiffIgnoreWhiteSpaceFeature;
-    if (version < makeVersionNumber(1,28,0)) {
-        features &= ~AnnotateBlameFeature;
-        features &= ~TimelineWidthFeature;
+        if (version < 0x12900)
+            features &= ~DiffIgnoreWhiteSpaceFeature;
+        if (version < 0x12800) {
+            features &= ~AnnotateBlameFeature;
+            features &= ~TimelineWidthFeature;
+        }
     }
 
     return features;

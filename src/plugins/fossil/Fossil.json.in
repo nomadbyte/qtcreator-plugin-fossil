@@ -14,6 +14,6 @@
     ],
     \"Category\" : \"Version Control\",
     \"Description\" : \"Fossil SCM integration (Release version: 4.1.0_2|1.33).\",
-    \"Url\" : \"https://github.com/nomadbyte/qt-creator-plugin-fossil\",
+    \"Url\" : \"https://github.com/nomadbyte/qtcreator-plugin-fossil\",
     $$dependencyList
 }

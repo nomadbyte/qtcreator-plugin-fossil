@@ -59,7 +59,6 @@ public:
     bool vcsMove(const QString &from, const QString &to) override;
     bool vcsCreateRepository(const QString &directory) override;
     bool vcsAnnotate(const QString &file, int line) override;
-    QString vcsTopic(const QString &directory) override;
     Core::ShellCommand *createInitialCheckoutCommand(const QString &sourceUrl,
                                                      const Utils::FileName &baseDirectory,
                                                      const QString &localName,

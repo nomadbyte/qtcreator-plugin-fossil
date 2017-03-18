@@ -667,36 +667,18 @@ QString FossilClient::synchronousGetRepositoryURL(const QString &workingDirector
     return output;
 }
 
-struct TopicData
-{
-    QDateTime timeStamp;
-    QString topic;
-};
-
 QString FossilClient::synchronousTopic(const QString &workingDirectory)
 {
-    static QMap<QString, TopicData> topicCache;
-
     if (workingDirectory.isEmpty())
         return QString();
 
     // return current branch name
 
-    const QString topLevel = findTopLevelForFile(workingDirectory);
-    QFileInfo currentStateFile(topLevel + QLatin1String("/")
-                               + QLatin1String(Constants::FOSSILREPO));
-
-    TopicData &data = topicCache[workingDirectory];
-    QDateTime lastModified = currentStateFile.lastModified();
-    if (lastModified == data.timeStamp)
-        return data.topic;
-
-    BranchInfo branchInfo = synchronousBranchQuery(workingDirectory);
+    const BranchInfo branchInfo = synchronousBranchQuery(workingDirectory);
     if (branchInfo.name().isEmpty())
         return QString();
 
-    data.timeStamp = lastModified;
-    return data.topic = branchInfo.name();
+    return branchInfo.name();
 }
 
 bool FossilClient::synchronousCreateRepository(const QString &workingDirectory, const QStringList &extraOptions)

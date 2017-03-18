@@ -42,6 +42,7 @@ public:
     static const QLatin1String diffIgnoreAllWhiteSpaceKey;
     static const QLatin1String diffStripTrailingCRKey;
     static const QLatin1String annotateShowCommittersKey;
+    static const QLatin1String annotateListVersionsKey;
     static const QLatin1String timelineWidthKey;
     static const QLatin1String timelineLineageFilterKey;
     static const QLatin1String timelineVerboseKey;

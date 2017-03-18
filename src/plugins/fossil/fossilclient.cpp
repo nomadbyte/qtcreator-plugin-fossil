@@ -99,6 +99,13 @@ public:
             mapSetting(addToggleButton(QLatin1String("|BLAME|"), tr("Show Committers")),
                        settings.boolPointer(FossilSettings::annotateShowCommittersKey));
         }
+
+        // Force listVersions setting to false by default.
+        // This way the annotated line number would not get offset by the version list.
+        settings.setValue(FossilSettings::annotateListVersionsKey, false);
+
+        mapSetting(addToggleButton(QLatin1String("--log"), tr("List Versions")),
+                   settings.boolPointer(FossilSettings::annotateListVersionsKey));
     }
 
     QStringList arguments() const
@@ -849,31 +856,40 @@ VcsBase::VcsBaseEditorWidget *FossilClient::annotate(
 
     VcsBase::VcsBaseEditorParameterWidget *paramWidget = editor->configurationWidget();
     if (!paramWidget && (paramWidget = createAnnotateEditor())) {
+        paramWidget->setBaseArguments(extraOptions);
         // editor has been just created, createVcsEditor() didn't set a configuration widget yet
         connect(paramWidget, &VcsBase::VcsBaseEditorParameterWidget::commandExecutionRequested,
-                [=]() { return this->annotate(workingDir, file, revision, lineNumber, extraOptions); } );
+                [=]() {
+                    const int line = VcsBase::VcsBaseEditor::lineNumberOfCurrentEditor();
+                    return this->annotate(workingDir, file, revision, line, paramWidget->arguments());
+                } );
         editor->setConfigurationWidget(paramWidget);
     }
+    QStringList effectiveArgs = (paramWidget ? paramWidget->arguments() : extraOptions);
 
     VcsBase::VcsCommand *cmd = createCommand(workingDir, editor);
-    cmd->setCookie(lineNumber);
 
     // here we introduce a "|BLAME|" meta-option to allow both annotate and blame modes
     QRegExp blameMetaOptionRx = QRegExp(QLatin1String("\\|BLAME\\|"));
     QTC_ASSERT(blameMetaOptionRx.isValid(), return editor);
-    QStringList paramArgs = paramWidget != 0 ? paramWidget->arguments() : QStringList();
 
-    int foundAt = paramArgs.indexOf(blameMetaOptionRx);
+    int foundAt = effectiveArgs.indexOf(blameMetaOptionRx);
     if (foundAt != -1) {
         vcsCmdString = QLatin1String("blame");
-        paramArgs.removeAt(foundAt);
+        effectiveArgs.removeAt(foundAt);
     }
     QStringList args;
     args << vcsCmdString
          << revisionSpec(revision)
-         << extraOptions << paramArgs << QLatin1String("--log") << file;
+         << effectiveArgs << file;
+
+    // When version list requested, ignore the source line.
+    if (args.indexOf(QLatin1String("--log")) != -1)
+        lineNumber = -1;
+    cmd->setCookie(lineNumber);
 
     enqueueJob(cmd, args);
+
     return editor;
 }
 
@@ -1052,19 +1068,20 @@ void FossilClient::log(const QString &workingDir, const QStringList &files,
 
     VcsBase::VcsBaseEditorParameterWidget *paramWidget = editor->configurationWidget();
     if (!paramWidget && (paramWidget = createLogEditor())) {
+        paramWidget->setBaseArguments(extraOptions);
         // editor has been just created, createVcsEditor() didn't set a configuration widget yet
         connect(paramWidget, &VcsBase::VcsBaseEditorParameterWidget::commandExecutionRequested,
-                [=]() { this->log(workingDir, files, extraOptions, enableAnnotationContextMenu); } );
+                [=]() { this->log(workingDir, files, paramWidget->arguments(), enableAnnotationContextMenu); } );
         editor->setConfigurationWidget(paramWidget);
     }
+    QStringList effectiveArgs = (paramWidget ? paramWidget->arguments() : extraOptions);
 
     //@TODO: move highlighter and widgets to fossil editor sources.
 
     new FossilLogHighlighter(editor->document());
 
     QStringList args;
-    const QStringList paramArgs = paramWidget != 0 ? paramWidget->arguments() : QStringList();
-    args << vcsCmdString << extraOptions << paramArgs;
+    args << vcsCmdString << effectiveArgs;
     if (!files.isEmpty())
          args << QLatin1String("--path") << files;
     enqueueJob(createCommand(workingDir, editor), args);
@@ -1096,19 +1113,20 @@ void FossilClient::logCurrentFile(const QString &workingDir, const QStringList &
 
     VcsBase::VcsBaseEditorParameterWidget *paramWidget = editor->configurationWidget();
     if (!paramWidget && (paramWidget = createLogCurrentFileEditor())) {
+        paramWidget->setBaseArguments(extraOptions);
         // editor has been just created, createVcsEditor() didn't set a configuration widget yet
         connect(paramWidget, &VcsBase::VcsBaseEditorParameterWidget::commandExecutionRequested,
-                [=]() { this->logCurrentFile(workingDir, files, extraOptions, enableAnnotationContextMenu); } );
+                [=]() { this->logCurrentFile(workingDir, files, paramWidget->arguments(), enableAnnotationContextMenu); } );
         editor->setConfigurationWidget(paramWidget);
     }
+    QStringList effectiveArgs = (paramWidget ? paramWidget->arguments() : extraOptions);
 
     //@TODO: move highlighter and widgets to fossil editor sources.
 
     new FossilLogHighlighter(editor->document());
 
     QStringList args;
-    const QStringList paramArgs = paramWidget != 0 ? paramWidget->arguments() : QStringList();
-    args << vcsCmdString << extraOptions << paramArgs << files;
+    args << vcsCmdString << effectiveArgs << files;
     enqueueJob(createCommand(workingDir, editor), args);
 }
 

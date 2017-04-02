@@ -37,11 +37,8 @@
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
        <widget class="QLabel" name="label">
-        <property name="toolTip">
-         <string>Privileged user added automatically to the created local repository.</string>
-        </property>
         <property name="text">
-         <string>Admin User:</string>
+         <string>Admin user:</string>
         </property>
        </widget>
       </item>
@@ -54,11 +51,8 @@
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="sslIdentityFileLabel">
-        <property name="toolTip">
-         <string>SSL/TLS client identity key to use if requested by the server.</string>
-        </property>
         <property name="text">
-         <string>SSL/TLS Identity:</string>
+         <string>SSL/TLS identity:</string>
         </property>
        </widget>
       </item>
@@ -72,7 +66,7 @@
       <item row="4" column="0">
        <widget class="QCheckBox" name="disableAutosyncCheckBox">
         <property name="toolTip">
-         <string>Disable automatic pull/push of local changes to the remote repository.</string>
+         <string>Disable automatic pull prior to commit or update and automatic push after commit or tag or branch creation.</string>
         </property>
         <property name="text">
          <string>Disable auto-sync</string>

@@ -35,7 +35,7 @@
       <item row="1" column="0">
        <widget class="QLabel" name="localRootLabel">
         <property name="text">
-         <string>Local Root:</string>
+         <string>Local root:</string>
         </property>
        </widget>
       </item>
@@ -95,7 +95,7 @@
       <item row="0" column="0">
        <widget class="QLabel" name="branchLabel">
         <property name="text">
-         <string>New Branch:</string>
+         <string>New branch:</string>
         </property>
        </widget>
       </item>
@@ -123,7 +123,7 @@
         <property name="toolTip">
          <string>Create a private check-in that is never synced.
 Children of private check-ins are automatically private.
-Private check-ins are not pushed to remote repository by default.</string>
+Private check-ins are not pushed to the remote repository by default.</string>
         </property>
         <property name="text">
          <string>Private</string>

@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2016, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2017, Artur Shepilko <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -269,14 +269,14 @@ void FossilPlugin::createFileActions(const Core::Context &context)
 
     createSeparator(context, Core::Id("Fossil.FileDirSeparator1"));
 
-    m_addAction = new Utils::ParameterAction(tr("Add"), tr("Add \"%1\""), Utils::ParameterAction::EnabledWithParameter, this);
+    m_addAction = new Utils::ParameterAction(tr("Add Current File"), tr("Add \"%1\""), Utils::ParameterAction::EnabledWithParameter, this);
     command = m_actionManager->registerAction(m_addAction, Core::Id(Constants::ADD), context);
     command->setAttribute(Core::Command::CA_UpdateText);
     connect(m_addAction, SIGNAL(triggered()), this, SLOT(addCurrentFile()));
     m_fossilContainer->addAction(command);
     m_commandLocator->appendCommand(command);
 
-    m_deleteAction = new Utils::ParameterAction(tr("Delete..."), tr("Delete \"%1\"..."), Utils::ParameterAction::EnabledWithParameter, this);
+    m_deleteAction = new Utils::ParameterAction(tr("Delete Current File..."), tr("Delete \"%1\"..."), Utils::ParameterAction::EnabledWithParameter, this);
     command = m_actionManager->registerAction(m_deleteAction, Core::Id(Constants::DELETE), context);
     command->setAttribute(Core::Command::CA_UpdateText);
     connect(m_deleteAction, SIGNAL(triggered()), this, SLOT(promptToDeleteCurrentFile()));
@@ -302,7 +302,8 @@ void FossilPlugin::annotateCurrentFile()
 {
     const VCSBase::VCSBasePluginState state = currentState();
     QTC_ASSERT(state.hasFile(), return);
-    m_client->annotate(state.currentFileTopLevel(), state.relativeCurrentFile());
+    const int lineNumber = VCSBase::VCSBaseEditorWidget::lineNumberOfCurrentEditor(state.currentFile());
+    m_client->annotate(state.currentFileTopLevel(), state.relativeCurrentFile(), QString(), lineNumber);
 }
 
 void FossilPlugin::diffCurrentFile()

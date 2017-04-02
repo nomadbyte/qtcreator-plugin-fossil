@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2016, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2017, Artur Shepilko <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -59,6 +59,15 @@ FossilEditor::FossilEditor(const VCSBase::VCSBaseEditorParameters *type, QWidget
 
     setAnnotateRevisionTextFormat(tr("Annotate %1"));
     setAnnotatePreviousRevisionTextFormat(tr("Annotate parent revision %1"));
+}
+
+void FossilEditor::commandFinishedGotoLine(bool ok, int /* exitCode */, const QVariant &v)
+{
+    if (ok && v.type() == QVariant::Int) {
+        const int line = v.toInt();
+        if (line >= 0)
+            gotoLine(line);
+    }
 }
 
 QSet<QString> FossilEditor::annotationChanges() const

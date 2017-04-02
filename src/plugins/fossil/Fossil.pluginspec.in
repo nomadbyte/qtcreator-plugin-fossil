@@ -1,6 +1,6 @@
 <plugin name=\"Fossil\" version=\"$$QTCREATOR_VERSION\" compatVersion=\"$$QTCREATOR_VERSION\">
     <vendor>Artur Shepilko</vendor>
-    <copyright>(C) 2013-2016 Artur Shepilko</copyright>
+    <copyright>(C) 2013-2017 Artur Shepilko</copyright>
     <license>
 Fossil VCS plugin for Qt Creator is a free software; the use, copy, and distribution rights are granted under the terms of the MIT License.
 
@@ -11,8 +11,8 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     </license>
     <category>Version Control</category>
-    <description>Fossil SCM integration (Release version: 2.4.1_6|1.33).</description>
-    <url>https://github.com/nomadbyte/qt-creator-plugin-fossil</url>
+    <description>Fossil SCM integration (Release version: 2.4.1_7|1.33).</description>
+    <url>https://github.com/nomadbyte/qtcreator-plugin-fossil</url>
     <dependencyList>
         <dependency name=\"TextEditor\" version=\"$$QTCREATOR_VERSION\"/>
         <dependency name=\"ProjectExplorer\" version=\"$$QTCREATOR_VERSION\"/>

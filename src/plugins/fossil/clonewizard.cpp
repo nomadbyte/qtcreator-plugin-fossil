@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2016, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2017, Artur Shepilko <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -104,7 +104,7 @@ QSharedPointer<VCSBase::AbstractCheckoutJob> CloneWizard::createJob(const QList<
     //
     //  2) LocalCheckout:
     //  -- open/checkout an existing local fossil
-    //  Clone URL is an absoulte local path and is the same as the local fossil.
+    //  Clone URL is an absolute local path and is the same as the local fossil.
 
     const QString cloneRepositoryFile = repositoryPanel->cloneRepository();
     const QString cloneRepositoryFileNative(QDir::toNativeSeparators(cloneRepositoryFile));

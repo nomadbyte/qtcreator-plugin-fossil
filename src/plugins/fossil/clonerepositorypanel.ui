@@ -99,7 +99,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="checkoutRepoFileLabel">
            <property name="toolTip">
-            <string>Path of an exisiting local fossil file to check out from.</string>
+            <string>Path of an existing local fossil file to check out from.</string>
            </property>
            <property name="text">
             <string>File:</string>
@@ -109,7 +109,7 @@
          <item row="0" column="1">
           <widget class="Utils::PathChooser" name="checkoutRepoFilePathChooser" native="true">
            <property name="toolTip">
-            <string>Path of an exisiting local fossil file to check out from.</string>
+            <string>Path of an existing local fossil file to check out from.</string>
            </property>
           </widget>
          </item>

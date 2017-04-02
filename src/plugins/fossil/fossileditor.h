@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2016, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2017, Artur Shepilko <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -31,6 +31,10 @@
 
 #include <QtCore/QRegExp>
 
+QT_BEGIN_NAMESPACE
+class QVariant;
+QT_END_NAMESPACE
+
 namespace Fossil {
 namespace Internal {
 
@@ -40,6 +44,10 @@ class FossilEditor : public VCSBase::VCSBaseEditorWidget
 
 public:
     explicit FossilEditor(const VCSBase::VCSBaseEditorParameters *type, QWidget *parent);
+
+public slots:
+    // Matches the signature of the finished signal of VCSBase::Command
+    void commandFinishedGotoLine(bool ok, int exitCode, const QVariant &v);
 
 private:
     QSet<QString> annotationChanges() const;

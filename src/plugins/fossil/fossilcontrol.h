@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2016, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2017, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -60,7 +60,6 @@ public:
     bool vcsMove(const QString &from, const QString &to) override;
     bool vcsCreateRepository(const QString &directory) override;
     bool vcsAnnotate(const QString &file, int line) override;
-    QString vcsTopic(const QString &directory) override;
     Core::ShellCommand *createInitialCheckoutCommand(const QString &sourceUrl,
                                                      const Utils::FileName &baseDirectory,
                                                      const QString &localName,

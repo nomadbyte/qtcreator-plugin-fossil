@@ -85,7 +85,7 @@
                 },
                 {
                     "name": "Repo",
-                    "trDisplayName": "Remote Repository:",
+                    "trDisplayName": "Remote repository:",
                     "trToolTip": "For example: https://[user[:pass]@]host[:port]/[path]",
                     "type": "LineEdit",
                     "enabled": "%{isCloneRepo}",
@@ -93,7 +93,7 @@
                 },
                 {
                     "name": "FossilName",
-                    "trDisplayName": "Local Clone:",
+                    "trDisplayName": "Local clone:",
                     "trToolTip": "Base name of a new local fossil file to clone into.",
                     "type": "LineEdit",
                     "enabled": "%{isCloneRepo}",
@@ -105,8 +105,8 @@
                 },
                 {
                     "name": "LocalRepo",
-                    "trDisplayName": "Local Repository:",
-                    "trToolTip": "Path of an exisiting local fossil file to check out from.",
+                    "trDisplayName": "Local repository:",
+                    "trToolTip": "Path of an existing local fossil file to check out from.",
                     "type": "PathChooser",
                     "enabled": "%{isLocalRepo}",
                     "mandatory": false,
@@ -133,7 +133,7 @@
                 },
                 {
                     "name": "Dir",
-                    "trDisplayName": "Checkout Directory:",
+                    "trDisplayName": "Checkout directory:",
                     "type": "LineEdit",
                     "isComplete": "%{JS: '%{Dir}' === '' || !Util.exists('%{TargetPath}')}",
                     "trIncompleteMessage": "The checkout directory already exists in the filesystem.",
@@ -160,7 +160,7 @@
                 },
                 {
                     "name": "AdminUser",
-                    "trDisplayName": "Admin User:",
+                    "trDisplayName": "Admin user:",
                     "trToolTip": "Privileged user added automatically to the created local repository.",
                     "type": "LineEdit",
                     "mandatory": false,
@@ -172,7 +172,7 @@
                 },
                 {
                     "name": "SslIdentity",
-                    "trDisplayName": "SSL/TLS Identity:",
+                    "trDisplayName": "SSL/TLS identity:",
                     "trToolTip": "SSL/TLS client identity key to use if requested by the server.",
                     "type": "PathChooser",
                     "mandatory": false,
@@ -197,8 +197,8 @@
                 },
                 {
                     "name": "DisableAutosync",
-                    "trDisplayName": "Turn off auto-sync",
-                    "trToolTip": "Turn off automatic pull/push of local changes to the remote repository.",
+                    "trDisplayName": "Disable auto-sync",
+                    "trToolTip": "Disable automatic pull prior to commit or update and automatic push after commit or tag or branch creation.",
                     "type": "CheckBox",
                     "enabled": "%{isCloneRepo}",
                     "data":

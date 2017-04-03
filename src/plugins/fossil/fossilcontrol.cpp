@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2016, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2017, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -42,10 +42,33 @@
 #include <QDir>
 #include <QUrl>
 
-using namespace Fossil::Internal;
+namespace Fossil {
+namespace Internal {
+
+class FossilTopicCache : public Core::IVersionControl::TopicCache
+{
+public:
+    FossilTopicCache(FossilClient *client) : m_client(client) {}
+
+protected:
+    QString trackFile(const QString &repository) override
+    {
+        return repository + QLatin1String("/") + QLatin1String(Constants::FOSSILREPO);
+    }
+
+    QString refreshTopic(const QString &repository) override
+    {
+        return m_client->synchronousTopic(repository);
+    }
+
+private:
+    FossilClient *m_client;
+};
+
 
 FossilControl::FossilControl(FossilClient *client)
-    : m_client(client)
+    : Core::IVersionControl(new FossilTopicCache(client))
+    , m_client(client)
 {
 }
 
@@ -153,11 +176,6 @@ bool FossilControl::vcsAnnotate(const QString &file, int line)
     return true;
 }
 
-QString FossilControl::vcsTopic(const QString &directory)
-{
-    return m_client->synchronousTopic(directory);
-}
-
 Core::ShellCommand *FossilControl::createInitialCheckoutCommand(const QString &sourceUrl,
                                                                 const Utils::FileName &baseDirectory,
                                                                 const QString &localName,
@@ -175,7 +193,7 @@ Core::ShellCommand *FossilControl::createInitialCheckoutCommand(const QString &s
     //
     //  2) LocalCheckout:
     //  -- open/checkout an existing local fossil
-    //  Clone URL is an absoulte local path and is the same as the local fossil.
+    //  Clone URL is an absolute local path and is the same as the local fossil.
 
     QString checkoutPath = FossilClient::buildPath(baseDirectory.toString(), localName, QString());
     QString fossilFile = options.value(QLatin1String("fossil-file"));
@@ -305,3 +323,6 @@ void FossilControl::changed(const QVariant &v)
         break;
     }
 }
+
+} // namespace Internal
+} // namespace Fossil

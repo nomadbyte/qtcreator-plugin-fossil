@@ -1,7 +1,7 @@
 /**************************************************************************
 **  This file is part of Fossil VCS plugin for Qt Creator
 **
-**  Copyright (c) 2013 - 2016, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
+**  Copyright (c) 2013 - 2017, Artur Shepilko, <qtc-fossil@nomadbyte.com>.
 **
 **  Based on Bazaar VCS plugin for Qt Creator by Hugues Delorme.
 **
@@ -42,6 +42,7 @@ public:
     static const QLatin1String diffIgnoreAllWhiteSpaceKey;
     static const QLatin1String diffStripTrailingCRKey;
     static const QLatin1String annotateShowCommittersKey;
+    static const QLatin1String annotateListVersionsKey;
     static const QLatin1String timelineWidthKey;
     static const QLatin1String timelineLineageFilterKey;
     static const QLatin1String timelineVerboseKey;
@@ -53,7 +54,7 @@ public:
 
 struct RepositorySettings
 {
-    enum AutosyncMode {AutosyncOff=0, AutosyncOn=1, AutosyncPullOnly};
+    enum AutosyncMode {AutosyncOff = 0, AutosyncOn = 1, AutosyncPullOnly};
 
     QString user;
     AutosyncMode autosync;

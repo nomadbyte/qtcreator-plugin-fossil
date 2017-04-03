@@ -1,6 +1,13 @@
 qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
 =================================
 
+## 4.0.1_3 - 2017-04-03
+
+- client min. version `fossil 1.33`
+- `Annotate Current File`: jump to current source line.
+- `Annotate Current File`: add a toggle to show a list of versions.
+
+
 ## 4.0.1_2 - 2016-11-09
 
 - client min. version `fossil 1.33`

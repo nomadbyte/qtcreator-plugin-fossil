@@ -45,7 +45,7 @@ OptionsPageWidget::OptionsPageWidget(QWidget *parent) :
     m_ui.setupUi(this);
     m_ui.commandChooser->setExpectedKind(Utils::PathChooser::ExistingCommand);
     m_ui.commandChooser->setPromptDialogTitle(tr("Fossil Command"));
-    m_ui.commandChooser->setHistoryCompleter(QLatin1String("Fossil.Command.History"));
+    m_ui.commandChooser->setHistoryCompleter("Fossil.Command.History");
     m_ui.defaultRepoPathChooser->setExpectedKind(Utils::PathChooser::ExistingDirectory);
     m_ui.defaultRepoPathChooser->setPromptDialogTitle(tr("Fossil Repositories"));
     m_ui.sslIdentityFilePathChooser->setExpectedKind(Utils::PathChooser::File);

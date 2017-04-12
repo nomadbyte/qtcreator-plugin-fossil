@@ -28,26 +28,23 @@
 
 #include <vcsbase/vcsbaseclientsettings.h>
 
-#include <QDebug>
-
-
 namespace Fossil {
 namespace Internal {
 
 class FossilSettings : public VcsBase::VcsBaseClientSettings
 {
 public:
-    static const QLatin1String defaultRepoPathKey;
-    static const QLatin1String sslIdentityFileKey;
-    static const QLatin1String diffIgnoreAllWhiteSpaceKey;
-    static const QLatin1String diffStripTrailingCRKey;
-    static const QLatin1String annotateShowCommittersKey;
-    static const QLatin1String annotateListVersionsKey;
-    static const QLatin1String timelineWidthKey;
-    static const QLatin1String timelineLineageFilterKey;
-    static const QLatin1String timelineVerboseKey;
-    static const QLatin1String timelineItemTypeKey;
-    static const QLatin1String disableAutosyncKey;
+    static const QString defaultRepoPathKey;
+    static const QString sslIdentityFileKey;
+    static const QString diffIgnoreAllWhiteSpaceKey;
+    static const QString diffStripTrailingCRKey;
+    static const QString annotateShowCommittersKey;
+    static const QString annotateListVersionsKey;
+    static const QString timelineWidthKey;
+    static const QString timelineLineageFilterKey;
+    static const QString timelineVerboseKey;
+    static const QString timelineItemTypeKey;
+    static const QString disableAutosyncKey;
 
     FossilSettings();
 };
@@ -68,15 +65,6 @@ inline bool operator== (const RepositorySettings &lh, const RepositorySettings &
     return (lh.user == rh.user
             && lh.autosync == rh.autosync
             && lh.sslIdentityFile == rh.sslIdentityFile);
-}
-
-inline QDebug operator<< (QDebug dbg, const RepositorySettings& rh) {
-    dbg.nospace() << "RepositorySettings("
-                  << rh.user << ", "
-                  << rh.autosync << ", "
-                  << rh.sslIdentityFile
-                  << ")";
-    return dbg;
 }
 
 } // namespace Internal

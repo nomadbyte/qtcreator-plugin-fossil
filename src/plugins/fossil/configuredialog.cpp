@@ -38,8 +38,6 @@ namespace Internal {
 
 class ConfigureDialogPrivate {
 public:
-    ConfigureDialogPrivate() {}
-
     RepositorySettings settings() {
         m_settings.user = m_ui.userLineEdit->text().trimmed();
         m_settings.sslIdentityFile = m_ui.sslIdentityFilePathChooser->path();

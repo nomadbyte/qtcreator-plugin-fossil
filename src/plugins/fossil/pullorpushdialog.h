@@ -43,8 +43,8 @@ public:
         PushMode
     };
 
-    explicit PullOrPushDialog(Mode mode, QWidget *parent = 0);
-    ~PullOrPushDialog() override;
+    explicit PullOrPushDialog(Mode mode, QWidget *parent = nullptr);
+    ~PullOrPushDialog() final;
 
     // Common parameters and options
     QString remoteLocation() const;
@@ -56,7 +56,7 @@ public:
     // Push-specific options
 
 protected:
-    void changeEvent(QEvent *e) override;
+    void changeEvent(QEvent *e) final;
 
 private:
     Mode m_mode;

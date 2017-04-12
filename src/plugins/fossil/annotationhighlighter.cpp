@@ -27,18 +27,26 @@
 #include "annotationhighlighter.h"
 #include "constants.h"
 
-using namespace Fossil::Internal;
-using namespace Fossil;
+#include <utils/qtcassert.h>
+
+namespace Fossil {
+namespace Internal {
 
 FossilAnnotationHighlighter::FossilAnnotationHighlighter(const ChangeNumbers &changeNumbers,
                                                          QTextDocument *document) :
     VcsBase::BaseAnnotationHighlighter(changeNumbers, document),
-    m_changeset(QLatin1String(Constants::CHANGESET_ID))
-{ }
+    m_changesetIdPattern(Constants::CHANGESET_ID)
+{
+    QTC_CHECK(m_changesetIdPattern.isValid());
+}
 
 QString FossilAnnotationHighlighter::changeNumber(const QString &block) const
 {
-    if (m_changeset.indexIn(block) != -1)
-        return m_changeset.cap(1);
+    QRegularExpressionMatch changesetIdMatch = m_changesetIdPattern.match(block);
+    if (changesetIdMatch.hasMatch())
+        return changesetIdMatch.captured(1);
     return QString();
 }
+
+} // namespace Internal
+} // namespace Fossil

@@ -68,10 +68,6 @@ private slots:
 private:
     bool isValidBranch() const;
 
-    const QChar m_spaceChar;
-    const QChar m_commaChar;
-    const QString m_tagsSeparator;
-
     QWidget *m_commitPanel;
     Ui::FossilCommitPanel m_commitPanelUi;
     QValidator *m_branchValidator;

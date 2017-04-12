@@ -37,11 +37,8 @@
 #include <QSyntaxHighlighter>
 #include <QTextEdit>
 
-#include <QDebug>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QDir>
-
-//TODO: Check to see when the Highlighter has been moved to a base class and use that instead
 
 namespace Fossil {
 namespace Internal {
@@ -59,18 +56,18 @@ class FossilSubmitHighlighter : QSyntaxHighlighter
 {
 public:
     explicit FossilSubmitHighlighter(Utils::CompletingTextEdit *parent);
-    void highlightBlock(const QString &text) override;
+    void highlightBlock(const QString &text) final;
 
 private:
     const QTextCharFormat m_commentFormat;
-    const QRegExp m_keywordRx;
+    const QRegularExpression m_keywordPattern;
 };
 
 FossilSubmitHighlighter::FossilSubmitHighlighter(Utils::CompletingTextEdit *parent) : QSyntaxHighlighter(parent),
     m_commentFormat(commentFormat()),
-    m_keywordRx(QLatin1String("\\[([0-9a-f]{5,40})\\]"))
+    m_keywordPattern("\\[([0-9a-f]{5,40})\\]")
 {
-    QTC_CHECK(m_keywordRx.isValid());
+    QTC_CHECK(m_keywordPattern.isValid());
 }
 
 void FossilSubmitHighlighter::highlightBlock(const QString &text)
@@ -79,31 +76,23 @@ void FossilSubmitHighlighter::highlightBlock(const QString &text)
     // where ticket-id is a partial SHA1.
     // Match the ticket-ids and highlight them for convenience.
 
-    //const QTextBlock block = currentBlock();
-
     // Format keywords
-    for (int start = 0;
-         (start = m_keywordRx.indexIn(text, start)) != -1;
-         start += m_keywordRx.matchedLength()) {
+    QRegularExpressionMatchIterator i = m_keywordPattern.globalMatch(text);
+    while (i.hasNext()) {
+        const QRegularExpressionMatch keywordMatch = i.next();
         QTextCharFormat charFormat = format(0);
-        //charFormat.setForeground(Qt::darkGreen);
-        //charFormat.setFontWeight(QFont::DemiBold);
         charFormat.setFontItalic(true);
-        setFormat(start, m_keywordRx.matchedLength(), charFormat);
+        setFormat(keywordMatch.capturedStart(0), keywordMatch.capturedLength(0), charFormat);
     }
 }
 
 
-FossilCommitWidget::FossilCommitWidget() :
-    m_spaceChar(QLatin1Char(' ')),
-    m_commaChar(QLatin1Char(',')),
-    m_tagsSeparator(QString(m_commaChar).append(m_spaceChar)),
-    m_commitPanel(new QWidget)
+FossilCommitWidget::FossilCommitWidget() : m_commitPanel(new QWidget)
 {
     m_commitPanelUi.setupUi(m_commitPanel);
     insertTopWidget(m_commitPanel);
     new FossilSubmitHighlighter(descriptionEdit());
-    m_branchValidator = new QRegExpValidator(QRegExp(QLatin1String("[^\\n]*")), this);
+    m_branchValidator = new QRegularExpressionValidator(QRegularExpression("[^\\n]*"), this);
 
     connect(m_commitPanelUi.branchLineEdit, &QLineEdit::textChanged,
             this, &FossilCommitWidget::branchChanged);
@@ -114,7 +103,7 @@ void FossilCommitWidget::setFields(const QString &repoPath, const BranchInfo &br
 {
     m_commitPanelUi.localRootLineEdit->setText(QDir::toNativeSeparators(repoPath));
     m_commitPanelUi.currentBranchLineEdit->setText(branch.name());
-    QString tagsText = tags.join(m_tagsSeparator);
+    const QString tagsText = tags.join(", ");
     m_commitPanelUi.currentTagsLineEdit->setText(tagsText);
     m_commitPanelUi.authorLineEdit->setText(userName);
 
@@ -133,11 +122,8 @@ QStringList FossilCommitWidget::tags() const
     if (tagsText.isEmpty())
         return QStringList();
 
-    QStringList tags;
-
-    tagsText.replace(m_commaChar, m_spaceChar);
-    tags = tagsText.split(m_spaceChar, QString::SkipEmptyParts);
-
+    tagsText.replace(',', ' ');
+    const QStringList tags = tagsText.split(' ', QString::SkipEmptyParts);
     return tags;
 }
 
@@ -147,7 +133,7 @@ QString FossilCommitWidget::committer() const
     if (author.isEmpty())
         return QString();
 
-    QString user = author;
+    const QString user = author;
     return user;
 }
 

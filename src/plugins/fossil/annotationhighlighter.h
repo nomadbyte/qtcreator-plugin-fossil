@@ -27,7 +27,7 @@
 #pragma once
 
 #include <vcsbase/baseannotationhighlighter.h>
-#include <QRegExp>
+#include <QRegularExpression>
 
 namespace Fossil {
 namespace Internal {
@@ -39,8 +39,8 @@ public:
                                          QTextDocument *document = nullptr);
 
 private:
-    QString changeNumber(const QString &block) const override;
-    QRegExp m_changeset;
+    QString changeNumber(const QString &block) const final;
+    QRegularExpression m_changesetIdPattern;
 };
 
 } // namespace Internal

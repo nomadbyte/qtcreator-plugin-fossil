@@ -37,15 +37,16 @@ class ConfigureDialogPrivate;
 class ConfigureDialog : public QDialog
 {
     Q_OBJECT
+
 public:
-    explicit ConfigureDialog(QWidget *parent = 0);
-    ~ConfigureDialog() override;
+    explicit ConfigureDialog(QWidget *parent = nullptr);
+    ~ConfigureDialog() final;
 
     const RepositorySettings settings() const;
     void setSettings(const RepositorySettings &settings);
 
 protected:
-    void changeEvent(QEvent *e) override;
+    void changeEvent(QEvent *e) final;
 
 private:
     ConfigureDialogPrivate *d = nullptr;

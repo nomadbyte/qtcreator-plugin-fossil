@@ -55,7 +55,7 @@ public:
 protected:
     QString trackFile(const QString &repository) override
     {
-        return repository + QLatin1String("/") + QLatin1String(Constants::FOSSILREPO);
+        return repository + "/" + Constants::FOSSILREPO;
     }
 
     QString refreshTopic(const QString &repository) override
@@ -82,6 +82,11 @@ Core::Id FossilControl::id() const
     return Core::Id(Constants::VCS_ID_FOSSIL);
 }
 
+bool FossilControl::isVcsFileOrDirectory(const Utils::FileName &fileName) const
+{
+    return m_client->isVcsFileOrDirectory(fileName);
+}
+
 bool FossilControl::managesDirectory(const QString &directory, QString *topLevel) const
 {
     QFileInfo dir(directory);
@@ -102,7 +107,7 @@ bool FossilControl::isConfigured() const
     if (binary.isEmpty())
         return false;
 
-    QFileInfo fi = binary.toFileInfo();
+    const QFileInfo fi = binary.toFileInfo();
     if ( !(fi.exists() && fi.isFile() && fi.isExecutable()) )
         return false;
 
@@ -111,7 +116,7 @@ bool FossilControl::isConfigured() const
     if (repoPath.isEmpty())
         return false;
 
-    QDir dir(repoPath);
+    const QDir dir(repoPath);
     if (!dir.exists())
         return false;
 
@@ -195,54 +200,52 @@ Core::ShellCommand *FossilControl::createInitialCheckoutCommand(const QString &s
     //  -- open/checkout an existing local fossil
     //  Clone URL is an absolute local path and is the same as the local fossil.
 
-    QString checkoutPath = FossilClient::buildPath(baseDirectory.toString(), localName, QString());
-    QString fossilFile = options.value(QLatin1String("fossil-file"));
-    Utils::FileName fossilFileName = Utils::FileName::fromUserInput(QDir::fromNativeSeparators(fossilFile));
+    const QString checkoutPath = Utils::FileName(baseDirectory).appendPath(localName).toString();
+    const QString fossilFile = options.value("fossil-file");
+    const Utils::FileName fossilFileName = Utils::FileName::fromUserInput(QDir::fromNativeSeparators(fossilFile));
     const QString fossilFileNative = fossilFileName.toUserOutput();
-    QFileInfo cloneRepository(fossilFileName.toString());
+    const QFileInfo cloneRepository(fossilFileName.toString());
 
     // Check when requested to clone a local repository and clone-into repository file is the same
     // or not specified.
     // In this case handle it as local fossil checkout request.
-    QUrl url(sourceUrl);
-    bool isLocalRepository = (options.value(QLatin1String("repository-type")) == QLatin1String("localRepo"));
+    const QUrl url(sourceUrl);
+    bool isLocalRepository = (options.value("repository-type") == "localRepo");
 
     if (url.isLocalFile() || url.isRelative()) {
-        QFileInfo sourcePath(url.path());
+        const QFileInfo sourcePath(url.path());
         isLocalRepository = (sourcePath.canonicalFilePath() == cloneRepository.canonicalFilePath());
     }
 
     // set clone repository admin user to configured user name
     // OR override it with the specified user from clone panel
-    QString adminUser = options.value(QLatin1String("admin-user"));
-    bool disableAutosync = (options.value(QLatin1String("settings-autosync")) == QLatin1String("off"));
-    QString checkoutBranch = options.value(QLatin1String("branch-tag"));
+    const QString adminUser = options.value("admin-user");
+    const bool disableAutosync = (options.value("settings-autosync") == "off");
+    const QString checkoutBranch = options.value("branch-tag");
 
     // first create the checkout directory,
     // as it needs to become a working directory for wizard command jobs
 
-    QDir checkoutDir(checkoutPath);
+    const QDir checkoutDir(checkoutPath);
     checkoutDir.mkpath(checkoutPath);
 
     // Setup the wizard page command job
     auto command = new VcsBase::VcsCommand(checkoutDir.path(), m_client->processEnvironment());
 
-    QStringList extraOptions;
-    QStringList args;
-
     if (!isLocalRepository
         && !cloneRepository.exists()) {
 
-        QString sslIdentityFile = options.value(QLatin1String("ssl-identity"));
-        Utils::FileName sslIdentityFileName = Utils::FileName::fromUserInput(QDir::fromNativeSeparators(sslIdentityFile));
-        bool includePrivate = (options.value(QLatin1String("include-private")) == QLatin1String("true"));
+        const QString sslIdentityFile = options.value("ssl-identity");
+        const Utils::FileName sslIdentityFileName = Utils::FileName::fromUserInput(QDir::fromNativeSeparators(sslIdentityFile));
+        const bool includePrivate = (options.value("include-private") == "true");
 
+        QStringList extraOptions;
         if (includePrivate)
-            extraOptions << QLatin1String("--private");
+            extraOptions << "--private";
         if (!sslIdentityFile.isEmpty())
-            extraOptions << QLatin1String("--ssl-identity") << sslIdentityFileName.toUserOutput();
+            extraOptions << "--ssl-identity" << sslIdentityFileName.toUserOutput();
         if (!adminUser.isEmpty())
-            extraOptions << QLatin1String("--admin-user") << adminUser;
+            extraOptions << "--admin-user" << adminUser;
 
         // Fossil allows saving the remote address and login. This is used to
         // facilitate autosync (commit/update) functionality.
@@ -258,52 +261,33 @@ Core::ShellCommand *FossilControl::createInitialCheckoutCommand(const QString &s
         //
         // So here we want Fossil to save the remote details when specified.
 
+        QStringList args;
         args << m_client->vcsCommandString(FossilClient::CloneCommand)
              << extraOptions
              << sourceUrl
              << fossilFileNative;
-
         command->addJob(m_client->vcsBinary(), args, -1);
     }
 
     // check out the cloned repository file into the working copy directory;
     // by default the latest revision is checked out
 
-    extraOptions.clear();
-    args.clear();
-
-    args << QLatin1String("open") << fossilFileNative;
-
+    QStringList args({"open", fossilFileNative});
     if (!checkoutBranch.isEmpty())
         args << checkoutBranch;
-    args << extraOptions;
-
     command->addJob(m_client->vcsBinary(), args, -1);
 
     // set user default to admin user if specified
     if (!isLocalRepository
         && !adminUser.isEmpty()) {
-
-        extraOptions.clear();
-        args.clear();
-
-        QString currentUser = adminUser;
-
-        args << QLatin1String("user") << QLatin1String("default") << currentUser
-             << QLatin1String("--user") << adminUser;
-
+        const QStringList args({ "user", "default", adminUser, "--user", adminUser});
         command->addJob(m_client->vcsBinary(), args, -1);
     }
 
     // turn-off autosync if requested
     if (!isLocalRepository
         && disableAutosync) {
-        extraOptions.clear();
-        args.clear();
-
-        args << QLatin1String("settings")
-             << QLatin1String("autosync") << QLatin1String("off");
-
+        const QStringList args({"settings", "autosync", "off"});
         command->addJob(m_client->vcsBinary(), args, -1);
     }
 
@@ -324,5 +308,5 @@ void FossilControl::changed(const QVariant &v)
     }
 }
 
-} // namespace Internal
 } // namespace Fossil
+} // namespace Internal

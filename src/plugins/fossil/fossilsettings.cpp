@@ -32,33 +32,33 @@
 namespace Fossil {
 namespace Internal {
 
-const QLatin1String FossilSettings::defaultRepoPathKey("defaultRepoPath");
-const QLatin1String FossilSettings::sslIdentityFileKey("sslIdentityFile");
-const QLatin1String FossilSettings::diffIgnoreAllWhiteSpaceKey("diffIgnoreAllWhiteSpace");
-const QLatin1String FossilSettings::diffStripTrailingCRKey("diffStripTrailingCR");
-const QLatin1String FossilSettings::annotateShowCommittersKey("annotateShowCommitters");
-const QLatin1String FossilSettings::annotateListVersionsKey("annotateListVersions");
-const QLatin1String FossilSettings::timelineWidthKey("timelineWidth");
-const QLatin1String FossilSettings::timelineLineageFilterKey("timelineLineageFilter");
-const QLatin1String FossilSettings::timelineVerboseKey("timelineVerbose");
-const QLatin1String FossilSettings::timelineItemTypeKey("timelineItemType");
-const QLatin1String FossilSettings::disableAutosyncKey("disableAutosync");
+const QString FossilSettings::defaultRepoPathKey("defaultRepoPath");
+const QString FossilSettings::sslIdentityFileKey("sslIdentityFile");
+const QString FossilSettings::diffIgnoreAllWhiteSpaceKey("diffIgnoreAllWhiteSpace");
+const QString FossilSettings::diffStripTrailingCRKey("diffStripTrailingCR");
+const QString FossilSettings::annotateShowCommittersKey("annotateShowCommitters");
+const QString FossilSettings::annotateListVersionsKey("annotateListVersions");
+const QString FossilSettings::timelineWidthKey("timelineWidth");
+const QString FossilSettings::timelineLineageFilterKey("timelineLineageFilter");
+const QString FossilSettings::timelineVerboseKey("timelineVerbose");
+const QString FossilSettings::timelineItemTypeKey("timelineItemType");
+const QString FossilSettings::disableAutosyncKey("disableAutosync");
 
 FossilSettings::FossilSettings()
 {
-    setSettingsGroup(QLatin1String(Constants::FOSSIL));
+    setSettingsGroup(Constants::FOSSIL);
     // Override default binary path
-    declareKey(binaryPathKey, QLatin1String(Constants::FOSSILDEFAULT));
-    declareKey(defaultRepoPathKey, QLatin1String(""));
-    declareKey(sslIdentityFileKey, QLatin1String(""));
+    declareKey(binaryPathKey, Constants::FOSSILDEFAULT);
+    declareKey(defaultRepoPathKey, "");
+    declareKey(sslIdentityFileKey, "");
     declareKey(diffIgnoreAllWhiteSpaceKey, false);
     declareKey(diffStripTrailingCRKey, false);
     declareKey(annotateShowCommittersKey, false);
     declareKey(annotateListVersionsKey, false);
     declareKey(timelineWidthKey, 0);
-    declareKey(timelineLineageFilterKey, QLatin1String(""));
+    declareKey(timelineLineageFilterKey, "");
     declareKey(timelineVerboseKey, false);
-    declareKey(timelineItemTypeKey, QLatin1String("all"));
+    declareKey(timelineItemTypeKey, "all");
     declareKey(disableAutosyncKey, true);
 }
 

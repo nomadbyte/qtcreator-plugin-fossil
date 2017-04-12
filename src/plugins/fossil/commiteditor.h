@@ -54,5 +54,5 @@ private:
     VcsBase::SubmitFileModel *m_fileModel = nullptr;
 };
 
-}
-}
+} // namespace Internal
+} // namespace Fossil

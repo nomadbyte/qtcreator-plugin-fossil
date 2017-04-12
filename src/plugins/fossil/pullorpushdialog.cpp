@@ -31,8 +31,8 @@
 
 #include <utils/qtcassert.h>
 
-
-using namespace Fossil::Internal;
+namespace Fossil {
+namespace Internal {
 
 PullOrPushDialog::PullOrPushDialog(Mode mode, QWidget *parent) : QDialog(parent),
     m_mode(mode),
@@ -106,3 +106,6 @@ void PullOrPushDialog::changeEvent(QEvent *e)
         break;
     }
 }
+
+} // namespace Internal
+} // namespace Fossil

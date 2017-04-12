@@ -26,14 +26,11 @@
 
 #include "branchinfo.h"
 
-#include <QDebug>
-
 namespace Fossil {
 namespace Internal {
 
-BranchInfo::BranchInfo(const QString &name, bool isCurrent, BranchFlags flags) :
+BranchInfo::BranchInfo(const QString &name, BranchFlags flags) :
     m_name(name),
-    m_isCurrent(isCurrent),
     m_flags(flags)
 { }
 
@@ -44,7 +41,7 @@ const QString &BranchInfo::name() const
 
 bool BranchInfo::isCurrent() const
 {
-    return m_isCurrent;
+    return m_flags.testFlag(Current);
 }
 
 bool BranchInfo::isClosed() const
@@ -55,17 +52,6 @@ bool BranchInfo::isClosed() const
 bool BranchInfo::isPrivate() const
 {
     return m_flags.testFlag(Private);
-}
-
-QDebug BranchInfo::printDebug(QDebug dbg) const
-{
-    dbg.nospace() << "("
-        << m_name << ", "
-        << m_isCurrent << ", "
-        << m_flags
-        << ")";
-
-    return dbg.nospace();
 }
 
 } // namespace Internal

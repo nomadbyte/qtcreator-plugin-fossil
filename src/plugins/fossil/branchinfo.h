@@ -27,47 +27,34 @@
 #pragma once
 
 #include <QString>
-#include <QDebug>
 
 namespace Fossil {
 namespace Internal {
-
 
 class BranchInfo
 {
 public:
     enum BranchFlag {
-        Open = 0x01,
+        Current = 0x01,
         Closed = 0x02,
-        Public = 0x04,
-        Private = 0x08
+        Private = 0x04
     };
     Q_DECLARE_FLAGS(BranchFlags, BranchFlag)
 
-    explicit BranchInfo(const QString &name, bool isCurrent = false, BranchFlags flags = BranchFlags(Open|Public));
-
+    explicit BranchInfo(const QString &name = QString(), BranchFlags flags = 0);
 
 public:
-    const QString& name() const;
+    const QString &name() const;
     bool isCurrent() const;
     bool isClosed() const;
     bool isPrivate() const;
 
-    friend QDebug operator<< (QDebug dbg, const BranchInfo& rh);
-
-
 private:
-    QDebug printDebug(QDebug dbg) const;
-
     QString m_name;
-    bool m_isCurrent;
     BranchFlags m_flags;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(BranchInfo::BranchFlags)
-
-
-inline QDebug operator<< (QDebug dbg, const BranchInfo& rh) { return rh.printDebug(dbg); }
 
 } // namespace Internal
 } // namespace Fossil

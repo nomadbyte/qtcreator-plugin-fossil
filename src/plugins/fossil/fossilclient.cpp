@@ -31,10 +31,13 @@
 
 #include <vcsbase/vcsbaseplugin.h>
 #include <vcsbase/vcsbaseeditor.h>
-#include <vcsbase/vcsbaseeditorparameterwidget.h>
+#include <vcsbase/vcsbaseeditorconfig.h>
 #include <vcsbase/vcsoutputwindow.h>
 #include <vcsbase/vcscommand.h>
 
+#include <utils/algorithm.h>
+#include <utils/fileutils.h>
+#include <utils/hostosinfo.h>
 #include <utils/qtcassert.h>
 
 #include <QSyntaxHighlighter>
@@ -45,58 +48,50 @@
 #include <QFileInfo>
 #include <QTextStream>
 #include <QMap>
-
-#include <QDebug>
+#include <QRegularExpression>
 
 namespace Fossil {
 namespace Internal {
 
 // Parameter widget controlling whitespace diff mode, associated with a parameter
-class FossilDiffParameterWidget : public VcsBase::VcsBaseEditorParameterWidget
+class FossilDiffConfig : public VcsBase::VcsBaseEditorConfig
 {
     Q_OBJECT
+
 public:
-    FossilDiffParameterWidget(FossilClient *client, QWidget *parent = 0) :
-        VcsBase::VcsBaseEditorParameterWidget(parent),
-        m_client(client)
+    FossilDiffConfig(FossilClient *client, QToolBar *toolBar) :
+        VcsBase::VcsBaseEditorConfig(toolBar)
     {
-        QTC_ASSERT(m_client, return);
-        VcsBase::VcsBaseClientSettings &settings = m_client->settings();
-        FossilClient::SupportedFeatures features = m_client->supportedFeatures();
+        QTC_ASSERT(client, return);
+
+        VcsBase::VcsBaseClientSettings &settings = client->settings();
+        FossilClient::SupportedFeatures features = client->supportedFeatures();
 
         if (features.testFlag(FossilClient::DiffIgnoreWhiteSpaceFeature)) {
-            mapSetting(addToggleButton(QLatin1String("-w"), tr("Ignore All Whitespace")),
+            mapSetting(addToggleButton("-w", tr("Ignore All Whitespace")),
                        settings.boolPointer(FossilSettings::diffIgnoreAllWhiteSpaceKey));
-            mapSetting(addToggleButton(QLatin1String("--strip-trailing-cr"), tr("Strip Trailing CR")),
+            mapSetting(addToggleButton("--strip-trailing-cr", tr("Strip Trailing CR")),
                        settings.boolPointer(FossilSettings::diffStripTrailingCRKey));
         }
     }
-
-    QStringList arguments() const
-    {
-        // pass args to Fossil verbatim
-        return VcsBaseEditorParameterWidget::arguments();
-    }
-
-private:
-    FossilClient *m_client;
 };
 
 // Parameter widget controlling annotate/blame mode
-class FossilAnnotateParameterWidget : public VcsBase::VcsBaseEditorParameterWidget
+class FossilAnnotateConfig : public VcsBase::VcsBaseEditorConfig
 {
     Q_OBJECT
+
 public:
-    FossilAnnotateParameterWidget(FossilClient *client, QWidget *parent = 0) :
-        VcsBase::VcsBaseEditorParameterWidget(parent),
-        m_client(client)
+    FossilAnnotateConfig(FossilClient *client, QToolBar *toolBar) :
+        VcsBase::VcsBaseEditorConfig(toolBar)
     {
-        QTC_ASSERT(m_client, return);
-        VcsBase::VcsBaseClientSettings &settings = m_client->settings();
-        FossilClient::SupportedFeatures features = m_client->supportedFeatures();
+        QTC_ASSERT(client, return);
+
+        VcsBase::VcsBaseClientSettings &settings = client->settings();
+        FossilClient::SupportedFeatures features = client->supportedFeatures();
 
         if (features.testFlag(FossilClient::AnnotateBlameFeature)) {
-            mapSetting(addToggleButton(QLatin1String("|BLAME|"), tr("Show Committers")),
+            mapSetting(addToggleButton("|BLAME|", tr("Show Committers")),
                        settings.boolPointer(FossilSettings::annotateShowCommittersKey));
         }
 
@@ -104,44 +99,35 @@ public:
         // This way the annotated line number would not get offset by the version list.
         settings.setValue(FossilSettings::annotateListVersionsKey, false);
 
-        mapSetting(addToggleButton(QLatin1String("--log"), tr("List Versions")),
+        mapSetting(addToggleButton("--log", tr("List Versions")),
                    settings.boolPointer(FossilSettings::annotateListVersionsKey));
     }
-
-    QStringList arguments() const
-    {
-        // pass args to Fossil verbatim
-        return VcsBaseEditorParameterWidget::arguments();
-    }
-
-private:
-    FossilClient *m_client;
 };
 
-class FossilLogCurrentFileParameterWidget : public VcsBase::VcsBaseEditorParameterWidget
+class FossilLogCurrentFileConfig : public VcsBase::VcsBaseEditorConfig
 {
     Q_OBJECT
+
 public:
-    FossilLogCurrentFileParameterWidget(FossilClient *client, QWidget *parent = 0) :
-        VcsBase::VcsBaseEditorParameterWidget(parent),
-        m_client(client)
+    FossilLogCurrentFileConfig(FossilClient *client, QToolBar *toolBar) :
+        VcsBase::VcsBaseEditorConfig(toolBar)
     {
-        QTC_ASSERT(m_client, return);
+        QTC_ASSERT(client, return);
     }
 
-private:
-    FossilClient *m_client;
 };
 
-class FossilLogParameterWidget : public VcsBase::VcsBaseEditorParameterWidget
+class FossilLogConfig : public VcsBase::VcsBaseEditorConfig
 {
     Q_OBJECT
+
 public:
-    FossilLogParameterWidget(FossilClient *client, QWidget *parent = 0) :
-        VcsBase::VcsBaseEditorParameterWidget(parent),
+    FossilLogConfig(FossilClient *client, QToolBar *toolBar) :
+        VcsBase::VcsBaseEditorConfig(toolBar),
         m_client(client)
     {
-        QTC_ASSERT(m_client, return);
+        QTC_ASSERT(client, return);
+
         addLineageComboBox();
         addVerboseToggleButton();
         addItemTypeComboBox();
@@ -159,10 +145,10 @@ public:
         // then parse it out in arguments.
         // All-choice is a blank argument with no additional parameters
         QList<ComboBoxItem> lineageFilterChoices;
-        lineageFilterChoices << ComboBoxItem(tr("Ancestors"), QLatin1String("ancestors"))
-                        << ComboBoxItem(tr("Descendants"), QLatin1String("descendants"))
-                        << ComboBoxItem(tr("Unfiltered"), QLatin1String(""));
-        mapSetting(addComboBox(QStringList(QLatin1String("|LINEAGE|%1|current")), lineageFilterChoices),
+        lineageFilterChoices << ComboBoxItem(tr("Ancestors"), "ancestors")
+                        << ComboBoxItem(tr("Descendants"), "descendants")
+                        << ComboBoxItem(tr("Unfiltered"), "");
+        mapSetting(addComboBox(QStringList("|LINEAGE|%1|current"), lineageFilterChoices),
                    settings.stringPointer(FossilSettings::timelineLineageFilterKey));
     }
 
@@ -171,7 +157,7 @@ public:
         VcsBase::VcsBaseClientSettings &settings = m_client->settings();
 
         // show files
-        mapSetting(addToggleButton(QLatin1String("-showfiles"), tr("Verbose"),
+        mapSetting(addToggleButton("-showfiles", tr("Verbose"),
                                    tr("Show files changed in each revision")),
                    settings.boolPointer(FossilSettings::timelineVerboseKey));
     }
@@ -181,39 +167,38 @@ public:
         VcsBase::VcsBaseClientSettings &settings = m_client->settings();
 
         // option: -t <val>
-        QList<ComboBoxItem> itemTypeChoices;
-        itemTypeChoices << ComboBoxItem(tr("All Items"), QLatin1String("all"))
-                        << ComboBoxItem(tr("File Commits"), QLatin1String("ci"))
-                        << ComboBoxItem(tr("Technical Notes"), QLatin1String("e"))
-                        << ComboBoxItem(tr("Tags"), QLatin1String("g"))
-                        << ComboBoxItem(tr("Tickets"), QLatin1String("t"))
-                        << ComboBoxItem(tr("Wiki Commits"), QLatin1String("w"));
+        const QList<ComboBoxItem> itemTypeChoices = {
+            ComboBoxItem(tr("All Items"), "all"),
+            ComboBoxItem(tr("File Commits"), "ci"),
+            ComboBoxItem(tr("Technical Notes"), "e"),
+            ComboBoxItem(tr("Tags"), "g"),
+            ComboBoxItem(tr("Tickets"), "t"),
+            ComboBoxItem(tr("Wiki Commits"), "w")
+        };
 
         // here we setup the ComboBox to map to the "-t <val>", which will produce
         // the enquoted option-values (e.g "-t all").
         // Fossil expects separate arguments for option and value ( i.e. "-t" "all")
         // so we need to handle the splitting explicitly in arguments().
-        mapSetting(addComboBox(QStringList(QLatin1String("-t %1")), itemTypeChoices),
+        mapSetting(addComboBox(QStringList("-t %1"), itemTypeChoices),
                    settings.stringPointer(FossilSettings::timelineItemTypeKey));
     }
 
-    QStringList arguments() const override
+    QStringList arguments() const final
     {
-        const QChar pipeChar(QLatin1Char('|'));
-        const QChar spaceChar(QLatin1Char(' '));
         QStringList args;
 
         // split "-t val" => "-t" "val"
-        foreach (const QString &arg, VcsBaseEditorParameterWidget::arguments()) {
-            if (arg.startsWith(QLatin1String("-t"))) {
-                args << arg.split(spaceChar);
+        foreach (const QString &arg, VcsBaseEditorConfig::arguments()) {
+            if (arg.startsWith("-t")) {
+                args << arg.split(' ');
 
-            } else if (arg.startsWith(pipeChar)){
+            } else if (arg.startsWith('|')){
                 // meta-option: "|OPT|val|extra1|..."
-                QStringList params = arg.split(pipeChar);
+                QStringList params = arg.split('|');
                 QString option = params[1];
                 for (int i = 2; i < params.size(); ++i) {
-                    if (option == QLatin1String("LINEAGE") && params[i].isEmpty()) {
+                    if (option == "LINEAGE" && params[i].isEmpty()) {
                         // empty lineage filter == Unfiltered
                         break;
                     }
@@ -234,11 +219,9 @@ private:
 
 unsigned FossilClient::makeVersionNumber(int major, int minor, int patch)
 {
-    const unsigned version = (QString().setNum(major).toUInt(0,16) << 16) +
-                             (QString().setNum(minor).toUInt(0,16) << 8) +
-                             (QString().setNum(patch).toUInt(0,16));
-
-    return version;
+    return (QString().setNum(major).toUInt(0,16) << 16) +
+           (QString().setNum(minor).toUInt(0,16) << 8) +
+           (QString().setNum(patch).toUInt(0,16));
 }
 
 static inline QString versionPart(unsigned part)
@@ -254,32 +237,11 @@ QString FossilClient::makeVersionString(unsigned version)
                     .arg(versionPart(version));
 }
 
-QString FossilClient::buildPath(const QString &path, const QString &baseName, const QString &suffix)
-{
-    // Intended use: handle the path in POSIX format, convert via QDir::toNativeSeparators() at use site.
-    const QChar separator(QLatin1Char('/'));
-
-    QString result = path;
-    if (!baseName.isEmpty()) {
-        if (!result.isEmpty() && !result.endsWith(QDir::separator()))
-            result += separator;
-        result += baseName;
-    }
-    // Add suffix unless user specified something else
-    const QChar dot = QLatin1Char('.');
-    if (!suffix.isEmpty() && !baseName.contains(dot)) {
-        if (!suffix.startsWith(dot))
-            result += dot;
-        result += suffix;
-    }
-    return result;
-}
-
 FossilClient::FossilClient() : VcsBase::VcsBaseClient(new FossilSettings)
 {
-    setDiffParameterWidgetCreator([this] { return new FossilDiffParameterWidget(this); });
-    // we override log method and instantiate FossilLogParameterWidget there
-    //setLogParameterWidgetCreator([this] { return new FossilLogParameterWidget(this); });
+    setDiffConfigCreator([this](QToolBar *toolBar) {
+        return new FossilDiffConfig(this, toolBar);
+    });
 }
 
 unsigned int FossilClient::synchronousBinaryVersion() const
@@ -287,113 +249,97 @@ unsigned int FossilClient::synchronousBinaryVersion() const
     if (settings().binaryPath().isEmpty())
         return 0;
 
-    QStringList args;
-    args << QLatin1String("version");
+    QStringList args("version");
 
     const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(QString(), args);
     if (response.result != Utils::SynchronousProcessResponse::Finished)
         return 0;
 
     QString output = response.stdOut();
-    output.remove(QLatin1Char('\r'));
-    if (output.endsWith(QLatin1Char('\n')))
-        output.truncate(output.size()-1);
+    output = output.trimmed();
 
     // fossil version:
     // "This is fossil version 1.27 [ccdefa355b] 2013-09-30 11:47:18 UTC"
-    QRegExp versionPattern(QLatin1String("^[^\\d]+(\\d+)\\.(\\d+).*$"));
+    QRegularExpression versionPattern("(\\d+)\\.(\\d+)");
     QTC_ASSERT(versionPattern.isValid(), return 0);
-    QTC_ASSERT(versionPattern.exactMatch(output), return 0);
-    const int major = versionPattern.cap(1).toInt();
-    const int minor = versionPattern.cap(2).toInt();
+    QRegularExpressionMatch versionMatch = versionPattern.match(output);
+    QTC_ASSERT(versionMatch.hasMatch(), return 0);
+    const int major = versionMatch.captured(1).toInt();
+    const int minor = versionMatch.captured(2).toInt();
     const int patch = 0;
     return makeVersionNumber(major,minor,patch);
 }
 
-BranchInfo FossilClient::synchronousBranchQuery(const QString &workingDirectory, QList<BranchInfo> *allBranches)
+QList<BranchInfo> FossilClient::branchListFromOutput(const QString &output, const BranchInfo::BranchFlags defaultFlags)
 {
-    // Return details of the current branch.
-    // When passed allBranches list arg, populate it with all branches.
+    // Branch list format:
+    // "  branch-name"
+    // "* current-branch"
+    return Utils::transform(output.split('\n', QString::SkipEmptyParts), [=](const QString& l) {
+        const QString &name = l.mid(2);
+        QTC_ASSERT(!name.isEmpty(), return BranchInfo());
+        const BranchInfo::BranchFlags flags = (l.startsWith("* ") ? defaultFlags | BranchInfo::Current : defaultFlags);
+        return BranchInfo(name, flags);
+    });
+}
 
-    const BranchInfo nullBranch(QString(),false);
-    const QString currentBranchIndicator(QLatin1String("*")); // '* current-branch'
+BranchInfo FossilClient::synchronousCurrentBranch(const QString &workingDirectory)
+{
+    if (workingDirectory.isEmpty())
+        return BranchInfo();
 
-    BranchInfo currentBranch(nullBranch);
-    bool getAllBranches = false;
-    bool getClosedBranches = false;
-    QMap<QString, BranchInfo> branchesByName;
+    // First try to get the current branch from the list of open branches
+    const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, {"branch", "list"});
+    if (response.result != Utils::SynchronousProcessResponse::Finished)
+        return BranchInfo();
 
-    if (allBranches != 0) {
-        getAllBranches = true;
-        allBranches->clear();
+    const QString output = sanitizeFossilOutput(response.stdOut());
+    BranchInfo currentBranch = Utils::findOrDefault(branchListFromOutput(output), [](const BranchInfo &b) {
+        return b.isCurrent();
+    });
+
+    if (!currentBranch.isCurrent()) {
+        // If not available from open branches, request it from the list of closed branches.
+        const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, {"branch", "list", "--closed"});
+        if (response.result != Utils::SynchronousProcessResponse::Finished)
+            return BranchInfo();
+
+        const QString output = sanitizeFossilOutput(response.stdOut());
+        currentBranch = Utils::findOrDefault(branchListFromOutput(output, BranchInfo::Closed), [](const BranchInfo &b) {
+            return b.isCurrent();
+        });
     }
 
-    if (workingDirectory.isEmpty())
-        return nullBranch;
-
-    // - retrieve a list of branches, parse out branch names and current indicator
-    // - query open branches first, if got no current, query the closed branches
-    // - if requested, store the all branch info (both open and closed)
-
-    do {
-
-        QStringList args;
-        args << QLatin1String("branch") << QLatin1String("list");
-
-        if (getClosedBranches)
-             args << QLatin1String("--closed");
-
-        const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, args);
-        if (response.result != Utils::SynchronousProcessResponse::Finished)
-            return nullBranch;
-
-        QString output = response.stdOut();
-        output.remove(QLatin1Char('\r'));
-        if (output.endsWith(QLatin1Char('\n')))
-            output.truncate(output.size()-1);
-
-        const QStringList lines = output.split(QLatin1Char('\n'));
-
-        QStringList::const_iterator cend = lines.constEnd();
-        for (QStringList::const_iterator cit = lines.constBegin(); cit != cend; ++cit) {
-            QString line = *cit;
-            if (line.isEmpty()) continue;
-
-            // parse branch line:
-            //   branch
-            // * current-branch
-
-            bool isCurrent = (line.startsWith(currentBranchIndicator));
-            QString name = line.mid(2);
-            bool isClosed = getClosedBranches;
-            BranchInfo::BranchFlags flags = BranchInfo::Public
-                    | (isClosed ? BranchInfo::Closed : BranchInfo::Open);
-
-            if (name.isEmpty()) continue;
-
-            BranchInfo branch(name, isCurrent, flags);
-
-            if (isCurrent) {
-                currentBranch = branch;
-
-                if (!getAllBranches)
-                    break;
-            }
-
-            if (getAllBranches)
-                branchesByName.insert(name, branch);
-        }
-
-        getClosedBranches = (!getClosedBranches
-                             && (getAllBranches || currentBranch.name().isEmpty()));
-
-    } while (getClosedBranches);
-
-
-    if (allBranches)
-        *allBranches = branchesByName.values();
-
     return currentBranch;
+}
+
+QList<BranchInfo> FossilClient::synchronousBranchQuery(const QString &workingDirectory)
+{
+    // Return a list of all branches, including the closed ones.
+    // Sort the list by branch name.
+
+    if (workingDirectory.isEmpty())
+        return QList<BranchInfo>();
+
+    // First get list of open branches
+    Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, {"branch", "list"});
+    if (response.result != Utils::SynchronousProcessResponse::Finished)
+        return QList<BranchInfo>();
+
+    QString output = sanitizeFossilOutput(response.stdOut());
+    QList<BranchInfo> branches = branchListFromOutput(output);
+
+    // Append a list of closed branches.
+    response = vcsFullySynchronousExec(workingDirectory, {"branch", "list", "--closed"});
+    if (response.result != Utils::SynchronousProcessResponse::Finished)
+        return QList<BranchInfo>();
+
+    output = sanitizeFossilOutput(response.stdOut());
+    branches.append(branchListFromOutput(output, BranchInfo::Closed));
+
+    std::sort(branches.begin(), branches.end(),
+          [](const BranchInfo &a, const BranchInfo &b) { return a.name() < b.name(); });
+    return branches;
 }
 
 RevisionInfo FossilClient::synchronousRevisionQuery(const QString &workingDirectory, const QString &id)
@@ -403,8 +349,7 @@ RevisionInfo FossilClient::synchronousRevisionQuery(const QString &workingDirect
     if (workingDirectory.isEmpty())
         return RevisionInfo();
 
-    QStringList args;
-    args << QLatin1String("info");
+    QStringList args("info");
     if (!id.isEmpty())
         args << id;
 
@@ -412,38 +357,33 @@ RevisionInfo FossilClient::synchronousRevisionQuery(const QString &workingDirect
     if (response.result != Utils::SynchronousProcessResponse::Finished)
         return RevisionInfo();
 
-    QString output = response.stdOut();
-    output.remove(QLatin1Char('\r'));
-    if (output.endsWith(QLatin1Char('\n')))
-        output.truncate(output.size()-1);
+    const QString output = sanitizeFossilOutput(response.stdOut());
 
     QString revisionId;
     QString parentId;
 
-    QRegExp revisionIdRx(QLatin1String("uuid:\\s*([0-9a-f]{5,40})"));
-    const QRegExp currentRevisionIdRx(QLatin1String("checkout:\\s*([0-9a-f]{5,40})"));
-    const QRegExp parentIdRx(QLatin1String("parent:\\s*([0-9a-f]{5,40})"));
-    if (id.isEmpty())
-        revisionIdRx = currentRevisionIdRx;
-    QTC_ASSERT(revisionIdRx.isValid(), return RevisionInfo());
-    QTC_ASSERT(parentIdRx.isValid(), return RevisionInfo());
+    const QRegularExpression idRx("([0-9a-f]{5,40})");
+    QTC_ASSERT(idRx.isValid(), return RevisionInfo());
 
-    //NOTE: parent does not exist for the root (initial empty check-in)
-    //      yet in this context we set parentId to its own revisionId
+    for (const QString &l : output.split('\n', QString::SkipEmptyParts)) {
+        if (l.startsWith("checkout: ", Qt::CaseInsensitive)
+            || l.startsWith("uuid: ", Qt::CaseInsensitive)) {
+            const QRegularExpressionMatch idMatch = idRx.match(l);
+            QTC_ASSERT(idMatch.hasMatch(), return RevisionInfo());
+            revisionId = idMatch.captured(1);
 
-    if (revisionIdRx.indexIn(output) != -1) {
-        revisionId = revisionIdRx.cap(1);
-
-        if (parentIdRx.indexIn(output) != -1) {
-            parentId = parentIdRx.cap(1);
-        } else {
-            parentId = revisionId;  // root
+        } else if (l.startsWith("parent: ", Qt::CaseInsensitive)){
+            const QRegularExpressionMatch idMatch = idRx.match(l);
+            if (idMatch.hasMatch())
+                parentId = idMatch.captured(1);
         }
     }
 
     // make sure id at least partially matches the retrieved revisionId
-    QTC_ASSERT(revisionId.left(id.size()).compare(id,Qt::CaseInsensitive) == 0,
-               return RevisionInfo());
+    QTC_ASSERT(revisionId.startsWith(id, Qt::CaseInsensitive), return RevisionInfo());
+
+    if (parentId.isEmpty())
+        parentId = revisionId;  // root
 
     return RevisionInfo(revisionId, parentId);
 }
@@ -454,13 +394,11 @@ QStringList FossilClient::synchronousTagQuery(const QString &workingDirectory, c
     // If no revision specified, all defined tags are listed.
     // Tag list includes branch names.
 
-    QStringList tags;
-
     if (workingDirectory.isEmpty())
         return QStringList();
 
-    QStringList args;
-    args << QLatin1String("tag") << QLatin1String("list");
+    QStringList args({"tag", "list"});
+
     if (!id.isEmpty())
         args << id;
 
@@ -468,70 +406,53 @@ QStringList FossilClient::synchronousTagQuery(const QString &workingDirectory, c
     if (response.result != Utils::SynchronousProcessResponse::Finished)
         return QStringList();
 
-    QString output = response.stdOut();
-    output.remove(QLatin1Char('\r'));
-    if (output.endsWith(QLatin1Char('\n')))
-        output.truncate(output.size()-1);
+    const QString output = sanitizeFossilOutput(response.stdOut());
 
-    tags = output.split(QLatin1Char('\n'));
-
-    return tags;
+    return output.split('\n', QString::SkipEmptyParts);
 }
 
 RepositorySettings FossilClient::synchronousSettingsQuery(const QString &workingDirectory)
 {
-    RepositorySettings repoSettings;
-
     if (workingDirectory.isEmpty())
         return RepositorySettings();
+
+    RepositorySettings repoSettings;
 
     repoSettings.user = synchronousUserDefaultQuery(workingDirectory);
     if (repoSettings.user.isEmpty())
         repoSettings.user = settings().stringValue(FossilSettings::userNameKey);
 
-    QStringList args;
-    args << QLatin1String("settings");
+    const QStringList args("settings");
 
     const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, args);
     if (response.result != Utils::SynchronousProcessResponse::Finished)
         return RepositorySettings();
 
-    QString output = response.stdOut();
-    output.remove(QLatin1Char('\r'));
-    if (output.endsWith(QLatin1Char('\n')))
-        output.truncate(output.size()-1);
+    const QString output = sanitizeFossilOutput(response.stdOut());
 
-    const QStringList lines = output.split(QLatin1Char('\n'));
-
-    QStringList::const_iterator cit = lines.constBegin();
-    QStringList::const_iterator cend = lines.constEnd();
-    for ( ; cit != cend; ++cit) {
-        QString line = *cit;
-        if (line.isEmpty()) continue;
-
+    for (const QString &line : output.split('\n', QString::SkipEmptyParts)) {
         // parse settings line:
-        // <setting-name> <(local|global)> <value>
-        const QChar spaceChar(QLatin1Char(' '));
-        QStringList fields = line.split(spaceChar, QString::SkipEmptyParts);
+        // <property> <(local|global)> <value>
+        // Fossil properties are case-insensitive; force them to lower-case.
+        // Values may be in mixed-case; force lower-case for fixed values.
+        const QStringList fields = line.split(' ', QString::SkipEmptyParts);
 
-        QString property = fields.at(0).toLower();
-        QString value;
-        if (fields.size() >= 3)
-            value = fields.at(2);
-        QString lcValue = value.toLower();
+        const QString property = fields.at(0).toLower();
+        const QString value = (fields.size() >= 3 ? fields.at(2) : QString());
+        const QString lcValue = value.toLower();
 
-        if (property == QLatin1String("autosync")) {
-            if (lcValue == QLatin1String("on")
-                || lcValue == QLatin1String("1"))
+        if (property == "autosync") {
+            if (lcValue == "on"
+                || lcValue == "1")
                 repoSettings.autosync = RepositorySettings::AutosyncOn;
-            else if (lcValue == QLatin1String("off")
-                     || lcValue == QLatin1String("0"))
-                     repoSettings.autosync = RepositorySettings::AutosyncOff;
-            else if (lcValue == QLatin1String("pullonly")
-                     || lcValue == QLatin1String("2"))
-                     repoSettings.autosync = RepositorySettings::AutosyncPullOnly;
+            else if (lcValue == "off"
+                     || lcValue == "0")
+                repoSettings.autosync = RepositorySettings::AutosyncOff;
+            else if (lcValue == "pullonly"
+                     || lcValue == "2")
+                repoSettings.autosync = RepositorySettings::AutosyncPullOnly;
         }
-        else if (property == QLatin1String("ssl-identity")) {
+        else if (property == "ssl-identity") {
             repoSettings.sslIdentityFile = value;
         }
     }
@@ -549,16 +470,13 @@ bool FossilClient::synchronousSetSetting(const QString &workingDirectory,
         return false;
 
     QStringList args;
-    QStringList extraOptions;
     if (value.isEmpty())
-        args << QLatin1String("unset") << property;
+        args << "unset" << property;
     else
-        args << QLatin1String("settings") << property << value;
+        args << "settings" << property << value;
 
     if (isGlobal)
-        extraOptions << QLatin1String("--global");
-
-    args << extraOptions;
+        args << "--global";
 
     const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, args);
     return (response.result == Utils::SynchronousProcessResponse::Finished);
@@ -572,18 +490,18 @@ bool FossilClient::synchronousConfigureRepository(const QString &workingDirector
         return false;
 
     // apply updated settings vs. current setting if given
-    bool applyAll = (currentSettings == RepositorySettings());
+    const bool applyAll = (currentSettings == RepositorySettings());
 
     if (!newSettings.user.isEmpty()
         && (applyAll
             || newSettings.user != currentSettings.user)
-            && !synchronousSetUserDefault(workingDirectory, newSettings.user)) {
+        && !synchronousSetUserDefault(workingDirectory, newSettings.user)){
         return false;
     }
 
     if ((applyAll
          || newSettings.sslIdentityFile != currentSettings.sslIdentityFile)
-        && !synchronousSetSetting(workingDirectory,QLatin1String("ssl-identity"), newSettings.sslIdentityFile)) {
+        && !synchronousSetSetting(workingDirectory, "ssl-identity", newSettings.sslIdentityFile)){
         return false;
     }
 
@@ -592,17 +510,17 @@ bool FossilClient::synchronousConfigureRepository(const QString &workingDirector
         QString value;
         switch (newSettings.autosync) {
         case RepositorySettings::AutosyncOff:
-            value = QLatin1String("off");
+            value = "off";
             break;
         case RepositorySettings::AutosyncOn:
-            value = QLatin1String("on");
+            value = "on";
             break;
         case RepositorySettings::AutosyncPullOnly:
-            value = QLatin1String("pullonly");
+            value = "pullonly";
             break;
         }
 
-        if (!synchronousSetSetting(workingDirectory,QLatin1String("autosync"), value))
+        if (!synchronousSetSetting(workingDirectory, "autosync", value))
             return false;
     }
 
@@ -614,19 +532,15 @@ QString FossilClient::synchronousUserDefaultQuery(const QString &workingDirector
     if (workingDirectory.isEmpty())
         return QString();
 
-    QStringList args;
-    args << QLatin1String("user") << QLatin1String("default");
+    const QStringList args({"user", "default"});
 
     const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, args);
     if (response.result != Utils::SynchronousProcessResponse::Finished)
         return QString();
 
-    QString output = response.stdOut();
-    output.remove(QLatin1Char('\r'));
-    if (output.endsWith(QLatin1Char('\n')))
-        output.truncate(output.size()-1);
+    QString output = sanitizeFossilOutput(response.stdOut());
 
-    return output;
+    return output.trimmed();
 }
 
 bool FossilClient::synchronousSetUserDefault(const QString &workingDirectory, const QString &userName)
@@ -635,9 +549,7 @@ bool FossilClient::synchronousSetUserDefault(const QString &workingDirectory, co
         return false;
 
     // set repository-default user
-    QStringList args;
-    args << QLatin1String("user") << QLatin1String("default") << userName
-         << QLatin1String("--user") << userName;
+    const QStringList args({"user", "default", userName, "--user", userName});
     const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, args);
     return (response.result == Utils::SynchronousProcessResponse::Finished);
 }
@@ -647,21 +559,17 @@ QString FossilClient::synchronousGetRepositoryURL(const QString &workingDirector
     if (workingDirectory.isEmpty())
         return QString();
 
-    QStringList args;
-    args << QLatin1String("remote-url");
+    const QStringList args("remote-url");
 
     const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, args);
     if (response.result != Utils::SynchronousProcessResponse::Finished)
         return QString();
 
-    QString output = response.stdOut();
-    output.remove(QLatin1Char('\r'));
-    if (output.endsWith(QLatin1Char('\n')))
-        output.truncate(output.size()-1);
+    QString output = sanitizeFossilOutput(response.stdOut());
+    output = output.trimmed();
 
     // Fossil returns "off" when no remote-url is set.
-
-    if (output.isEmpty() || output.toLower() == QLatin1String("off"))
+    if (output.isEmpty() || output.toLower() == "off")
         return QString();
 
     return output;
@@ -674,7 +582,7 @@ QString FossilClient::synchronousTopic(const QString &workingDirectory)
 
     // return current branch name
 
-    const BranchInfo branchInfo = synchronousBranchQuery(workingDirectory);
+    const BranchInfo branchInfo = synchronousCurrentBranch(workingDirectory);
     if (branchInfo.name().isEmpty())
         return QString();
 
@@ -689,9 +597,9 @@ bool FossilClient::synchronousCreateRepository(const QString &workingDirectory, 
     // use the configured default repository location for path
     // use the configured default user for admin
 
-    QString repoName = QDir(workingDirectory).dirName().simplified();
-    QString repoPath = settings().stringValue(FossilSettings::defaultRepoPathKey);
-    QString adminUser = settings().stringValue(FossilSettings::userNameKey);
+    const QString repoName = QDir(workingDirectory).dirName().simplified();
+    const QString repoPath = settings().stringValue(FossilSettings::defaultRepoPathKey);
+    const QString adminUser = settings().stringValue(FossilSettings::userNameKey);
 
     if (repoName.isEmpty() || repoPath.isEmpty())
         return false;
@@ -699,18 +607,17 @@ bool FossilClient::synchronousCreateRepository(const QString &workingDirectory, 
     // @TODO: handle spaces in the path
     // @TODO: what about --template options?
 
-    QString repoFile = buildPath(repoPath, repoName, QLatin1String(Constants::FOSSIL_FILE_SUFFIX));
-    QString repoFileNative(QDir::toNativeSeparators(repoFile));
+    const Utils::FileName repoFilePath = Utils::FileName::fromString(repoPath)
+            .appendPath(Utils::FileName::fromString(repoName, Constants::FOSSIL_FILE_SUFFIX).toString());
     QStringList args(vcsCommandString(CreateRepositoryCommand));
     if (!adminUser.isEmpty())
-        args << QLatin1String("--admin-user") << adminUser;
-    args << extraOptions << repoFileNative;
+        args << "--admin-user" << adminUser;
+    args << extraOptions << repoFilePath.toUserOutput();
     Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, args);
     if (response.result != Utils::SynchronousProcessResponse::Finished)
         return false;
 
-    QString output = response.stdOut();
-    output.remove(QLatin1Char('\r'));
+    QString output = sanitizeFossilOutput(response.stdOut());
     outputWindow->append(output);
 
     // check out the created repository file into the working directory
@@ -719,13 +626,12 @@ bool FossilClient::synchronousCreateRepository(const QString &workingDirectory, 
     response.clear();
     output.clear();
 
-    args << QLatin1String("open") << repoFileNative;
+    args << "open" << repoFilePath.toUserOutput();
     response = vcsFullySynchronousExec(workingDirectory, args);
     if (response.result != Utils::SynchronousProcessResponse::Finished)
         return false;
 
-    output = response.stdOut();
-    output.remove(QLatin1Char('\r'));
+    output = sanitizeFossilOutput(response.stdOut());
     outputWindow->append(output);
 
     // set user default to admin if specified
@@ -735,14 +641,12 @@ bool FossilClient::synchronousCreateRepository(const QString &workingDirectory, 
         response.clear();
         output.clear();
 
-        args << QLatin1String("user") << QLatin1String("default") << adminUser
-             << QLatin1String("--user") << adminUser;
+        args << "user" << "default" << adminUser << "--user" << adminUser;
         response = vcsFullySynchronousExec(workingDirectory, args);
         if (response.result != Utils::SynchronousProcessResponse::Finished)
             return false;
 
-        output = response.stdOut();
-        output.remove(QLatin1Char('\r'));
+        QString output = sanitizeFossilOutput(response.stdOut());
         outputWindow->append(output);
     }
 
@@ -762,23 +666,20 @@ bool FossilClient::synchronousMove(const QString &workingDir,
     if (!QFile::rename(from, to))
         return false;
 
-    QStringList args;
-    args << vcsCommandString(MoveCommand) << extraOptions << from << to;
+    QStringList args(vcsCommandString(MoveCommand));
+    args << extraOptions << from << to;
     const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDir, args);
     return (response.result == Utils::SynchronousProcessResponse::Finished);
 }
 
 bool FossilClient::synchronousPull(const QString &workingDir, const QString &srcLocation, const QStringList &extraOptions)
 {
-    QString remoteLocation(srcLocation);
-    if (remoteLocation.isEmpty())
-        remoteLocation = synchronousGetRepositoryURL(workingDir);
-
+    const QString remoteLocation = (!srcLocation.isEmpty() ? srcLocation : synchronousGetRepositoryURL(workingDir));
     if (remoteLocation.isEmpty())
         return false;
 
-    QStringList args;
-    args << vcsCommandString(PullCommand) << remoteLocation << extraOptions;
+    QStringList args({vcsCommandString(PullCommand), remoteLocation});
+    args << extraOptions;
     // Disable UNIX terminals to suppress SSH prompting
     const unsigned flags =
             VcsBase::VcsCommand::SshPasswordPrompt
@@ -793,15 +694,12 @@ bool FossilClient::synchronousPull(const QString &workingDir, const QString &src
 
 bool FossilClient::synchronousPush(const QString &workingDir, const QString &dstLocation, const QStringList &extraOptions)
 {
-    QString remoteLocation(dstLocation);
-    if (remoteLocation.isEmpty())
-        remoteLocation = synchronousGetRepositoryURL(workingDir);
-
+    const QString remoteLocation = (!dstLocation.isEmpty() ? dstLocation : synchronousGetRepositoryURL(workingDir));
     if (remoteLocation.isEmpty())
         return false;
 
-    QStringList args;
-    args << vcsCommandString(PushCommand) << remoteLocation << extraOptions;
+    QStringList args({vcsCommandString(PushCommand), remoteLocation});
+    args << extraOptions;
     // Disable UNIX terminals to suppress SSH prompting
     const unsigned flags =
             VcsBase::VcsCommand::SshPasswordPrompt
@@ -815,15 +713,15 @@ void FossilClient::commit(const QString &repositoryRoot, const QStringList &file
                           const QString &commitMessageFile, const QStringList &extraOptions)
 {
     VcsBaseClient::commit(repositoryRoot, files, commitMessageFile,
-                          QStringList(extraOptions) << QLatin1String("-M") << commitMessageFile);
+                          QStringList(extraOptions) << "-M" << commitMessageFile);
 }
 
 VcsBase::VcsBaseEditorWidget *FossilClient::annotate(
         const QString &workingDir, const QString &file, const QString &revision,
         int lineNumber, const QStringList &extraOptions)
 {
-    // 'fossil annotate' command has a variant 'fossil blame'
-    // blame command attributes committing username to source lines
+    // 'fossil annotate' command has a variant 'fossil blame'.
+    // blame command attributes a committing username to source lines,
     // annotate shows line numbers
 
     QString vcsCmdString = vcsCommandString(AnnotateCommand);
@@ -836,34 +734,31 @@ VcsBase::VcsBaseEditorWidget *FossilClient::annotate(
                                                   VcsBase::VcsBaseEditor::getCodec(source),
                                                   vcsCmdString.toLatin1().constData(), id);
 
-    VcsBase::VcsBaseEditorParameterWidget *paramWidget = editor->configurationWidget();
-    if (!paramWidget && (paramWidget = createAnnotateEditor())) {
-        paramWidget->setBaseArguments(extraOptions);
-        // editor has been just created, createVcsEditor() didn't set a configuration widget yet
-        connect(paramWidget, &VcsBase::VcsBaseEditorParameterWidget::commandExecutionRequested,
-                [=]() {
-                    const int line = VcsBase::VcsBaseEditor::lineNumberOfCurrentEditor();
-                    return this->annotate(workingDir, file, revision, line, paramWidget->arguments());
-                } );
-        editor->setConfigurationWidget(paramWidget);
+    QStringList effectiveArgs = extraOptions;
+    if (!editor->configurationAdded()) {
+        if (VcsBase::VcsBaseEditorConfig *editorConfig = createAnnotateEditor(editor)) {
+            editorConfig->setBaseArguments(extraOptions);
+            // editor has been just created, createVcsEditor() didn't set a configuration widget yet
+            connect(editorConfig, &VcsBase::VcsBaseEditorConfig::commandExecutionRequested,
+                    [=]() {
+                        const int line = VcsBase::VcsBaseEditor::lineNumberOfCurrentEditor();
+                        return this->annotate(workingDir, file, revision, line, editorConfig->arguments());
+                    } );
+            effectiveArgs = editorConfig->arguments();
+            editor->setConfigurationAdded();
+        }
     }
-    QStringList effectiveArgs = (paramWidget ? paramWidget->arguments() : extraOptions);
 
     VcsBase::VcsCommand *cmd = createCommand(workingDir, editor);
 
     // here we introduce a "|BLAME|" meta-option to allow both annotate and blame modes
-    QRegExp blameMetaOptionRx = QRegExp(QLatin1String("\\|BLAME\\|"));
-    QTC_ASSERT(blameMetaOptionRx.isValid(), return editor);
-
-    int foundAt = effectiveArgs.indexOf(blameMetaOptionRx);
-    if (foundAt != -1) {
-        vcsCmdString = QLatin1String("blame");
-        effectiveArgs.removeAt(foundAt);
+    int pos = effectiveArgs.indexOf("|BLAME|");
+    if (pos != -1) {
+        vcsCmdString = "blame";
+        effectiveArgs.removeAt(pos);
     }
-    QStringList args;
-    args << vcsCmdString
-         << revisionSpec(revision)
-         << effectiveArgs << file;
+    QStringList args(vcsCmdString);
+    args << revisionSpec(revision) << effectiveArgs << file;
 
     // When version list requested, ignore the source line.
     if (args.indexOf(QLatin1String("--log")) != -1)
@@ -871,14 +766,19 @@ VcsBase::VcsBaseEditorWidget *FossilClient::annotate(
     cmd->setCookie(lineNumber);
 
     enqueueJob(cmd, args);
-
     return editor;
+}
+
+bool FossilClient::isVcsFileOrDirectory(const Utils::FileName &fileName) const
+{
+    // true for any dir or file other than fossil checkout db-file
+    return !(fileName.toFileInfo().isFile()
+             && fileName.fileName().compare(Constants::FOSSILREPO, Utils::HostOsInfo::fileNameCaseSensitivity()));
 }
 
 QString FossilClient::findTopLevelForFile(const QFileInfo &file) const
 {
-    const QString repositoryCheckFile =
-            QLatin1String(Constants::FOSSILREPO);
+    const QString repositoryCheckFile = Constants::FOSSILREPO;
     return file.isDir() ?
                 VcsBase::VcsBasePlugin::findRepositoryForDirectory(file.absoluteFilePath(),
                                                                    repositoryCheckFile) :
@@ -888,12 +788,12 @@ QString FossilClient::findTopLevelForFile(const QFileInfo &file) const
 
 bool FossilClient::managesFile(const QString &workingDirectory, const QString &fileName) const
 {
-    QStringList args(QLatin1String("finfo"));
-    args << fileName;
+    const QStringList args({"finfo", fileName});
     const Utils::SynchronousProcessResponse response = vcsFullySynchronousExec(workingDirectory, args);
     if (response.result != Utils::SynchronousProcessResponse::Finished)
         return false;
-    return !response.stdOut().toLower().startsWith("no history for file");
+    QString output = sanitizeFossilOutput(response.stdOut());
+    return !output.startsWith("no history for file", Qt::CaseInsensitive);
 }
 
 unsigned int FossilClient::binaryVersion() const
@@ -948,22 +848,21 @@ FossilClient::SupportedFeatures FossilClient::supportedFeatures() const
             features &= ~TimelineWidthFeature;
         }
     }
-
     return features;
 }
 
 void FossilClient::view(const QString &source, const QString &id, const QStringList &extraOptions)
 {
-    QStringList args(QLatin1String("diff"));
+    QStringList args("diff");
 
     const QFileInfo fi(source);
     const QString workingDirectory = fi.isFile() ? fi.absolutePath() : source;
 
     RevisionInfo revisionInfo = synchronousRevisionQuery(workingDirectory,id);
 
-    args << QLatin1String("--from") << revisionInfo.parentId
-         << QLatin1String("--to") << revisionInfo.id
-         << QLatin1String("-v")
+    args << "--from" << revisionInfo.parentId
+         << "--to" << revisionInfo.id
+         << "-v"
          << extraOptions;
 
     const Core::Id kind = vcsEditorKind(DiffCommand);
@@ -980,17 +879,17 @@ class FossilLogHighlighter : QSyntaxHighlighter
 {
 public:
     explicit FossilLogHighlighter(QTextDocument *parent);
-    virtual void highlightBlock(const QString &text);
+    virtual void highlightBlock(const QString &text) final;
 
 private:
-    const QRegExp m_revisionIdRx;
-    const QRegExp m_dateRx;
+    const QRegularExpression m_revisionIdRx;
+    const QRegularExpression m_dateRx;
 };
 
 FossilLogHighlighter::FossilLogHighlighter(QTextDocument * parent) :
     QSyntaxHighlighter(parent),
-    m_revisionIdRx(QLatin1String(Constants::CHANGESET_ID)),
-    m_dateRx(QLatin1String("([0-9]{4}-[0-9]{2}-[0-9]{2})"))
+    m_revisionIdRx(Constants::CHANGESET_ID),
+    m_dateRx("([0-9]{4}-[0-9]{2}-[0-9]{2})")
 {
     QTC_CHECK(m_revisionIdRx.isValid());
     QTC_CHECK(m_dateRx.isValid());
@@ -1000,26 +899,24 @@ void FossilLogHighlighter::highlightBlock(const QString &text)
 {
     // Match the revision-ids and dates -- highlight them for convenience.
 
-    //const QTextBlock block = currentBlock();
-
     // Format revision-ids
-    for (int start = 0;
-         (start = m_revisionIdRx.indexIn(text, start)) != -1;
-         start += m_revisionIdRx.matchedLength()) {
+    QRegularExpressionMatchIterator i = m_revisionIdRx.globalMatch(text);
+    while (i.hasNext()) {
+        const QRegularExpressionMatch revisionIdMatch = i.next();
         QTextCharFormat charFormat = format(0);
         charFormat.setForeground(Qt::darkBlue);
         //charFormat.setFontItalic(true);
-        setFormat(start, m_revisionIdRx.matchedLength(), charFormat);
+        setFormat(revisionIdMatch.capturedStart(0), revisionIdMatch.capturedLength(0), charFormat);
     }
 
     // Format dates
-    for (int start = 0;
-         (start = m_dateRx.indexIn(text, start)) != -1;
-         start += m_dateRx.matchedLength()) {
+    i = m_dateRx.globalMatch(text);
+    while (i.hasNext()) {
+        const QRegularExpressionMatch dateMatch = i.next();
         QTextCharFormat charFormat = format(0);
         charFormat.setForeground(Qt::darkBlue);
         charFormat.setFontWeight(QFont::DemiBold);
-        setFormat(start, m_dateRx.matchedLength(), charFormat);
+        setFormat(dateMatch.capturedStart(0), dateMatch.capturedLength(0), charFormat);
     }
 }
 
@@ -1048,24 +945,26 @@ void FossilClient::log(const QString &workingDir, const QStringList &files,
                                                            vcsCmdString.toLatin1().constData(), id);
     editor->setFileLogAnnotateEnabled(enableAnnotationContextMenu);
 
-    VcsBase::VcsBaseEditorParameterWidget *paramWidget = editor->configurationWidget();
-    if (!paramWidget && (paramWidget = createLogEditor())) {
-        paramWidget->setBaseArguments(extraOptions);
-        // editor has been just created, createVcsEditor() didn't set a configuration widget yet
-        connect(paramWidget, &VcsBase::VcsBaseEditorParameterWidget::commandExecutionRequested,
-                [=]() { this->log(workingDir, files, paramWidget->arguments(), enableAnnotationContextMenu); } );
-        editor->setConfigurationWidget(paramWidget);
+    QStringList effectiveArgs = extraOptions;
+    if (!editor->configurationAdded()) {
+        if (VcsBase::VcsBaseEditorConfig *editorConfig = createLogEditor(editor)) {
+            editorConfig->setBaseArguments(extraOptions);
+            // editor has been just created, createVcsEditor() didn't set a configuration widget yet
+            connect(editorConfig, &VcsBase::VcsBaseEditorConfig::commandExecutionRequested,
+                [=]() { this->log(workingDir, files, editorConfig->arguments(), enableAnnotationContextMenu); } );
+            effectiveArgs = editorConfig->arguments();
+            editor->setConfigurationAdded();
+        }
     }
-    QStringList effectiveArgs = (paramWidget ? paramWidget->arguments() : extraOptions);
 
     //@TODO: move highlighter and widgets to fossil editor sources.
 
     new FossilLogHighlighter(editor->document());
 
-    QStringList args;
-    args << vcsCmdString << effectiveArgs;
+    QStringList args(vcsCmdString);
+    args << effectiveArgs;
     if (!files.isEmpty())
-         args << QLatin1String("--path") << files;
+         args << "--path" << files;
     enqueueJob(createCommand(workingDir, editor), args);
 }
 
@@ -1083,7 +982,7 @@ void FossilClient::logCurrentFile(const QString &workingDir, const QStringList &
         return;
     }
 
-    const QString vcsCmdString = QLatin1String("finfo");
+    const QString vcsCmdString = "finfo";
     const Core::Id kind = vcsEditorKind(LogCommand);
     const QString id = VcsBase::VcsBaseEditor::getTitleId(workingDir, files);
     const QString title = vcsEditorTitle(vcsCmdString, id);
@@ -1093,22 +992,24 @@ void FossilClient::logCurrentFile(const QString &workingDir, const QStringList &
                                                            vcsCmdString.toLatin1().constData(), id);
     editor->setFileLogAnnotateEnabled(enableAnnotationContextMenu);
 
-    VcsBase::VcsBaseEditorParameterWidget *paramWidget = editor->configurationWidget();
-    if (!paramWidget && (paramWidget = createLogCurrentFileEditor())) {
-        paramWidget->setBaseArguments(extraOptions);
-        // editor has been just created, createVcsEditor() didn't set a configuration widget yet
-        connect(paramWidget, &VcsBase::VcsBaseEditorParameterWidget::commandExecutionRequested,
-                [=]() { this->logCurrentFile(workingDir, files, paramWidget->arguments(), enableAnnotationContextMenu); } );
-        editor->setConfigurationWidget(paramWidget);
+    QStringList effectiveArgs = extraOptions;
+    if (!editor->configurationAdded()) {
+        if (VcsBase::VcsBaseEditorConfig *editorConfig = createLogEditor(editor)) {
+            editorConfig->setBaseArguments(extraOptions);
+            // editor has been just created, createVcsEditor() didn't set a configuration widget yet
+            connect(editorConfig, &VcsBase::VcsBaseEditorConfig::commandExecutionRequested,
+                [=]() { this->logCurrentFile(workingDir, files, editorConfig->arguments(), enableAnnotationContextMenu); } );
+            effectiveArgs = editorConfig->arguments();
+            editor->setConfigurationAdded();
+        }
     }
-    QStringList effectiveArgs = (paramWidget ? paramWidget->arguments() : extraOptions);
 
     //@TODO: move highlighter and widgets to fossil editor sources.
 
     new FossilLogHighlighter(editor->document());
 
-    QStringList args;
-    args << vcsCmdString << effectiveArgs << files;
+    QStringList args(vcsCmdString);
+    args << effectiveArgs << files;
     enqueueJob(createCommand(workingDir, editor), args);
 }
 
@@ -1119,13 +1020,13 @@ void FossilClient::revertFile(const QString &workingDir,
 {
     QStringList args(vcsCommandString(RevertCommand));
     if (!revision.isEmpty())
-        args << QLatin1String("-r") << revision;
+        args << "-r" << revision;
 
     args << extraOptions << file;
 
     // Indicate file list
     VcsBase::VcsCommand *cmd = createCommand(workingDir);
-    cmd->setCookie(QStringList(workingDir + QLatin1Char('/') + file));
+    cmd->setCookie(QStringList(workingDir + "/" + file));
     connect(cmd, &VcsBase::VcsCommand::success, this, &VcsBase::VcsBaseClient::changed, Qt::QueuedConnection);
     enqueueJob(cmd, args);
 }
@@ -1144,8 +1045,8 @@ void FossilClient::revertAll(const QString &workingDir, const QString &revision,
              << extraOptions;
 
     } else {
-        args << QLatin1String("checkout") << revision
-             << QLatin1String("--force")
+        args << "checkout" << revision
+             << "--force"
              << extraOptions;
     }
 
@@ -1156,15 +1057,32 @@ void FossilClient::revertAll(const QString &workingDir, const QString &revision,
     enqueueJob(createCommand(workingDir), args);
 }
 
+QString FossilClient::sanitizeFossilOutput(const QString &output) const
+{
+#if defined(Q_OS_WIN) || defined(Q_OS_CYGWIN)
+    // Strip possible extra '\r' in output from the Fossil client on Windows.
+
+    // Fossil client contained a long-standing bug which caused an extraneous '\r'
+    // added to output lines from certain commands in excess of the expected <CR/LF>.
+    // While the output appeared normal on a terminal, in non-interactive context
+    // it would get incorrectly split, resulting in extra empty lines.
+    // Bug fix is fairly recent, so for compatibility we need to strip the '\r'.
+    QString result(output);
+    return result.remove('\r');
+#else
+    return output;
+#endif
+}
+
 QString FossilClient::vcsCommandString(VcsCommandTag cmd) const
 {
     // override specific client commands
     // otherwise return baseclient command
 
     switch (cmd) {
-    case RemoveCommand: return QLatin1String("rm");
-    case MoveCommand: return QLatin1String("mv");
-    case LogCommand: return QLatin1String("timeline");
+    case RemoveCommand: return QString("rm");
+    case MoveCommand: return QString("mv");
+    case LogCommand: return QString("timeline");
 
     default: return VcsBaseClient::vcsCommandString(cmd);
     }
@@ -1200,14 +1118,12 @@ QStringList FossilClient::revisionSpec(const QString &revision) const
 
 FossilClient::StatusItem FossilClient::parseStatusLine(const QString &line) const
 {
-    const QChar spaceChar(QLatin1Char(' '));
-
     StatusItem item;
 
     // Ref: fossil source 'src/checkin.c' status_report()
     // Expect at least one non-leading blank space.
 
-    int pos = line.indexOf(spaceChar);
+    int pos = line.indexOf(' ');
 
     if (line.isEmpty() || pos < 1)
         return StatusItem();
@@ -1215,36 +1131,36 @@ FossilClient::StatusItem FossilClient::parseStatusLine(const QString &line) cons
     QString label(line.left(pos));
     QString flags;
 
-    if (label == QLatin1String("EDITED"))
-        flags = QLatin1String(Constants::FSTATUS_EDITED);
-    else if (label == QLatin1String("ADDED"))
-        flags = QLatin1String(Constants::FSTATUS_ADDED);
-    else if (label == QLatin1String("RENAMED"))
-        flags = QLatin1String(Constants::FSTATUS_RENAMED);
-    else if (label == QLatin1String("DELETED"))
-        flags = QLatin1String(Constants::FSTATUS_DELETED);
-    else if (label == QLatin1String("MISSING"))
-        flags = QLatin1String("Missing");
-    else if (label == QLatin1String("ADDED_BY_MERGE"))
-        flags = QLatin1String(Constants::FSTATUS_ADDED_BY_MERGE);
-    else if (label == QLatin1String("UPDATED_BY_MERGE"))
-        flags = QLatin1String(Constants::FSTATUS_UPDATED_BY_MERGE);
-    else if (label == QLatin1String("ADDED_BY_INTEGRATE"))
-        flags = QLatin1String(Constants::FSTATUS_ADDED_BY_INTEGRATE);
-    else if (label == QLatin1String("UPDATED_BY_INTEGRATE"))
-        flags = QLatin1String(Constants::FSTATUS_UPDATED_BY_INTEGRATE);
-    else if (label == QLatin1String("CONFLICT"))
-        flags = QLatin1String("Conflict");
-    else if (label == QLatin1String("EXECUTABLE"))
-        flags = QLatin1String("Set Exec");
-    else if (label == QLatin1String("SYMLINK"))
-        flags = QLatin1String("Set Symlink");
-    else if (label == QLatin1String("UNEXEC"))
-        flags = QLatin1String("Unset Exec");
-    else if (label == QLatin1String("UNLINK"))
-        flags = QLatin1String("Unset Symlink");
-    else if (label == QLatin1String("NOT_A_FILE"))
-        flags = QLatin1String(Constants::FSTATUS_UNKNOWN);
+    if (label == "EDITED")
+        flags = Constants::FSTATUS_EDITED;
+    else if (label == "ADDED")
+        flags = Constants::FSTATUS_ADDED;
+    else if (label == "RENAMED")
+        flags = Constants::FSTATUS_RENAMED;
+    else if (label == "DELETED")
+        flags = Constants::FSTATUS_DELETED;
+    else if (label == "MISSING")
+        flags = "Missing";
+    else if (label == "ADDED_BY_MERGE")
+        flags = Constants::FSTATUS_ADDED_BY_MERGE;
+    else if (label == "UPDATED_BY_MERGE")
+        flags = Constants::FSTATUS_UPDATED_BY_MERGE;
+    else if (label == "ADDED_BY_INTEGRATE")
+        flags = Constants::FSTATUS_ADDED_BY_INTEGRATE;
+    else if (label == "UPDATED_BY_INTEGRATE")
+        flags = Constants::FSTATUS_UPDATED_BY_INTEGRATE;
+    else if (label == "CONFLICT")
+        flags = "Conflict";
+    else if (label == "EXECUTABLE")
+        flags = "Set Exec";
+    else if (label == "SYMLINK")
+        flags = "Set Symlink";
+    else if (label == "UNEXEC")
+        flags = "Unset Exec";
+    else if (label == "UNLINK")
+        flags = "Unset Symlink";
+    else if (label == "NOT_A_FILE")
+        flags = Constants::FSTATUS_UNKNOWN;
 
 
     if (flags.isEmpty())
@@ -1259,24 +1175,24 @@ FossilClient::StatusItem FossilClient::parseStatusLine(const QString &line) cons
     return item;
 }
 
-VcsBase::VcsBaseEditorParameterWidget *FossilClient::createAnnotateEditor()
+VcsBase::VcsBaseEditorConfig *FossilClient::createAnnotateEditor(VcsBase::VcsBaseEditorWidget *editor)
 {
-    return new FossilAnnotateParameterWidget(this);
+    return new FossilAnnotateConfig(this, editor->toolBar());
 }
 
-VcsBase::VcsBaseEditorParameterWidget *FossilClient::createLogCurrentFileEditor()
+VcsBase::VcsBaseEditorConfig *FossilClient::createLogCurrentFileEditor(VcsBase::VcsBaseEditorWidget *editor)
 {
     SupportedFeatures features = supportedFeatures();
 
     if (features.testFlag(TimelinePathFeature))
-        return createLogEditor();
+        return createLogEditor(editor);
 
-    return new FossilLogCurrentFileParameterWidget(this);
+    return new FossilLogCurrentFileConfig(this, editor->toolBar());
 }
 
-VcsBase::VcsBaseEditorParameterWidget *FossilClient::createLogEditor()
+VcsBase::VcsBaseEditorConfig *FossilClient::createLogEditor(VcsBase::VcsBaseEditorWidget *editor)
 {
-    return new FossilLogParameterWidget(this);
+    return new FossilLogConfig(this, editor->toolBar());
 }
 
 } // namespace Internal

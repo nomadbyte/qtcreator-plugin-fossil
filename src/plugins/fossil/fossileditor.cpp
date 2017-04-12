@@ -41,47 +41,53 @@
 #include <QTextBlock>
 #include <QDir>
 #include <QFileInfo>
-#include <QDebug>
 
-using namespace Fossil::Internal;
-using namespace Fossil;
+namespace Fossil {
+namespace Internal {
 
 FossilEditorWidget::FossilEditorWidget() :
-    m_exactChangesetId(QLatin1String(Constants::CHANGESET_ID_EXACT)),
-    m_exactDiffFileId(QLatin1String(Constants::DIFFFILE_ID_EXACT)),
-    m_firstChangesetId(QString(QLatin1String("\n%1 ")).arg(QLatin1String(Constants::CHANGESET_ID))),
-    m_nextChangesetId(QString(QLatin1String("\n%1 ")).arg(QLatin1String(Constants::CHANGESET_ID)))
+    m_exactChangesetId(Constants::CHANGESET_ID_EXACT),
+    m_firstChangesetId(QString("\n") + Constants::CHANGESET_ID + " "),
+    m_nextChangesetId(m_firstChangesetId)
 {
     QTC_ASSERT(m_exactChangesetId.isValid(), return);
-    QTC_ASSERT(m_exactDiffFileId.isValid(), return);
     QTC_ASSERT(m_firstChangesetId.isValid(), return);
     QTC_ASSERT(m_nextChangesetId.isValid(), return);
 
     setAnnotateRevisionTextFormat(tr("&Annotate %1"));
     setAnnotatePreviousRevisionTextFormat(tr("Annotate &Parent Revision %1"));
 
-    setDiffFilePattern(m_exactDiffFileId);
-    QRegExp logChangePattern(QLatin1String("^.*\\[([0-9a-f]{5,40})\\]"));
+    const QRegExp exactDiffFileIdPattern(Constants::DIFFFILE_ID_EXACT);
+    QTC_ASSERT(exactDiffFileIdPattern.isValid(), return);
+    setDiffFilePattern(exactDiffFileIdPattern);
+
+    const QRegExp logChangePattern("^.*\\[([0-9a-f]{5,40})\\]");
     QTC_ASSERT(logChangePattern.isValid(), return);
     setLogEntryPattern(logChangePattern);
 }
 
 QSet<QString> FossilEditorWidget::annotationChanges() const
 {
-    QSet<QString> changes;
+
     const QString txt = toPlainText();
     if (txt.isEmpty())
-        return changes;
+        return QSet<QString>();
 
     // extract changeset id at the beginning of each annotated line:
     // <changeid> ...:
 
-    if (m_firstChangesetId.indexIn(txt) != -1) {
-        changes.insert(m_firstChangesetId.cap(1));
-        int pos = 0;
-        while ((pos = m_nextChangesetId.indexIn(txt, pos)) != -1) {
-            pos += m_nextChangesetId.matchedLength();
-            changes.insert(m_nextChangesetId.cap(1));
+    QSet<QString> changes;
+
+    QRegularExpressionMatch firstChangesetIdMatch = m_firstChangesetId.match(txt);
+    if (firstChangesetIdMatch.hasMatch()) {
+        QString changeId = firstChangesetIdMatch.captured(1);
+        changes.insert(changeId);
+
+        QRegularExpressionMatchIterator i = m_nextChangesetId.globalMatch(txt);
+        while (i.hasNext()) {
+            const QRegularExpressionMatch nextChangesetIdMatch = i.next();
+            changeId = nextChangesetIdMatch.captured(1);
+            changes.insert(changeId);
         }
     }
     return changes;
@@ -93,7 +99,8 @@ QString FossilEditorWidget::changeUnderCursor(const QTextCursor &cursorIn) const
     cursor.select(QTextCursor::WordUnderCursor);
     if (cursor.hasSelection()) {
         const QString change = cursor.selectedText();
-        if (m_exactChangesetId.exactMatch(change))
+        QRegularExpressionMatch exactChangesetIdMatch = m_exactChangesetId.match(change);
+        if (exactChangesetIdMatch.hasMatch())
             return change;
     }
     return QString();
@@ -104,3 +111,6 @@ VcsBase::BaseAnnotationHighlighter *FossilEditorWidget::createAnnotationHighligh
 {
     return new FossilAnnotationHighlighter(changes);
 }
+
+} // namespace Internal
+} // namespace Fossil

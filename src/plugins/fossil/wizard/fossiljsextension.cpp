@@ -57,14 +57,12 @@ public:
 
 void FossilJsExtension::parseArgOptions(const QStringList &args, QMap<QString, QString> &options)
 {
-    const QChar pipeChar(QLatin1Char('|'));
-
     options.clear();
 
     foreach (const QString &arg, args) {
         if (arg.isEmpty()) continue;
 
-        QStringList opt = arg.split(pipeChar, QString::KeepEmptyParts);
+        QStringList opt = arg.split('|', QString::KeepEmptyParts);
         options.insert(opt[0], opt.size() > 1 ? opt[1] : QString());
     }
 }

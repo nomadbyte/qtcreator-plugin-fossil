@@ -59,12 +59,12 @@ public:
 
     static unsigned makeVersionNumber(int major, int minor, int patch);
     static QString makeVersionString(unsigned version);
-    static QString buildPath(const QString &path, const QString &baseName, const QString &suffix);
 
     FossilClient();
 
     unsigned int synchronousBinaryVersion() const;
-    BranchInfo synchronousBranchQuery(const QString &workingDirectory, QList<BranchInfo> *allBranches = 0);
+    BranchInfo synchronousCurrentBranch(const QString &workingDirectory);
+    QList<BranchInfo> synchronousBranchQuery(const QString &workingDirectory);
     RevisionInfo synchronousRevisionQuery(const QString &workingDirectory, const QString &id = QString());
     QStringList synchronousTagQuery(const QString &workingDirectory, const QString &id = QString());
     RepositorySettings synchronousSettingsQuery(const QString &workingDirectory);
@@ -77,52 +77,53 @@ public:
     QString synchronousGetRepositoryURL(const QString &workingDirectory);
     QString synchronousTopic(const QString &workingDirectory);
     bool synchronousCreateRepository(const QString &workingDirectory,
-                                     const QStringList &extraOptions = QStringList()) override;
+                                     const QStringList &extraOptions = QStringList()) final;
     bool synchronousMove(const QString &workingDir,
                          const QString &from, const QString &to,
-                         const QStringList &extraOptions = QStringList()) override;
+                         const QStringList &extraOptions = QStringList()) final;
     bool synchronousPull(const QString &workingDir,
                          const QString &srcLocation,
-                         const QStringList &extraOptions = QStringList()) override;
+                         const QStringList &extraOptions = QStringList()) final;
     bool synchronousPush(const QString &workingDir,
                          const QString &dstLocation,
-                         const QStringList &extraOptions = QStringList()) override;
+                         const QStringList &extraOptions = QStringList()) final;
     void commit(const QString &repositoryRoot, const QStringList &files,
-                const QString &commitMessageFile, const QStringList &extraOptions = QStringList()) override;
+                const QString &commitMessageFile, const QStringList &extraOptions = QStringList()) final;
     VcsBase::VcsBaseEditorWidget *annotate(
             const QString &workingDir, const QString &file, const QString &revision = QString(),
-            int lineNumber = -1, const QStringList &extraOptions = QStringList()) override;
+            int lineNumber = -1, const QStringList &extraOptions = QStringList()) final;
     void log(const QString &workingDir, const QStringList &files = QStringList(),
              const QStringList &extraOptions = QStringList(),
-             bool enableAnnotationContextMenu = false) override;
+             bool enableAnnotationContextMenu = false) final;
     void logCurrentFile(const QString &workingDir, const QStringList &files = QStringList(),
                         const QStringList &extraOptions = QStringList(),
                         bool enableAnnotationContextMenu = false);
     void revertFile(const QString &workingDir, const QString &file,
                     const QString &revision = QString(),
-                    const QStringList &extraOptions = QStringList()) override;
+                    const QStringList &extraOptions = QStringList()) final;
     void revertAll(const QString &workingDir, const QString &revision = QString(),
-                   const QStringList &extraOptions = QStringList()) override;
-    QString findTopLevelForFile(const QFileInfo &file) const override;
+                   const QStringList &extraOptions = QStringList()) final;
+    bool isVcsFileOrDirectory(const Utils::FileName &fileName) const;
+    QString findTopLevelForFile(const QFileInfo &file) const final;
     bool managesFile(const QString &workingDirectory, const QString &fileName) const;
     unsigned int binaryVersion() const;
     QString binaryVersionString() const;
     SupportedFeatures supportedFeatures() const;
-
-public slots:
     void view(const QString &source, const QString &id,
-              const QStringList &extraOptions = QStringList()) override;
-
-protected:
-    QString vcsCommandString(VcsCommandTag cmd) const override;
-    Core::Id vcsEditorKind(VcsCommandTag cmd) const override;
-    QStringList revisionSpec(const QString &revision) const override;
-    StatusItem parseStatusLine(const QString &line) const override;
-    VcsBase::VcsBaseEditorParameterWidget *createAnnotateEditor();
-    VcsBase::VcsBaseEditorParameterWidget *createLogCurrentFileEditor();
-    VcsBase::VcsBaseEditorParameterWidget *createLogEditor();
+              const QStringList &extraOptions = QStringList()) final;
 
 private:
+    static QList<BranchInfo> branchListFromOutput(const QString &output, const BranchInfo::BranchFlags defaultFlags = 0);
+
+    QString sanitizeFossilOutput(const QString &output) const;
+    QString vcsCommandString(VcsCommandTag cmd) const final;
+    Core::Id vcsEditorKind(VcsCommandTag cmd) const final;
+    QStringList revisionSpec(const QString &revision) const final;
+    StatusItem parseStatusLine(const QString &line) const final;
+    VcsBase::VcsBaseEditorConfig *createAnnotateEditor(VcsBase::VcsBaseEditorWidget *editor);
+    VcsBase::VcsBaseEditorConfig *createLogCurrentFileEditor(VcsBase::VcsBaseEditorWidget *editor);
+    VcsBase::VcsBaseEditorConfig *createLogEditor(VcsBase::VcsBaseEditorWidget *editor);
+
     friend class FossilControl;
 };
 

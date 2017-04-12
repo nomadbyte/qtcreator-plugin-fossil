@@ -28,7 +28,7 @@
 
 #include <vcsbase/vcsbaseeditor.h>
 
-#include <QRegExp>
+#include <QRegularExpression>
 
 namespace Fossil {
 namespace Internal {
@@ -41,14 +41,13 @@ public:
     FossilEditorWidget();
 
 private:
-    QSet<QString> annotationChanges() const override;
-    QString changeUnderCursor(const QTextCursor &cursor) const override;
-    VcsBase::BaseAnnotationHighlighter *createAnnotationHighlighter(const QSet<QString> &changes) const override;
+    QSet<QString> annotationChanges() const final;
+    QString changeUnderCursor(const QTextCursor &cursor) const final;
+    VcsBase::BaseAnnotationHighlighter *createAnnotationHighlighter(const QSet<QString> &changes) const final;
 
-    const QRegExp m_exactChangesetId;
-    const QRegExp m_exactDiffFileId;
-    const QRegExp m_firstChangesetId;
-    const QRegExp m_nextChangesetId;
+    const QRegularExpression m_exactChangesetId;
+    const QRegularExpression m_firstChangesetId;
+    const QRegularExpression m_nextChangesetId;
 };
 
 } // namespace Internal

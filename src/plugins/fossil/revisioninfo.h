@@ -30,7 +30,6 @@
 
 #include <QString>
 #include <QStringList>
-#include <QDebug>
 
 namespace Fossil {
 namespace Internal {
@@ -44,14 +43,6 @@ public:
     const QString parentId;
 
 };
-
-inline QDebug operator<< (QDebug dbg, const RevisionInfo& rh) {
-    dbg.nospace() << "RevisionInfo("
-                  << rh.id << ", "
-                  << rh.parentId
-                  << ")";
-    return dbg;
-}
 
 } // namespace Internal
 } // namespace Fossil

@@ -54,6 +54,7 @@
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/projecttree.h>
 #include <projectexplorer/project.h>
+#include <projectexplorer/jsonwizard/jsonwizardfactory.h>
 
 #include <utils/parameteraction.h>
 #include <utils/qtcassert.h>
@@ -72,8 +73,7 @@
 #include <QDialog>
 #include <QMessageBox>
 #include <QFileDialog>
-
-#include <QDebug>
+#include <QRegularExpression>
 
 namespace Fossil {
 namespace Internal {
@@ -113,8 +113,8 @@ FossilPlugin::FossilPlugin()
 FossilPlugin::~FossilPlugin()
 {
     delete m_client;
-    m_client = 0;
-    m_instance = 0;
+    m_client = nullptr;
+    m_instance = nullptr;
 }
 
 bool FossilPlugin::initialize(const QStringList &arguments, QString *errorMessage)
@@ -131,20 +131,22 @@ bool FossilPlugin::initialize(const QStringList &arguments, QString *errorMessag
 
     addAutoReleasedObject(new OptionsPage(vcsCtrl));
 
-    static const char *describeSlot = SLOT(view(QString,QString));
+    const auto describeFunc = [this](const QString &source, const QString &id) {
+        m_client->view(source, id);
+    };
+
     const int editorCount = sizeof(editorParameters) / sizeof(VcsBase::VcsBaseEditorParameters);
     const auto widgetCreator = []() { return new FossilEditorWidget; };
     for (int i = 0; i < editorCount; i++)
-        addAutoReleasedObject(new VcsBase::VcsEditorFactory(editorParameters + i, widgetCreator, m_client, describeSlot));
+        addAutoReleasedObject(new VcsBase::VcsEditorFactory(editorParameters + i, widgetCreator, describeFunc));
 
     addAutoReleasedObject(new VcsBase::VcsSubmitEditorFactory(&submitEditorParameters,
         []() { return new CommitEditor(&submitEditorParameters); }));
 
-    const QString prefix = QLatin1String("fossil");
-    m_commandLocator = new Core::CommandLocator("Fossil", prefix, prefix);
+    m_commandLocator = new Core::CommandLocator("Fossil", "fossil", "fossil");
     addAutoReleasedObject(m_commandLocator);
 
-    Core::JsExpander::registerQObjectForJs(QLatin1String("Fossil"), new FossilJsExtension);
+    Core::JsExpander::registerQObjectForJs("Fossil", new FossilJsExtension);
 
     createMenu(context);
 
@@ -276,10 +278,10 @@ void FossilPlugin::logCurrentFile()
     QTC_ASSERT(state.hasFile(), return);
     FossilClient::SupportedFeatures features = m_client->supportedFeatures();
     QStringList extraOptions;
-    extraOptions << QLatin1String("-n") << QString::number(m_client->settings().intValue(FossilSettings::logCountKey));
+    extraOptions << "-n" << QString::number(m_client->settings().intValue(FossilSettings::logCountKey));
 
     if (features.testFlag(FossilClient::TimelineWidthFeature))
-        extraOptions << QLatin1String("-W") << QString::number(m_client->settings().intValue(FossilSettings::timelineWidthKey));
+        extraOptions << "-W" << QString::number(m_client->settings().intValue(FossilSettings::timelineWidthKey));
 
     // annotate only supported for current revision, so disable context menu
     bool enableAnnotationContextMenu = false;
@@ -358,10 +360,10 @@ void FossilPlugin::logRepository()
     QTC_ASSERT(state.hasTopLevel(), return);
     FossilClient::SupportedFeatures features = m_client->supportedFeatures();
     QStringList extraOptions;
-    extraOptions << QLatin1String("-n") << QString::number(m_client->settings().intValue(FossilSettings::logCountKey));
+    extraOptions << "-n" << QString::number(m_client->settings().intValue(FossilSettings::logCountKey));
 
     if (features.testFlag(FossilClient::TimelineWidthFeature))
-        extraOptions << QLatin1String("-W") << QString::number(m_client->settings().intValue(FossilSettings::timelineWidthKey));
+        extraOptions << "-W" << QString::number(m_client->settings().intValue(FossilSettings::timelineWidthKey));
 
     m_client->log(state.topLevel(), QStringList(), extraOptions);
 }
@@ -458,9 +460,9 @@ void FossilPlugin::pull()
 
     QStringList extraOptions;
     if (!dialog.isRememberOptionEnabled())
-        extraOptions << QLatin1String("--once");
+        extraOptions << "--once";
     if (dialog.isPrivateOptionEnabled())
-        extraOptions << QLatin1String("--private");
+        extraOptions << "--private";
     m_client->synchronousPull(state.topLevel(), remoteLocation, extraOptions);
 }
 
@@ -486,9 +488,9 @@ void FossilPlugin::push()
 
     QStringList extraOptions;
     if (!dialog.isRememberOptionEnabled())
-        extraOptions << QLatin1String("--once");
+        extraOptions << "--once";
     if (dialog.isPrivateOptionEnabled())
-        extraOptions << QLatin1String("--private");
+        extraOptions << "--private";
     m_client->synchronousPush(state.topLevel(), remoteLocation, extraOptions);
 }
 
@@ -600,7 +602,7 @@ void FossilPlugin::showCommitWidget(const QList<VcsBase::VcsBaseClient::StatusIt
     commitEditor->document()->setPreferredDisplayName(msg);
 
     const RevisionInfo currentRevision = m_client->synchronousRevisionQuery(m_submitRepository);
-    const BranchInfo currentBranch = m_client->synchronousBranchQuery(m_submitRepository);
+    const BranchInfo currentBranch = m_client->synchronousCurrentBranch(m_submitRepository);
     const QString currentUser = m_client->synchronousUserDefaultQuery(m_submitRepository);
     QStringList tags = m_client->synchronousTagQuery(m_submitRepository, currentRevision.id);
     // Fossil includes branch name in tag list -- remove.
@@ -702,7 +704,7 @@ bool FossilPlugin::submitEditorAboutToClose()
         //rewrite entries of the form 'file => newfile' to 'newfile' because
         //this would mess the commit command
         for (QStringList::iterator iFile = files.begin(); iFile != files.end(); ++iFile) {
-            const QStringList parts = iFile->split(QLatin1String(" => "), QString::SkipEmptyParts);
+            const QStringList parts = iFile->split(" => ", QString::SkipEmptyParts);
             if (!parts.isEmpty())
                 *iFile = parts.last();
         }
@@ -711,24 +713,24 @@ bool FossilPlugin::submitEditorAboutToClose()
         QStringList extraOptions;
         // Author -- override the repository-default user
         if (!commitWidget->committer().isEmpty())
-            extraOptions << QLatin1String("--user") << commitWidget->committer();
+            extraOptions << "--user" << commitWidget->committer();
         // Branch
         QString branch = commitWidget->newBranch();
         if (!branch.isEmpty()) {
             // @TODO: make enquote utility function
             QString enquotedBranch = branch;
-            if (branch.contains(QRegExp(QLatin1String("\\s"))))
-                enquotedBranch = QString(QLatin1String("\"%1\"")).arg(branch);
-            extraOptions << QLatin1String("--branch") << enquotedBranch;
+            if (branch.contains(QRegularExpression("\\s")))
+                enquotedBranch = QString("\"") + branch + "\"";
+            extraOptions << "--branch" << enquotedBranch;
         }
         // Tags
         foreach (QString tag, commitWidget->tags()) {
-            extraOptions << QLatin1String("--tag") << tag;
+            extraOptions << "--tag" << tag;
         }
 
         // Whether local commit or not
         if (commitWidget->isPrivateOptionEnabled())
-            extraOptions += QLatin1String("--private");
+            extraOptions += "--private";
         m_client->commit(m_submitRepository, files, editorDocument->filePath().toString(), extraOptions);
     }
     return true;

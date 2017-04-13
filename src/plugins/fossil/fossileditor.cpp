@@ -35,6 +35,7 @@
 #include <utils/synchronousprocess.h>
 #include <vcsbase/diffandloghighlighter.h>
 
+#include <QRegularExpression>
 #include <QRegExp>
 #include <QString>
 #include <QTextCursor>
@@ -45,15 +46,31 @@
 namespace Fossil {
 namespace Internal {
 
-FossilEditorWidget::FossilEditorWidget() :
-    m_exactChangesetId(Constants::CHANGESET_ID_EXACT),
-    m_firstChangesetId(QString("\n") + Constants::CHANGESET_ID + " "),
-    m_nextChangesetId(m_firstChangesetId)
+class FossilEditorWidgetPrivate
 {
-    QTC_ASSERT(m_exactChangesetId.isValid(), return);
-    QTC_ASSERT(m_firstChangesetId.isValid(), return);
-    QTC_ASSERT(m_nextChangesetId.isValid(), return);
+public:
+    FossilEditorWidgetPrivate() :
+        m_exactChangesetId(Constants::CHANGESET_ID_EXACT),
+        m_firstChangesetId(QString("\n") + Constants::CHANGESET_ID + " "),
+        m_nextChangesetId(m_firstChangesetId),
+        m_configurationWidget(nullptr)
+    {
+        QTC_ASSERT(m_exactChangesetId.isValid(), return);
+        QTC_ASSERT(m_firstChangesetId.isValid(), return);
+        QTC_ASSERT(m_nextChangesetId.isValid(), return);
+    }
 
+
+    const QRegularExpression m_exactChangesetId;
+    const QRegularExpression m_firstChangesetId;
+    const QRegularExpression m_nextChangesetId;
+
+    VcsBase::VcsBaseEditorConfig *m_configurationWidget;
+};
+
+FossilEditorWidget::FossilEditorWidget() :
+    d(new FossilEditorWidgetPrivate)
+{
     setAnnotateRevisionTextFormat(tr("&Annotate %1"));
     setAnnotatePreviousRevisionTextFormat(tr("Annotate &Parent Revision %1"));
 
@@ -64,6 +81,26 @@ FossilEditorWidget::FossilEditorWidget() :
     const QRegExp logChangePattern("^.*\\[([0-9a-f]{5,40})\\]");
     QTC_ASSERT(logChangePattern.isValid(), return);
     setLogEntryPattern(logChangePattern);
+}
+
+FossilEditorWidget::~FossilEditorWidget()
+{
+    delete d;
+}
+
+bool FossilEditorWidget::setConfigurationWidget(VcsBase::VcsBaseEditorConfig *w)
+{
+    if (configurationAdded())
+        return false;
+
+    d->m_configurationWidget = w;
+    setConfigurationAdded();
+    return true;
+}
+
+VcsBase::VcsBaseEditorConfig *FossilEditorWidget::configurationWidget() const
+{
+    return d->m_configurationWidget;
 }
 
 QSet<QString> FossilEditorWidget::annotationChanges() const
@@ -78,12 +115,12 @@ QSet<QString> FossilEditorWidget::annotationChanges() const
 
     QSet<QString> changes;
 
-    QRegularExpressionMatch firstChangesetIdMatch = m_firstChangesetId.match(txt);
+    QRegularExpressionMatch firstChangesetIdMatch = d->m_firstChangesetId.match(txt);
     if (firstChangesetIdMatch.hasMatch()) {
         QString changeId = firstChangesetIdMatch.captured(1);
         changes.insert(changeId);
 
-        QRegularExpressionMatchIterator i = m_nextChangesetId.globalMatch(txt);
+        QRegularExpressionMatchIterator i = d->m_nextChangesetId.globalMatch(txt);
         while (i.hasNext()) {
             const QRegularExpressionMatch nextChangesetIdMatch = i.next();
             changeId = nextChangesetIdMatch.captured(1);
@@ -99,7 +136,7 @@ QString FossilEditorWidget::changeUnderCursor(const QTextCursor &cursorIn) const
     cursor.select(QTextCursor::WordUnderCursor);
     if (cursor.hasSelection()) {
         const QString change = cursor.selectedText();
-        QRegularExpressionMatch exactChangesetIdMatch = m_exactChangesetId.match(change);
+        QRegularExpressionMatch exactChangesetIdMatch = d->m_exactChangesetId.match(change);
         if (exactChangesetIdMatch.hasMatch())
             return change;
     }

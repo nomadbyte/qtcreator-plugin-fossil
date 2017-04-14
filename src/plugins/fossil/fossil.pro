@@ -36,3 +36,4 @@ FORMS += \
     fossilcommitpanel.ui \
     pullorpushdialog.ui \
     configuredialog.ui
+RESOURCES += fossil.qrc

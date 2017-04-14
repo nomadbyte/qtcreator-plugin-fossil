@@ -108,5 +108,8 @@ const char FSTATUS_UPDATED_BY_INTEGRATE[] = "Updated by Integrate";
 const char FSTATUS_RENAMED[] = "Renamed";
 const char FSTATUS_UNKNOWN[] = "Unknown";
 
+// Fossil Json Wizards
+const char WIZARD_PATH[] = ":/fossil/wizard";
+
 } // namespace Constants
 } // namespace Fossil

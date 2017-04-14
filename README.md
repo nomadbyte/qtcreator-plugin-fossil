@@ -239,6 +239,7 @@ to `Qt Creator` own README)
 - On _Linux_:
 
         sudo cp $QTC_BUILD_DIR/lib/qtcreator/plugins/*Fossil*  $QTC_INSTALL_DIR/lib/qtcreator/plugins/
+        ## for versions prior to v4.3.0_1
         sudo cp -R $QTC_BUILD_DIR/share/qtcreator/templates/wizards/projects/vcs/fossil  $QTC_INSTALL_DIR/share/qtcreator/templates/wizards/projects/vcs/
 
 - Optionally install the updated documentation

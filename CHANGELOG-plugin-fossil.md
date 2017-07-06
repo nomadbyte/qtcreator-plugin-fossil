@@ -1,6 +1,16 @@
 qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
 =================================
 
+## 4.3.1_1 - 2017-07-06
+
+- Adapted to updated `Qt Creator 4.3.1` `VcsBase` framework
+- Move clone wizard files into fossil qrc resource file
+- client min. version `fossil 1.33`
+
+- __NOTE__: Installation instructions changed -- no longer need to copy
+  the clone wizard files, as they are now linked into the plugin lib
+
+
 ## 4.2.1_1 - 2017-04-10
 
 - Adapted to updated `Qt Creator 4.2.1` `VcsBase` framework

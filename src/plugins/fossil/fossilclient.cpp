@@ -773,7 +773,7 @@ VcsBase::VcsBaseEditorWidget *FossilClient::annotate(
     args << revisionSpec(revision) << effectiveArgs << file;
 
     // When version list requested, ignore the source line.
-    if (args.indexOf(QLatin1String("--log")) != -1)
+    if (args.contains("--log"))
         lineNumber = -1;
     cmd->setCookie(lineNumber);
 

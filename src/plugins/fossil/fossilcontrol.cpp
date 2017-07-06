@@ -53,12 +53,12 @@ public:
     { }
 
 protected:
-    QString trackFile(const QString &repository) override
+    QString trackFile(const QString &repository) final
     {
         return repository + "/" + Constants::FOSSILREPO;
     }
 
-    QString refreshTopic(const QString &repository) override
+    QString refreshTopic(const QString &repository) final
     {
         return m_client->synchronousTopic(repository);
     }
@@ -308,5 +308,5 @@ void FossilControl::changed(const QVariant &v)
     }
 }
 
-} // namespace Fossil
 } // namespace Internal
+} // namespace Fossil

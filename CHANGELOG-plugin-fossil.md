@@ -1,6 +1,12 @@
 qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
 =================================
 
+
+## 4.3.1_2 - 2017-10-25
+
+- __FIXED__:`isVcsFileOrDirectory()` is incorrect
+
+
 ## 4.3.1_1 - 2017-07-06
 
 - Adapted to updated `Qt Creator 4.3.1` `VcsBase` framework

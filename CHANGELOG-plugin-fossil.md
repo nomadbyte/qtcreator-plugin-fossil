@@ -1,6 +1,12 @@
 qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
 =================================
 
+## 4.5.0_1 - 2018-02-11
+
+- Adapted to `Qt Creator 4.5.0` `VcsBase` framework
+- client min. version `fossil 1.33`
+
+
 ## 4.4.1_1 - 2017-11-01
 
 - Adapted to `Qt Creator 4.4.1` `VcsBase` framework

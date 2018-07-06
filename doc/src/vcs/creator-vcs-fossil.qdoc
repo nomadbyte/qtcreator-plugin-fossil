@@ -56,8 +56,8 @@
             and remote clones. For example: \c ~/fossils/qt.
 
         \li Configure \uicontrol {Version Control Options} for the Fossil plugin
-           to use the designated directory as
-           \uicontrol {Local Repositories Default path}.
+            to use the designated directory as
+            \uicontrol {Local Repositories Default path}.
     \endlist
 
     Now Fossil should become available as a VCS choice to create new local
@@ -67,8 +67,9 @@
     \section1 Additional Fossil Functions
 
     In addition to the standard version control system functions described in
-    \l{Using Common Functions}, the \uicontrol Fossil submenu contains
+    \l {Using Common Functions}, the \uicontrol Fossil submenu contains
     the following items:
+
     \table
         \header
             \li Menu Item

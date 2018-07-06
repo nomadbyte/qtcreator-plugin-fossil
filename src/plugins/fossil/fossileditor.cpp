@@ -125,6 +125,41 @@ QString FossilEditorWidget::changeUnderCursor(const QTextCursor &cursorIn) const
     return QString();
 }
 
+QString FossilEditorWidget::decorateVersion(const QString &revision) const
+{
+    static const int shortChangesetIdSize(10);
+    static const int maxTextSize(120);
+
+    const QFileInfo fi(source());
+    const QString workingDirectory = fi.absolutePath();
+    RevisionInfo revisionInfo = FossilPlugin::instance()->client()->synchronousRevisionQuery(workingDirectory, revision, true);
+
+    // format: 'revision (committer "comment...")'
+    QString output = revision.left(shortChangesetIdSize)
+            + " (" + revisionInfo.committer
+            + " \"" + revisionInfo.commentMsg.left(maxTextSize);
+
+    if (output.size() > maxTextSize) {
+        output.truncate(maxTextSize - 3);
+        output.append("...");
+    }
+    output.append("\")");
+    return output;
+}
+
+QStringList FossilEditorWidget::annotationPreviousVersions(const QString &revision) const
+{
+    QStringList revisions;
+    const QFileInfo fi(source());
+    const QString workingDirectory = fi.absolutePath();
+    RevisionInfo revisionInfo = FossilPlugin::instance()->client()->synchronousRevisionQuery(workingDirectory, revision);
+    if (revisionInfo.parentId.isEmpty())
+        return QStringList();
+
+    revisions.append(revisionInfo.parentId);
+    revisions.append(revisionInfo.mergeParentIds);
+    return revisions;
+}
 
 VcsBase::BaseAnnotationHighlighter *FossilEditorWidget::createAnnotationHighlighter(const QSet<QString> &changes) const
 {

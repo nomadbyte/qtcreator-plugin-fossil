@@ -343,7 +343,23 @@ QList<BranchInfo> FossilClient::synchronousBranchQuery(const QString &workingDir
     return branches;
 }
 
-RevisionInfo FossilClient::synchronousRevisionQuery(const QString &workingDirectory, const QString &id)
+QStringList FossilClient::parseRevisionCommentLine(const QString &commentLine)
+{
+    // "comment:      This is a (test) commit message (user: the.name)"
+
+    const QRegularExpression commentRx("^comment:\\s+(.*)\\s\\(user:\\s(.*)\\)$",
+                                       QRegularExpression::CaseInsensitiveOption);
+    QTC_ASSERT(commentRx.isValid(), return QStringList());
+
+    const QRegularExpressionMatch match = commentRx.match(commentLine);
+    if (!match.hasMatch())
+        return QStringList();
+
+    return QStringList({match.captured(1), match.captured(2)});
+}
+
+RevisionInfo FossilClient::synchronousRevisionQuery(const QString &workingDirectory, const QString &id,
+                                                    bool getCommentMsg) const
 {
     // Query details of the given revision/check-out id,
     // if none specified, provide information about current revision
@@ -362,6 +378,9 @@ RevisionInfo FossilClient::synchronousRevisionQuery(const QString &workingDirect
 
     QString revisionId;
     QString parentId;
+    QStringList mergeParentIds;
+    QString commentMsg;
+    QString committer;
 
     const QRegularExpression idRx("([0-9a-f]{5,40})");
     QTC_ASSERT(idRx.isValid(), return RevisionInfo());
@@ -377,6 +396,15 @@ RevisionInfo FossilClient::synchronousRevisionQuery(const QString &workingDirect
             const QRegularExpressionMatch idMatch = idRx.match(l);
             if (idMatch.hasMatch())
                 parentId = idMatch.captured(1);
+        } else if (l.startsWith("merged-from: ", Qt::CaseInsensitive)) {
+            const QRegularExpressionMatch idMatch = idRx.match(l);
+            if (idMatch.hasMatch())
+                mergeParentIds.append(idMatch.captured(1));
+        } else if (getCommentMsg
+                   && l.startsWith("comment: ", Qt::CaseInsensitive)) {
+            const QStringList commentLineParts = parseRevisionCommentLine(l);
+            commentMsg = commentLineParts.value(0);
+            committer = commentLineParts.value(1);
         }
     }
 
@@ -386,7 +414,7 @@ RevisionInfo FossilClient::synchronousRevisionQuery(const QString &workingDirect
     if (parentId.isEmpty())
         parentId = revisionId;  // root
 
-    return RevisionInfo(revisionId, parentId);
+    return RevisionInfo(revisionId, parentId, mergeParentIds, commentMsg, committer);
 }
 
 QStringList FossilClient::synchronousTagQuery(const QString &workingDirectory, const QString &id)

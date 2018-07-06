@@ -49,11 +49,13 @@ public:
         TimelineWidthFeature = 0x4,
         DiffIgnoreWhiteSpaceFeature = 0x8,
         TimelinePathFeature = 0x10,
+        AnnotateRevisionFeature = 0x20,
         AllSupportedFeatures =  // | all defined features
             AnnotateBlameFeature
             | TimelineWidthFeature
             | DiffIgnoreWhiteSpaceFeature
             | TimelinePathFeature
+            | AnnotateRevisionFeature
     };
     Q_DECLARE_FLAGS(SupportedFeatures, SupportedFeature)
 

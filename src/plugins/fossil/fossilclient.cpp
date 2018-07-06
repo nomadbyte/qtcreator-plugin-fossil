@@ -727,7 +727,7 @@ VcsBase::VcsBaseEditorWidget *FossilClient::annotate(
 
     QString vcsCmdString = vcsCommandString(AnnotateCommand);
     const Core::Id kind = vcsEditorKind(AnnotateCommand);
-    const QString id = VcsBase::VcsBaseEditor::getSource(workingDir, QStringList(file));
+    const QString id = VcsBase::VcsBaseEditor::getTitleId(workingDir, QStringList(file), revision);
     const QString title = vcsEditorTitle(vcsCmdString, id);
     const QString source = VcsBase::VcsBaseEditor::getSource(workingDir, file);
 
@@ -763,7 +763,11 @@ VcsBase::VcsBaseEditorWidget *FossilClient::annotate(
         effectiveArgs.removeAt(pos);
     }
     QStringList args(vcsCmdString);
-    args << revisionSpec(revision) << effectiveArgs << file;
+    if (!revision.isEmpty()
+        && supportedFeatures().testFlag(AnnotateRevisionFeature))
+        args << "-r" << revision;
+
+    args << effectiveArgs << file;
 
     // When version list requested, ignore the source line.
     if (args.contains("--log"))
@@ -845,8 +849,10 @@ FossilClient::SupportedFeatures FossilClient::supportedFeatures() const
 
     const unsigned int version = binaryVersion();
 
-    if (version < 0x13000) {
-        features &= ~TimelinePathFeature;
+    if (version < 0x20400) {
+        features &= ~AnnotateRevisionFeature;
+        if (version < 0x13000)
+            features &= ~TimelinePathFeature;
         if (version < 0x12900)
             features &= ~DiffIgnoreWhiteSpaceFeature;
         if (version < 0x12800) {
@@ -854,6 +860,7 @@ FossilClient::SupportedFeatures FossilClient::supportedFeatures() const
             features &= ~TimelineWidthFeature;
         }
     }
+
     return features;
 }
 

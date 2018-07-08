@@ -1,6 +1,17 @@
 qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
 =================================
 
+## 4.6.2_1 - 2018-07-08
+
+- Adapted to `Qt Creator 4.6.2` `VcsBase` framework
+- client min. version `fossil 1.33`
+- `Annotate Current File`: support annotating a specific revision which can be
+  selected from the context menu (thanks to `fossil annotate -r` option added
+  in v2.4)
+- Updated clone wizard icons to grayscale matching the current Qt Creator
+  styling.
+
+
 ## 4.5.0_1 - 2018-02-11
 
 - Adapted to `Qt Creator 4.5.0` `VcsBase` framework

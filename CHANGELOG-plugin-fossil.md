@@ -1,6 +1,13 @@
 qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
 =================================
 
+## 4.7.0_1
+
+- Adapted to `Qt Creator 4.7.0-rc1` `VcsBase` framework
+- Change the default (300) and max number (1000) of history log entries shown
+- Change the command execution's maximum timeout value (360s)
+
+
 ## 4.6.2_1 - 2018-07-08
 
 - Adapted to `Qt Creator 4.6.2` `VcsBase` framework

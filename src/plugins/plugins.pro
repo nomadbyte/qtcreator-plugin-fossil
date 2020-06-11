@@ -64,7 +64,8 @@ SUBDIRS   = \
     qmlpreview \
     studiowelcome \
     webassembly \
-    mcusupport
+    mcusupport \
+    marketplace
 
 qtHaveModule(serialport) {
     SUBDIRS += serialterminal

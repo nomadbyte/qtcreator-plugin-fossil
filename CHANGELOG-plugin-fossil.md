@@ -1,6 +1,9 @@
 qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
 =================================
 
+## 4.12.1_1
+
+
 ## 4.11.2_1 - 2020-06-11
 
 - Main development shifted over to [plugin-fossil-scm] repository hosted at

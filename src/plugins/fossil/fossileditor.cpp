@@ -132,7 +132,9 @@ QString FossilEditorWidget::decorateVersion(const QString &revision) const
 
     const QFileInfo fi(source());
     const QString workingDirectory = fi.absolutePath();
-    RevisionInfo revisionInfo = FossilPlugin::instance()->client()->synchronousRevisionQuery(workingDirectory, revision, true);
+    FossilClient *client = FossilPlugin::instance()->client();
+    RevisionInfo revisionInfo =
+            client->synchronousRevisionQuery(workingDirectory, revision, true);
 
     // format: 'revision (committer "comment...")'
     QString output = revision.left(shortChangesetIdSize)
@@ -152,7 +154,9 @@ QStringList FossilEditorWidget::annotationPreviousVersions(const QString &revisi
     QStringList revisions;
     const QFileInfo fi(source());
     const QString workingDirectory = fi.absolutePath();
-    RevisionInfo revisionInfo = FossilPlugin::instance()->client()->synchronousRevisionQuery(workingDirectory, revision);
+    FossilClient *client = FossilPlugin::instance()->client();
+    RevisionInfo revisionInfo =
+            client->synchronousRevisionQuery(workingDirectory, revision);
     if (revisionInfo.parentId.isEmpty())
         return QStringList();
 
@@ -161,7 +165,8 @@ QStringList FossilEditorWidget::annotationPreviousVersions(const QString &revisi
     return revisions;
 }
 
-VcsBase::BaseAnnotationHighlighter *FossilEditorWidget::createAnnotationHighlighter(const QSet<QString> &changes) const
+VcsBase::BaseAnnotationHighlighter *FossilEditorWidget::createAnnotationHighlighter(
+        const QSet<QString> &changes) const
 {
     return new FossilAnnotationHighlighter(changes);
 }

@@ -44,6 +44,7 @@
 #include <coreplugin/id.h>
 #include <coreplugin/vcsmanager.h>
 #include <coreplugin/coreconstants.h>
+#include <coreplugin/helpmanager.h>
 #include <coreplugin/icore.h>
 #include <coreplugin/idocument.h>
 #include <coreplugin/documentmanager.h>
@@ -144,12 +145,13 @@ bool FossilPlugin::initialize(const QStringList &arguments, QString *errorMessag
 
     m_commandLocator = new Core::CommandLocator("Fossil", "fossil", "fossil", this);
 
-    ProjectExplorer::JsonWizardFactory::addWizardPath(Utils::FileName::fromString(Constants::WIZARD_PATH));
-    Core::JsExpander::registerQObjectForJs("Fossil", new FossilJsExtension);
+    ProjectExplorer::JsonWizardFactory::addWizardPath(Utils::FilePath::fromString(Constants::WIZARD_PATH));
+    Core::JsExpander::registerGlobalObject<FossilJsExtension>("Fossil");
 
     createMenu(context);
 
-    createSubmitEditorActions();
+    Core::HelpManager::registerDocumentation({Core::HelpManager::documentationPath()
+                                              + "/fossil.qch"});
 
     return true;
 }
@@ -163,6 +165,7 @@ FossilClient *FossilPlugin::client() const
 {
     return m_client;
 }
+
 
 void FossilPlugin::createMenu(const Core::Context &context)
 {
@@ -525,26 +528,6 @@ void FossilPlugin::configureRepository()
     m_client->synchronousConfigureRepository(state.topLevel(), newSettings, currentSettings);
 }
 
-void FossilPlugin::createSubmitEditorActions()
-{
-    Core::Context context(Constants::COMMIT_ID);
-    Core::Command *command;
-
-    m_editorCommit = new QAction(VcsBase::VcsBaseSubmitEditor::submitIcon(), tr("Commit"), this);
-    command = Core::ActionManager::registerAction(m_editorCommit, Constants::COMMIT, context);
-    command->setAttribute(Core::Command::CA_UpdateText);
-    connect(m_editorCommit, &QAction::triggered, this, &FossilPlugin::commitFromEditor);
-
-    m_editorDiff = new QAction(VcsBase::VcsBaseSubmitEditor::diffIcon(), tr("Diff &Selected Files"), this);
-    command = Core::ActionManager::registerAction(m_editorDiff, Constants::DIFFEDITOR, context);
-
-    m_editorUndo = new QAction(tr("&Undo"), this);
-    command = Core::ActionManager::registerAction(m_editorUndo, Core::Constants::UNDO, context);
-
-    m_editorRedo = new QAction(tr("&Redo"), this);
-    command = Core::ActionManager::registerAction(m_editorRedo, Core::Constants::REDO, context);
-}
-
 void FossilPlugin::commit()
 {
     if (!promptBeforeCommit())
@@ -611,7 +594,6 @@ void FossilPlugin::showCommitWidget(const QList<VcsBase::VcsBaseClient::StatusIt
     tags.removeAll(currentBranch.name());
     commitEditor->setFields(m_submitRepository, currentBranch, tags, currentUser, status);
 
-    commitEditor->registerActions(m_editorUndo, m_editorRedo, m_editorCommit, m_editorDiff);
     connect(commitEditor, &VcsBase::VcsBaseSubmitEditor::diffSelectedFiles,
             this, &FossilPlugin::diffFromEditorSelected);
     commitEditor->setCheckScriptWorkingDirectory(m_submitRepository);
@@ -636,7 +618,7 @@ void FossilPlugin::createRepository()
     // Find current starting directory
     QString directory;
     if (const ProjectExplorer::Project *currentProject = ProjectExplorer::ProjectTree::currentProject())
-        directory = currentProject->document()->filePath().toFileInfo().absolutePath();
+        directory = currentProject->projectDirectory().toString();
     // Prompt for a directory that is not under version control yet
     QWidget *mw = Core::ICore::mainWindow();
     do {
@@ -682,10 +664,8 @@ bool FossilPlugin::submitEditorAboutToClose()
     QTC_ASSERT(editorDocument, return true);
 
     bool promptOnSubmit = false;
-    const VcsBase::VcsBaseSubmitEditor::PromptSubmitResult response =
-            commitEditor->promptSubmit(tr("Close Commit Editor"), tr("Do you want to commit the changes?"),
-                                       tr("Message check failed. Do you want to proceed?"),
-                                       &promptOnSubmit, !m_submitActionTriggered);
+    const VcsBase::VcsBaseSubmitEditor::PromptSubmitResult response
+        = commitEditor->promptSubmit(this, &promptOnSubmit, !m_submitActionTriggered);
     m_submitActionTriggered = false;
 
     switch (response) {

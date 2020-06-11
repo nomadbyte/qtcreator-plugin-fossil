@@ -3,6 +3,12 @@ qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
 
 ## 4.11.2_1
 
+- Main development shifted over to [plugin-fossil-scm] repository hosted at
+  Qt Creator project
+- Adapted to `Qt Creator 4.11.2` `VcsBase` framework
+
+[plugin-fossil-scm]: https://code.qt.io/cgit/qt-creator/plugin-fossil-scm.git
+
 
 ## 4.7.0_1
 

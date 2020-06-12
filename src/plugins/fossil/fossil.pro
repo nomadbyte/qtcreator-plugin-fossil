@@ -1,7 +1,6 @@
 include(../../qtcreatorplugin.pri)
 SOURCES += \
     fossilclient.cpp \
-    fossilcontrol.cpp \
     fossilplugin.cpp \
     optionspage.cpp \
     fossilsettings.cpp \
@@ -17,7 +16,6 @@ SOURCES += \
 HEADERS += \
     fossilclient.h \
     constants.h \
-    fossilcontrol.h \
     fossilplugin.h \
     optionspage.h \
     fossilsettings.h \

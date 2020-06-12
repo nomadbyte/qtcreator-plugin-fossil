@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2018 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the Qt Creator documentation.
@@ -30,8 +30,7 @@
 // **********************************************************************
 
 /*!
-    \contentspage index.html
-    \previouspage creator-project-wizards-xml.html
+    \previouspage creator-project-wizards.html
     \page creator-version-control.html
     \nextpage creator-vcs-bazaar.html
 
@@ -52,8 +51,9 @@
             \li \l{http://www-01.ibm.com/software/awdtools/clearcase/}
             \li Disabled by default. To enable the plugin, select
                 \uicontrol Help > \uicontrol {About Plugins} >
-                \uicontrol {Version Control} > \uicontrol ClearCase, and then
-                restart \QC.
+                \uicontrol {Version Control} > \uicontrol ClearCase.
+                Then select \uicontrol {Restart Now} to restart \QC
+                and load the plugin.
         \row
             \li \l{Using CVS}{CVS}
             \li \l{http://www.nongnu.org/cvs/}
@@ -79,8 +79,9 @@
 
                 Disabled by default. To enable the plugin, select
                 \uicontrol Help > \uicontrol {About Plugins} >
-                \uicontrol {Version Control} > \uicontrol Perforce,
-                and then restart \QC.
+                \uicontrol {Version Control} > \uicontrol Perforce.
+                Then select \uicontrol {Restart Now} to restart \QC
+                and load the plugin.
         \row
             \li \l{Using Subversion}{Subversion}
             \li \l{http://subversion.apache.org/}
@@ -99,10 +100,10 @@
     You can also select \uicontrol Tools and then select \uicontrol {Create Repository}
     in the submenu for the version control system.
 
-    To import a project that is under version control, choose \uicontrol {File >
-    New File or Project > Project from Version Control} and select the
-    version control system that you use. Follow the instructions of the
-    wizard to import the project.
+    To import a project that is under version control, choose \uicontrol File >
+    \uicontrol {New File or Project} > \uicontrol {Project from Version Control}
+    and select the version control system that you use. Follow the instructions
+    of the wizard to import the project.
 
     \section1 Using Common Functions
 
@@ -124,8 +125,8 @@
     \endlist
 
     The \uicontrol{Version Control} output pane displays the commands that are
-    executed, a timestamp, and the relevant output. Select \uicontrol {Window > Output
-    Panes > Version Control} to open the pane.
+    executed, a timestamp, and the relevant output. Select \uicontrol Window >
+    \uicontrol {Output Panes} > \uicontrol {Version Control} to open the pane.
 
     \image qtcreator-vcs-pane.png
 
@@ -154,7 +155,8 @@
     instead, select the \uicontrol {Switch to Text Diff Editor} (1) option from
     the toolbar. In the inline
     diff view, you can use context menu commands to apply, revert, stage, and
-    unstage hunks, as well as send them to a code pasting service.
+    unstage chunks or selected lines, as well as send chunks to a code pasting
+    service.
 
     \section2 Viewing Versioning History and Change Details
 

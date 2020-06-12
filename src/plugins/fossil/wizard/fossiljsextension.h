@@ -36,6 +36,7 @@ namespace Fossil {
 namespace Internal {
 
 class FossilJsExtensionPrivate;
+class FossilSettings;
 
 class FossilJsExtension : public QObject
 {
@@ -44,7 +45,7 @@ class FossilJsExtension : public QObject
 public:
     static void parseArgOptions(const QStringList &args, QMap<QString, QString> &options);
 
-    FossilJsExtension();
+    FossilJsExtension(FossilSettings *settings);
     ~FossilJsExtension();
 
     Q_INVOKABLE bool isConfigured() const;

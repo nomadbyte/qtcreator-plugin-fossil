@@ -40,18 +40,16 @@ using namespace Core;
 namespace Fossil {
 namespace Internal {
 
-
 class FossilJsExtensionPrivate {
-
 public:
-    FossilJsExtensionPrivate() :
-        m_vscId(Constants::VCS_ID_FOSSIL) { }
-
-    FossilClient *client() const {
-        return FossilPlugin::instance()->client();
+    FossilJsExtensionPrivate(FossilSettings *settings) :
+        m_vscId(Constants::VCS_ID_FOSSIL),
+        m_settings(settings)
+    {
     }
 
     Core::Id m_vscId;
+    VcsBase::VcsBaseClientSettings *m_settings;
 };
 
 
@@ -67,8 +65,8 @@ void FossilJsExtension::parseArgOptions(const QStringList &args, QMap<QString, Q
     }
 }
 
-FossilJsExtension::FossilJsExtension() :
-    d(new FossilJsExtensionPrivate)
+FossilJsExtension::FossilJsExtension(FossilSettings *settings) :
+    d(new FossilJsExtensionPrivate(settings))
 { }
 
 FossilJsExtension::~FossilJsExtension()
@@ -93,8 +91,7 @@ QString FossilJsExtension::defaultAdminUser() const
     if (!isConfigured())
         return QString();
 
-    VcsBase::VcsBaseClientSettings &settings = d->client()->settings();
-    return settings.stringValue(FossilSettings::userNameKey);
+    return d->m_settings->stringValue(FossilSettings::userNameKey);
 }
 
 QString FossilJsExtension::defaultSslIdentityFile() const
@@ -102,8 +99,7 @@ QString FossilJsExtension::defaultSslIdentityFile() const
     if (!isConfigured())
         return QString();
 
-    VcsBase::VcsBaseClientSettings &settings = d->client()->settings();
-    return settings.stringValue(FossilSettings::sslIdentityFileKey);
+    return d->m_settings->stringValue(FossilSettings::sslIdentityFileKey);
 }
 
 QString FossilJsExtension::defaultLocalRepoPath() const
@@ -111,8 +107,7 @@ QString FossilJsExtension::defaultLocalRepoPath() const
     if (!isConfigured())
         return QString();
 
-    VcsBase::VcsBaseClientSettings &settings = d->client()->settings();
-    return settings.stringValue(FossilSettings::defaultRepoPathKey);
+    return d->m_settings->stringValue(FossilSettings::defaultRepoPathKey);
 }
 
 bool FossilJsExtension::defaultDisableAutosync() const
@@ -120,8 +115,7 @@ bool FossilJsExtension::defaultDisableAutosync() const
     if (!isConfigured())
         return false;
 
-    VcsBase::VcsBaseClientSettings &settings = d->client()->settings();
-    return settings.boolValue(FossilSettings::disableAutosyncKey);
+    return d->m_settings->boolValue(FossilSettings::disableAutosyncKey);
 }
 
 } // namespace Internal

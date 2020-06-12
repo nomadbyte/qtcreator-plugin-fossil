@@ -50,19 +50,13 @@ class FossilEditorWidgetPrivate
 {
 public:
     FossilEditorWidgetPrivate() :
-        m_exactChangesetId(Constants::CHANGESET_ID_EXACT),
-        m_firstChangesetId(QString("\n") + Constants::CHANGESET_ID + " "),
-        m_nextChangesetId(m_firstChangesetId)
+        m_exactChangesetId(Constants::CHANGESET_ID_EXACT)
     {
         QTC_ASSERT(m_exactChangesetId.isValid(), return);
-        QTC_ASSERT(m_firstChangesetId.isValid(), return);
-        QTC_ASSERT(m_nextChangesetId.isValid(), return);
     }
 
 
     const QRegularExpression m_exactChangesetId;
-    const QRegularExpression m_firstChangesetId;
-    const QRegularExpression m_nextChangesetId;
 };
 
 FossilEditorWidget::FossilEditorWidget() :
@@ -70,46 +64,14 @@ FossilEditorWidget::FossilEditorWidget() :
 {
     setAnnotateRevisionTextFormat(tr("&Annotate %1"));
     setAnnotatePreviousRevisionTextFormat(tr("Annotate &Parent Revision %1"));
-
-    const QRegExp exactDiffFileIdPattern(Constants::DIFFFILE_ID_EXACT);
-    QTC_ASSERT(exactDiffFileIdPattern.isValid(), return);
-    setDiffFilePattern(exactDiffFileIdPattern);
-
-    const QRegExp logChangePattern("^.*\\[([0-9a-f]{5,40})\\]");
-    QTC_ASSERT(logChangePattern.isValid(), return);
-    setLogEntryPattern(logChangePattern);
+    setDiffFilePattern(Constants::DIFFFILE_ID_EXACT);
+    setLogEntryPattern("^.*\\[([0-9a-f]{5,40})\\]");
+    setAnnotationEntryPattern(QString("^") + Constants::CHANGESET_ID + " ");
 }
 
 FossilEditorWidget::~FossilEditorWidget()
 {
     delete d;
-}
-
-QSet<QString> FossilEditorWidget::annotationChanges() const
-{
-
-    const QString txt = toPlainText();
-    if (txt.isEmpty())
-        return QSet<QString>();
-
-    // extract changeset id at the beginning of each annotated line:
-    // <changeid> ...:
-
-    QSet<QString> changes;
-
-    QRegularExpressionMatch firstChangesetIdMatch = d->m_firstChangesetId.match(txt);
-    if (firstChangesetIdMatch.hasMatch()) {
-        QString changeId = firstChangesetIdMatch.captured(1);
-        changes.insert(changeId);
-
-        QRegularExpressionMatchIterator i = d->m_nextChangesetId.globalMatch(txt);
-        while (i.hasNext()) {
-            const QRegularExpressionMatch nextChangesetIdMatch = i.next();
-            changeId = nextChangesetIdMatch.captured(1);
-            changes.insert(changeId);
-        }
-    }
-    return changes;
 }
 
 QString FossilEditorWidget::changeUnderCursor(const QTextCursor &cursorIn) const
@@ -132,7 +94,7 @@ QString FossilEditorWidget::decorateVersion(const QString &revision) const
 
     const QFileInfo fi(source());
     const QString workingDirectory = fi.absolutePath();
-    FossilClient *client = FossilPlugin::instance()->client();
+    const FossilClient *client = FossilPlugin::client();
     RevisionInfo revisionInfo =
             client->synchronousRevisionQuery(workingDirectory, revision, true);
 
@@ -154,7 +116,7 @@ QStringList FossilEditorWidget::annotationPreviousVersions(const QString &revisi
     QStringList revisions;
     const QFileInfo fi(source());
     const QString workingDirectory = fi.absolutePath();
-    FossilClient *client = FossilPlugin::instance()->client();
+    const FossilClient *client = FossilPlugin::client();
     RevisionInfo revisionInfo =
             client->synchronousRevisionQuery(workingDirectory, revision);
     if (revisionInfo.parentId.isEmpty())

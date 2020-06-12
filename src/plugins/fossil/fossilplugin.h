@@ -32,103 +32,34 @@
 #include <vcsbase/vcsbaseplugin.h>
 #include <coreplugin/icontext.h>
 
-QT_BEGIN_NAMESPACE
-class QAction;
-QT_END_NAMESPACE
-
 namespace Core {
 class ActionContainer;
 class CommandLocator;
 class Id;
 } // namespace Core
 
-namespace Utils { class ParameterAction; }
-
 namespace Fossil {
 namespace Internal {
 
 class OptionsPage;
 class FossilClient;
-class FossilControl;
 class FossilEditorWidget;
 
-class FossilPlugin : public VcsBase::VcsBasePlugin
+class FossilPlugin final : public ExtensionSystem::IPlugin
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QtCreatorPlugin" FILE "Fossil.json")
 
+    ~FossilPlugin() final;
+
+    bool initialize(const QStringList &arguments, QString *errorMessage) final;
+    void extensionsInitialized() final;
+
 public:
-    FossilPlugin();
-    ~FossilPlugin();
-    bool initialize(const QStringList &arguments, QString *errorMessage) override;
+    static const FossilSettings &settings();
+    static FossilClient *client();
 
-    static FossilPlugin *instance();
-    FossilClient *client() const;
-
-protected:
-    void updateActions(VcsBase::VcsBasePlugin::ActionState) override;
-    bool submitEditorAboutToClose() override;
-
-private:
-    // File menu action slots
-    void addCurrentFile();
-    void deleteCurrentFile();
-    void annotateCurrentFile();
-    void diffCurrentFile();
-    void logCurrentFile();
-    void revertCurrentFile();
-    void statusCurrentFile();
-
-    // Directory menu action slots
-    void diffRepository();
-    void logRepository();
-    void revertAll();
-    void statusMulti();
-
-    // Repository menu action slots
-    void pull();
-    void push();
-    void update();
-    void configureRepository();
-    void commit();
-    void showCommitWidget(const QList<VcsBase::VcsBaseClient::StatusItem> &status);
-    void commitFromEditor() override;
-    void diffFromEditorSelected(const QStringList &files);
-    void createRepository();
-
-    // Methods
-    void createMenu(const Core::Context &context);
-    void createFileActions(const Core::Context &context);
-    void createDirectoryActions(const Core::Context &context);
-    void createRepositoryActions(const Core::Context &context);
-
-    // Variables
-    static FossilPlugin *m_instance;
-    FossilClient *m_client = nullptr;
-
-    Core::CommandLocator *m_commandLocator = nullptr;
-    Core::ActionContainer *m_fossilContainer = nullptr;
-
-    QList<QAction *> m_repositoryActionList;
-
-    // Menu Items (file actions)
-    Utils::ParameterAction *m_addAction = nullptr;
-    Utils::ParameterAction *m_deleteAction = nullptr;
-    Utils::ParameterAction *m_annotateFile = nullptr;
-    Utils::ParameterAction *m_diffFile = nullptr;
-    Utils::ParameterAction *m_logFile = nullptr;
-    Utils::ParameterAction *m_renameFile = nullptr;
-    Utils::ParameterAction *m_revertFile = nullptr;
-    Utils::ParameterAction *m_statusFile = nullptr;
-
-    QAction *m_createRepositoryAction = nullptr;
-
-    // Submit editor actions
-    QAction *m_menuAction = nullptr;
-
-    QString m_submitRepository;
-    bool m_submitActionTriggered = false;
-
+    static void showCommitWidget(const QList<VcsBase::VcsBaseClient::StatusItem> &status);
 
 #ifdef WITH_TESTS
 private slots:

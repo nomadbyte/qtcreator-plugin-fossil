@@ -38,7 +38,7 @@ namespace Fossil {
 namespace Internal {
 
 class FossilSettings;
-class FossilControl;
+class FossilPluginPrivate;
 
 class FossilClient : public VcsBase::VcsBaseClient
 {
@@ -62,7 +62,7 @@ public:
     static unsigned makeVersionNumber(int major, int minor, int patch);
     static QString makeVersionString(unsigned version);
 
-    FossilClient();
+    explicit FossilClient(FossilSettings *settings);
 
     unsigned int synchronousBinaryVersion() const;
     BranchInfo synchronousCurrentBranch(const QString &workingDirectory);
@@ -116,7 +116,7 @@ public:
               const QStringList &extraOptions = QStringList()) final;
 
 private:
-    static QList<BranchInfo> branchListFromOutput(const QString &output, const BranchInfo::BranchFlags defaultFlags = 0);
+    static QList<BranchInfo> branchListFromOutput(const QString &output, const BranchInfo::BranchFlags defaultFlags = {});
     static QStringList parseRevisionCommentLine(const QString &commentLine);
 
     QString sanitizeFossilOutput(const QString &output) const;
@@ -128,7 +128,7 @@ private:
     VcsBase::VcsBaseEditorConfig *createLogCurrentFileEditor(VcsBase::VcsBaseEditorWidget *editor);
     VcsBase::VcsBaseEditorConfig *createLogEditor(VcsBase::VcsBaseEditorWidget *editor);
 
-    friend class FossilControl;
+    friend class FossilPluginPrivate;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(FossilClient::SupportedFeatures)

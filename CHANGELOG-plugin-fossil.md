@@ -3,12 +3,24 @@ qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
 
 ## 4.12.1_1
 
+- Adapted to `Qt Creator 4.12.1` `VcsBase` framework
+
+- __ISSUE__:`Fossil Status` action outputs the repository status details into
+  the `Version Control` output pane; the version hash-string is highlighted as
+  a link. Clicking on such hash-string link fails due to absence of Git(!!)
+  repository.
+
 
 ## 4.11.2_1 - 2020-06-11
 
 - Main development shifted over to [plugin-fossil-scm] repository hosted at
   Qt Creator project
 - Adapted to `Qt Creator 4.11.2` `VcsBase` framework
+
+- __ISSUE__:`Fossil Clone` import-wizard  incorrectly pre-fills the
+  `Local Repostiory` name from the entered `Remote Repository` location.
+- __ISSUE__:`Fossil Push/Pull` actions always require entering full URL, even
+  it should have been saved already.
 
 [plugin-fossil-scm]: https://code.qt.io/cgit/qt-creator/plugin-fossil-scm.git
 

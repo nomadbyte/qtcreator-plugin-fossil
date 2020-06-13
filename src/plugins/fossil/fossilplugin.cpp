@@ -599,22 +599,26 @@ void FossilPluginPrivate::pull()
 
     PullOrPushDialog dialog(PullOrPushDialog::PullMode, Core::ICore::dialogParent());
     dialog.setLocalBaseDirectory(m_client.settings().stringValue(FossilSettings::defaultRepoPathKey));
-    dialog.setDefaultRemoteLocation(m_client.synchronousGetRepositoryURL(state.topLevel()));
+    QString defaultURL(m_client.synchronousGetRepositoryURL(state.topLevel()));
+    dialog.setDefaultRemoteLocation(defaultURL);
     if (dialog.exec() != QDialog::Accepted)
         return;
 
     QString remoteLocation(dialog.remoteLocation());
-    if (remoteLocation.isEmpty())
-        remoteLocation = m_client.synchronousGetRepositoryURL(state.topLevel());
-
-    if (remoteLocation.isEmpty()) {
+    if (remoteLocation.isEmpty()
+        && defaultURL.isEmpty()) {
         VcsBase::VcsOutputWindow::appendError(tr("Remote repository is not defined."));
         return;
     }
+    else if (remoteLocation == defaultURL) {
+        remoteLocation.clear();
+    }
 
     QStringList extraOptions;
-    if (!dialog.isRememberOptionEnabled())
+    if (!remoteLocation.isEmpty()
+        && !dialog.isRememberOptionEnabled()) {
         extraOptions << "--once";
+    }
     if (dialog.isPrivateOptionEnabled())
         extraOptions << "--private";
     m_client.synchronousPull(state.topLevel(), remoteLocation, extraOptions);
@@ -627,22 +631,26 @@ void FossilPluginPrivate::push()
 
     PullOrPushDialog dialog(PullOrPushDialog::PushMode, Core::ICore::dialogParent());
     dialog.setLocalBaseDirectory(m_client.settings().stringValue(FossilSettings::defaultRepoPathKey));
-    dialog.setDefaultRemoteLocation(m_client.synchronousGetRepositoryURL(state.topLevel()));
+    QString defaultURL(m_client.synchronousGetRepositoryURL(state.topLevel()));
+    dialog.setDefaultRemoteLocation(defaultURL);
     if (dialog.exec() != QDialog::Accepted)
         return;
 
     QString remoteLocation(dialog.remoteLocation());
-    if (remoteLocation.isEmpty())
-        remoteLocation = m_client.synchronousGetRepositoryURL(state.topLevel());
-
-    if (remoteLocation.isEmpty()) {
+    if (remoteLocation.isEmpty()
+        && defaultURL.isEmpty()) {
         VcsBase::VcsOutputWindow::appendError(tr("Remote repository is not defined."));
         return;
     }
+    else if (remoteLocation == defaultURL) {
+        remoteLocation.clear();
+    }
 
     QStringList extraOptions;
-    if (!dialog.isRememberOptionEnabled())
+    if (!remoteLocation.isEmpty()
+        && !dialog.isRememberOptionEnabled()) {
         extraOptions << "--once";
+    }
     if (dialog.isPrivateOptionEnabled())
         extraOptions << "--private";
     m_client.synchronousPush(state.topLevel(), remoteLocation, extraOptions);

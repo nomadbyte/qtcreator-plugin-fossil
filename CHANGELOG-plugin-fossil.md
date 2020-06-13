@@ -3,6 +3,11 @@ qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
 
 ## 4.12.1_2
 
+- __FIXED__:`Fossil Clone` import-wizard  incorrectly pre-fills the
+  `Local Repostiory` name from the entered `Remote Repository` location.
+- __FIXED__:`Fossil Push/Pull` actions always require entering full URL, even
+  it should have been saved already.
+
 
 ## 4.12.1_1 - 2020-06-13
 

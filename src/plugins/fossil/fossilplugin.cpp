@@ -315,6 +315,15 @@ FossilPluginPrivate::FossilPluginPrivate()
 
     createMenu(context);
 
+    connect(VcsOutputWindow::instance(), &VcsOutputWindow::referenceClicked,
+            this, [this](const QString &name) {
+        const VcsBasePluginState state = currentState();
+        if (!state.hasTopLevel())
+            return;
+        if (!name.contains(".."))  // Git-style ref ranges are not supported
+            describe(state.topLevel(), name);
+    });
+
     Core::HelpManager::registerDocumentation({Core::HelpManager::documentationPath()
                                               + "/fossil.qch"});
 }

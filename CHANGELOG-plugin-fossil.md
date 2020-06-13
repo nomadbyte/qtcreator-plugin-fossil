@@ -3,6 +3,10 @@ qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
 
 ## 4.12.1_2
 
+- __FIXED__:`Fossil Status` action outputs the repository status details into
+  the `Version Control` output pane; the version hash-string is highlighted as
+  a link. Clicking on such hash-string link fails due to absence of Git(!!)
+  repository.
 - __FIXED__:`Fossil Clone` import-wizard  incorrectly pre-fills the
   `Local Repostiory` name from the entered `Remote Repository` location.
 - __FIXED__:`Fossil Push/Pull` actions always require entering full URL, even

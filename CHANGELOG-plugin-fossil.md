@@ -1,6 +1,20 @@
 qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
 =================================
 
+## 4.11.2_2 - 2020-07-14
+
+- Adapted to `fossil 2.12` (`fossil info` command outputs `hash:` now, instead
+  of `uuid:` as [previously][1]). Should still function properly with prior
+  `fossil` versions.
+
+- __FIXED__:`Fossil Clone` import-wizard  incorrectly pre-fills the
+  `Local Repostiory` name from the entered `Remote Repository` location.
+- __FIXED__:`Fossil Push/Pull` actions always require entering full URL, even
+  though it should have been saved already.
+
+[1]: https://fossil-scm.org/fossil/info/8ad5e4690854a81 "src/info.c"
+
+
 ## 4.11.2_1 - 2020-06-11
 
 - Main development shifted over to [plugin-fossil-scm] repository hosted at

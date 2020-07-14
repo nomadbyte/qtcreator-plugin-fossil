@@ -70,6 +70,11 @@ protected:
     bool submitEditorAboutToClose() override;
 
 private:
+    enum SyncMode {
+        SyncPull,
+        SyncPush
+    };
+
     // File menu action slots
     void addCurrentFile();
     void deleteCurrentFile();
@@ -86,8 +91,8 @@ private:
     void statusMulti();
 
     // Repository menu action slots
-    void pull();
-    void push();
+    void pull() { pullOrPush(SyncPull); }
+    void push() { pullOrPush(SyncPush); }
     void update();
     void configureRepository();
     void commit();
@@ -101,6 +106,8 @@ private:
     void createFileActions(const Core::Context &context);
     void createDirectoryActions(const Core::Context &context);
     void createRepositoryActions(const Core::Context &context);
+
+    bool pullOrPush(SyncMode mode);
 
     // Variables
     static FossilPlugin *m_instance;

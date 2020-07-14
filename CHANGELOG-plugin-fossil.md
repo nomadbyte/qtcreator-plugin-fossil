@@ -1,6 +1,11 @@
 qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
 =================================
 
+## 4.12.4_1 - 2020-07-14
+
+- Adapted to `Qt Creator 4.12.4` `VcsBase` framework
+
+
 ## 4.12.1_2 - 2020-07-14
 
 - Adapted to `fossil 2.12` (`fossil info` command outputs `hash:` now, instead

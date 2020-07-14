@@ -140,6 +140,11 @@ class FossilPluginPrivate final : public VcsBase::VcsBasePluginPrivate
     Q_DECLARE_TR_FUNCTIONS(Fossil::Internal::FossilPlugin)
 
 public:
+    enum SyncMode {
+        SyncPull,
+        SyncPush
+    };
+
     FossilPluginPrivate();
 
     // IVersionControl
@@ -185,8 +190,8 @@ public:
     void statusMulti();
 
     // Repository menu action slots
-    void pull();
-    void push();
+    void pull() { pullOrPush(SyncPull); }
+    void push() { pullOrPush(SyncPush); }
     void update();
     void configureRepository();
     void commit();
@@ -202,6 +207,8 @@ public:
     void createRepositoryActions(const Core::Context &context);
 
     void describe(const QString &source, const QString &id) { m_client.view(source, id); };
+
+    bool pullOrPush(SyncMode mode);
 
     // Variables
     FossilSettings m_fossilSettings;
@@ -601,68 +608,51 @@ void FossilPluginPrivate::createRepositoryActions(const Core::Context &context)
     m_fossilContainer->addAction(command);
 }
 
-void FossilPluginPrivate::pull()
+bool FossilPluginPrivate::pullOrPush(FossilPluginPrivate::SyncMode mode)
 {
-    const VcsBase::VcsBasePluginState state = currentState();
-    QTC_ASSERT(state.hasTopLevel(), return);
+    PullOrPushDialog::Mode pullOrPushMode;
+    switch (mode) {
+    case SyncPull:
+        pullOrPushMode = PullOrPushDialog::PullMode;
+        break;
+    case SyncPush:
+        pullOrPushMode = PullOrPushDialog::PushMode;
+        break;
+    default:
+        return false;
+    }
 
-    PullOrPushDialog dialog(PullOrPushDialog::PullMode, Core::ICore::dialogParent());
+    const VcsBase::VcsBasePluginState state = currentState();
+    QTC_ASSERT(state.hasTopLevel(), return false);
+
+    PullOrPushDialog dialog(pullOrPushMode, Core::ICore::dialogParent());
     dialog.setLocalBaseDirectory(m_client.settings().stringValue(FossilSettings::defaultRepoPathKey));
-    QString defaultURL(m_client.synchronousGetRepositoryURL(state.topLevel()));
+    const QString defaultURL(m_client.synchronousGetRepositoryURL(state.topLevel()));
     dialog.setDefaultRemoteLocation(defaultURL);
     if (dialog.exec() != QDialog::Accepted)
-        return;
+        return true;
 
     QString remoteLocation(dialog.remoteLocation());
-    if (remoteLocation.isEmpty()
-        && defaultURL.isEmpty()) {
+    if (remoteLocation.isEmpty() && defaultURL.isEmpty()) {
         VcsBase::VcsOutputWindow::appendError(tr("Remote repository is not defined."));
-        return;
-    }
-    else if (remoteLocation == defaultURL) {
+        return false;
+    } else if (remoteLocation == defaultURL) {
         remoteLocation.clear();
     }
 
     QStringList extraOptions;
-    if (!remoteLocation.isEmpty()
-        && !dialog.isRememberOptionEnabled()) {
+    if (!remoteLocation.isEmpty() && !dialog.isRememberOptionEnabled())
         extraOptions << "--once";
-    }
     if (dialog.isPrivateOptionEnabled())
         extraOptions << "--private";
-    m_client.synchronousPull(state.topLevel(), remoteLocation, extraOptions);
-}
-
-void FossilPluginPrivate::push()
-{
-    const VcsBase::VcsBasePluginState state = currentState();
-    QTC_ASSERT(state.hasTopLevel(), return);
-
-    PullOrPushDialog dialog(PullOrPushDialog::PushMode, Core::ICore::dialogParent());
-    dialog.setLocalBaseDirectory(m_client.settings().stringValue(FossilSettings::defaultRepoPathKey));
-    QString defaultURL(m_client.synchronousGetRepositoryURL(state.topLevel()));
-    dialog.setDefaultRemoteLocation(defaultURL);
-    if (dialog.exec() != QDialog::Accepted)
-        return;
-
-    QString remoteLocation(dialog.remoteLocation());
-    if (remoteLocation.isEmpty()
-        && defaultURL.isEmpty()) {
-        VcsBase::VcsOutputWindow::appendError(tr("Remote repository is not defined."));
-        return;
+    switch (mode) {
+    case SyncPull:
+        return m_client.synchronousPull(state.topLevel(), remoteLocation, extraOptions);
+    case SyncPush:
+        return m_client.synchronousPush(state.topLevel(), remoteLocation, extraOptions);
+    default:
+        return false;
     }
-    else if (remoteLocation == defaultURL) {
-        remoteLocation.clear();
-    }
-
-    QStringList extraOptions;
-    if (!remoteLocation.isEmpty()
-        && !dialog.isRememberOptionEnabled()) {
-        extraOptions << "--once";
-    }
-    if (dialog.isPrivateOptionEnabled())
-        extraOptions << "--private";
-    m_client.synchronousPush(state.topLevel(), remoteLocation, extraOptions);
 }
 
 void FossilPluginPrivate::update()

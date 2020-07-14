@@ -395,7 +395,7 @@ RevisionInfo FossilClient::synchronousRevisionQuery(const QString &workingDirect
     QTC_ASSERT(idRx.isValid(), return RevisionInfo());
 
     const QString hashToken =
-            (supportedFeatures().testFlag(InfoHashFeature) ? "hash: " : "uuid: ");
+            QString::fromUtf8(supportedFeatures().testFlag(InfoHashFeature) ? "hash: " : "uuid: ");
 
     for (const QString &l : output.split('\n', QString::SkipEmptyParts)) {
         if (l.startsWith("checkout: ", Qt::CaseInsensitive)
@@ -715,13 +715,12 @@ bool FossilClient::synchronousMove(const QString &workingDir,
 
 bool FossilClient::synchronousPull(const QString &workingDir, const QString &srcLocation, const QStringList &extraOptions)
 {
-    QStringList args({vcsCommandString(PullCommand)});
+    QStringList args(vcsCommandString(PullCommand));
     if (srcLocation.isEmpty()) {
         const QString defaultURL(synchronousGetRepositoryURL(workingDir));
         if (defaultURL.isEmpty())
             return false;
-    }
-    else {
+    } else {
         args << srcLocation;
     }
 
@@ -740,13 +739,12 @@ bool FossilClient::synchronousPull(const QString &workingDir, const QString &src
 
 bool FossilClient::synchronousPush(const QString &workingDir, const QString &dstLocation, const QStringList &extraOptions)
 {
-    QStringList args({vcsCommandString(PushCommand)});
+    QStringList args(vcsCommandString(PushCommand));
     if (dstLocation.isEmpty()) {
         const QString defaultURL(synchronousGetRepositoryURL(workingDir));
         if (defaultURL.isEmpty())
             return false;
-    }
-    else {
+    } else {
         args << dstLocation;
     }
 

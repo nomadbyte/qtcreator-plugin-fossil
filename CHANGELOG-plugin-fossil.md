@@ -1,7 +1,11 @@
 qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
 =================================
 
-## 4.12.1_2
+## 4.12.1_2 - 2020-07-14
+
+- Adapted to `fossil 2.12` (`fossil info` command outputs `hash:` now, instead
+  of `uuid:` as [previously][1]). Older fossil versions should still function
+  properly.
 
 - __FIXED__:`Fossil Status` action outputs the repository status details into
   the `Version Control` output pane; the version hash-string is highlighted as
@@ -11,6 +15,8 @@ qtcreator-plugin-fossil ChangeLog  {#qtc-fossil-changelog}
   `Local Repostiory` name from the entered `Remote Repository` location.
 - __FIXED__:`Fossil Push/Pull` actions always require entering full URL, even
   it should have been saved already.
+
+[1]: https://fossil-scm.org/fossil/info/8ad5e4690854a81 "src/info.c"
 
 
 ## 4.12.1_1 - 2020-06-13

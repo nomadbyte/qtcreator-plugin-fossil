@@ -83,6 +83,35 @@ Updates and details about the current version listed in
 Quick Start
 -----------
 
+The recent releases of `qtcreator-plugin-fossil` are available already pre-
+built for the supported platforms, thanks to the GitHub's CI workflow features.
+This greatly simplifies the availability and installation of the plugin.
+
+To install the `qtcreator-plugin-fossil` for `Qt Creator` version 4.11 and
+higher, you may download the binary release package from the project's
+[Releases][releases] GtHub page.
+
+The packages are prepared for direct integration of the `Fossil plugin` into
+an existing `Qt Creator` installation and consist of the plugin library file
+and an updated `Qt Creator` documentation (`.qch`)  file.
+
+In brief, the plugin's 7z-package could be extracted directly into the
+`Qt Creator` installation directory. For example, plugin's `ver=4.11.2_2`
+built for `Qt Creator` version 4.11.2 (compatible with 4.11.0 and higher
+patch-releases):
+
+     7z x QtCreator-Fossil-${ver}-Linux-x64.7z -o"${qtc_dir}" '-x!README.md'
+
+Alternatively, the `qtcreator-plugin-fossil` library file could be installed
+as a user-plugin, locally to the user's home directory. Please refer to the
+`README.md` file included in the release installation package for details.
+
+[releases]: https://github.com/nomadbyte/qtcreator-plugin-fossil/releases
+
+
+Building from Sources
+---------------------
+
 In short, it's a `Qt Creator` plugin, so those familiar with plugin building
 may just skip through to fetch the sources. Otherwise, read on.
 
